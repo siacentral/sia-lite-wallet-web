@@ -1,17 +1,36 @@
+// https://eslint.org/docs/user-guide/configuring
+
 module.exports = {
-  root: true,
-  env: {
-    node: true
-  },
-  'extends': [
-    'plugin:vue/essential',
-    '@vue/standard'
-  ],
-  rules: {
-    'no-console': process.env.NODE_ENV === 'production' ? 'error' : 'off',
-    'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off'
-  },
-  parserOptions: {
-    parser: 'babel-eslint'
-  }
-}
+	root: true,
+	parserOptions: {
+		parser: 'babel-eslint'
+	},
+	env: {
+		browser: true
+	},
+	extends: [
+		'plugin:vue/essential',
+		'standard'
+	],
+	globals: {
+		'__static': 'readonly'
+	},
+	// required to lint *.vue files
+	plugins: [
+		'vue'
+	],
+	// add your custom rules here
+	rules: {
+		// allow async-await
+		'generator-star-spacing': 'off',
+		'no-tabs': 'off',
+		'indent': ['error', 'tab'],
+		'space-before-function-paren': ['error', 'never'],
+		'semi': ['error', 'always'],
+		'eol-last': 'off',
+		// allow debugger during development
+		'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
+		'one-var': 'off',
+		'curly': ['error', 'multi-or-nest']
+	}
+};

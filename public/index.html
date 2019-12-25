@@ -1,17 +1,44 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width,initial-scale=1.0">
-    <link rel="icon" href="<%= BASE_URL %>favicon.ico">
-    <title>sia-lite-ui</title>
-  </head>
-  <body>
-    <noscript>
-      <strong>We're sorry but sia-lite-ui doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
-    </noscript>
-    <div id="app"></div>
-    <!-- built files will be auto injected -->
-  </body>
+
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width,initial-scale=1.0">
+	<link rel="icon" type="image/png" sizes="32x32"
+		href="<%= htmlWebpackPlugin.files.publicPath %>img/icons/icon-32.png">
+	<link rel="icon" type="image/png" sizes="16x16"
+		href="<%= htmlWebpackPlugin.files.publicPath %>img/icons/icon-16.png">
+	<meta property="og:title" content="Sia Central Offline Cold Storage Generator" />
+	<meta property="og:description"
+		content="Offline Sia seed generator" />
+	<meta property="og:type" content="website" />
+	<meta property="og:url" content="<%= BASE_URL %>" />
+	<meta property="og:image" content="<%= BASE_URL%>img/icons/icon-152.png" />
+	<meta property="og:image_width" content="152" />
+	<meta property="og:image_height" content="152" />
+	<meta name="theme-color" content="#19cf86">
+
+	<!-- Add to home screen for Safari on iOS -->
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black">
+	<meta name="apple-mobile-web-app-title" content="{{ name }}">
+	<link rel="apple-touch-icon" href="<%= htmlWebpackPlugin.files.publicPath %>img/icons/icon-152.png">
+	<link rel="mask-icon" href="<%= htmlWebpackPlugin.files.publicPath %>img/icons/siacentral.svg" color="#19cf86">
+	<!-- Add to home screen for Windows -->
+	<meta name="msapplication-TileImage" content="<%= htmlWebpackPlugin.files.publicPath %>img/icons/icon-144.png">
+	<meta name="msapplication-TileColor" content="#19cf86">
+	<title>Sia Lite Wallet</title>
+	<script type="text/javascript" src="<%= BASE_URL %>sia/wasm_exec.js"></script>
+</head>
+
+<body class="dark">
+	<noscript>
+		<strong>We're sorry but Sia Lite Wallet doesn't work properly without JavaScript enabled. Please enable it to
+			continue.</strong>
+	</noscript>
+	<div id="app"></div>
+	<!-- built files will be auto injected -->
+</body>
+
 </html>
