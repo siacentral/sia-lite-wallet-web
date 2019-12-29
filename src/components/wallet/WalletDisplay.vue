@@ -5,7 +5,7 @@
 			<div class="wallet-siacoin-balance" v-html="formatSiacoinString(balance)"></div>
 			<div class="wallet-display-balance" v-html="formatCurrencyString(balance)"></div>
 			<div class="wallet-buttons">
-				<button class="btn wallet-btn" @click="modal='send'">Send</button>
+				<button class="btn wallet-btn" @click="modal='send'" v-if="wallet.type !== 'watch'">Send</button>
 				<button class="btn wallet-btn" @click="modal='receive'">Receive</button>
 			</div>
 		</div>
@@ -64,10 +64,10 @@ export default {
 			return this.wallet.unconfirmedBalance();
 		},
 		name() {
-			if (!this.wallet || !this.wallet.name || this.wallet.name.length === 0)
+			if (!this.wallet || !this.wallet.title || this.wallet.title.length === 0)
 				return 'Wallet';
 
-			return this.wallet.name;
+			return this.wallet.title;
 		},
 		transactions() {
 			const transactions = this.wallet ? this.wallet.transactions : null,
