@@ -12,6 +12,8 @@ const scanQueue = [],
 let scanning = false;
 
 export function queueWallet(wallet, full) {
+	full = typeof full === 'boolean' ? full : false;
+
 	if (scanQueue.findIndex(w => w.id === wallet.id && w.full === full) !== -1)
 		return;
 
@@ -68,24 +70,28 @@ export async function scanWallet(wallet, full) {
 		default:
 			throw new Error('unknown wallet type');
 		}
-
-		await scanTransactions(wallet);
 	} catch (ex) {
 		console.error('scanWallet', wallet.id, ex);
-	} finally {
-		clearTimeout(quickTimeouts[wallet.id]);
+	}
 
-		quickTimeouts[wallet.id] = setTimeout(() => {
-			queueWallet(wallet, false);
-		}, 300000);
+	try {
+		await scanTransactions(wallet);
+	} catch (ex) {
+		console.error('scanTransactions', wallet.id, ex);
+	}
 
-		if (full) {
-			clearTimeout(fullTimeouts[wallet.id]);
+	clearTimeout(quickTimeouts[wallet.id]);
 
-			fullTimeouts[wallet.id] = setTimeout(() => {
-				queueWallet(wallet, true);
-			}, 1.8e+6);
-		}
+	quickTimeouts[wallet.id] = setTimeout(() => {
+		queueWallet(wallet, false);
+	}, 300000);
+
+	if (full) {
+		clearTimeout(fullTimeouts[wallet.id]);
+
+		fullTimeouts[wallet.id] = setTimeout(() => {
+			queueWallet(wallet, true);
+		}, 1.8e+6);
 	}
 }
 
@@ -97,8 +103,6 @@ export async function scanTransactions(wallet) {
 
 	const mapped = addresses.map(a => a.address),
 		balance = await getTransactions(mapped);
-
-	console.log(balance);
 
 	let confirmed = new BigNumber(balance.confirmed_balance),
 		unconfirmed = new BigNumber(balance.unconfirmed_delta);

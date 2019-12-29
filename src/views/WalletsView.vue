@@ -4,7 +4,7 @@
 		<div class="wallets-list">
 			<div class="wallets">
 				<div :class="{ 'wallet': true, 'active-wallet': selectedWallet === idx }" @click="selectedWallet = idx" v-for="(wallet, idx) in wallets" :key="wallet.id">
-					<div class="wallet-name">{{ wallet.name || 'Wallet' }}</div>
+					<div class="wallet-name">{{ wallet.title || 'Wallet' }}</div>
 					<div class="wallet-balance" v-html="getDisplayBalance(wallet)"></div>
 				</div>
 			</div>
