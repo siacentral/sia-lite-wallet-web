@@ -3,9 +3,7 @@
 		<transition name="fade-top" mode="out-in" appear>
 			<div class="receive-grid" v-show="loaded" key="receive">
 				<button class="btn-prev" @click="onChangeAddress(-1)"><icon icon="chevron-left" /></button>
-				<div>
-					<address-qr-code class="qr-display" :address="addresses[current] || ''" />
-				</div>
+				<address-qr-code class="qr-display" :address="addresses[current] || ''" />
 				<button class="btn-next" @click="onChangeAddress(1)"><icon icon="chevron-right" /></button>
 				<div class="control">
 					<input :value="addresses[current]" readonly />
@@ -78,9 +76,16 @@ export default {
 
 <style lang="stylus" scoped>
 .qr-display {
+	width: 100%;
 	padding: 10px;
+	margin: auto;
     background: dark-gray;
     border-radius: 4px;
+
+	@media screen and (min-width: 500px) {
+		width: 200px;
+		height: 200px;
+	}
 
 	svg {
 		margin: auto;
@@ -93,6 +98,7 @@ export default {
 	height: 100%;
 	grid-gap: 15px;
 	align-items: safe center;
+	align-content: safe center;
 	grid-template-columns: auto minmax(0, 1fr) auto;
 
 	.control {
