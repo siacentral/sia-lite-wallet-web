@@ -19,6 +19,7 @@
 					v-else />
 			</transition>
 		</div>
+		<transaction-totals :transaction="transaction" :wallet="wallet" :mode="mode" />
 		<transition name="fade" mode="out-in" appear>
 			<sign-ledger-transaction
 				v-if="wallet.type === 'ledger' && !transactionSigned"
@@ -43,12 +44,14 @@ import { broadcastTransaction } from '@/api/siacentral';
 import SignLedgerTransaction from '@/components/ledger/SignLedgerTransaction';
 import TransactionSummary from '@/components/transaction/TransactionSummary';
 import TransactionOutputs from '@/components/transaction/TransactionOutputs';
+import TransactionTotals from '@/components/transaction/TransactionTotals';
 
 export default {
 	components: {
 		SignLedgerTransaction,
 		TransactionOutputs,
-		TransactionSummary
+		TransactionSummary,
+		TransactionTotals
 	},
 	props: {
 		wallet: Object,
