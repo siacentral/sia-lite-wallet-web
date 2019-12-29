@@ -141,10 +141,12 @@ export function formatNumber(val, dec) {
 	if (!dec)
 		dec = 0;
 
+	val = new BigNumber(val);
+
 	return new Intl.NumberFormat([], {
 		type: 'decimal',
 		minimumFractionDigits: dec
-	}).format(roundNumber(val.dividedBy(1e24), dec));
+	}).format(roundNumber(val, dec));
 }
 
 function roundNumber(val, dec) {
