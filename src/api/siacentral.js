@@ -50,6 +50,4 @@ export async function broadcastTransaction(transaction, parents) {
 
 	if (resp.type !== 'success')
 		throw new Error(resp.message);
-
-	console.log(resp);
 }
