@@ -1,173 +1,114 @@
 <template>
-	<div>
+	<div class="transaction-verify">
 		<h2 class="text-center">Verify Transaction</h2>
-		<div class="recipients">
-			<template class="recipient" v-for="recipient in recipients" >
-				<identicon :value="recipient.unlockhash" :key="`identicon-${recipient.unlockhash}`" />
-				<input class="recipient-address" :key="`address-${recipient.unlockhash}`" :value="recipient.unlockhash" readonly />
-				<div class="text-right" v-html="getRecipientSC(recipient)" :key="`sc-${recipient.unlockhash}`" />
-				<div class="text-right" v-html="getRecipientCurrency(recipient)" :key="`usd-${recipient.unlockhash}`" />
-			</template>
+		<div class="summary-type">
+			<button @click="mode = 'summary'" :class="getSummaryClasses('summary')">Summary</button>
+			<button @click="mode = 'outputs'" :class="getSummaryClasses('outputs')">Outputs</button>
 		</div>
-		<div class="extras-info">
-			<div class="divider" />
-			<div>Send Amount</div>
-			<div class="text-right" v-html="sendAmountSC" />
-			<div class="text-right" v-html="sendAmountCurrency" />
-			<div>Transaction Fee</div>
-			<div class="text-right" v-html="transactionFeeSC" />
-			<div class="text-right" v-html="transactionFeeCurrency" />
-			<div class="divider" />
-			<div>Total Amount</div>
-			<div class="text-right" v-html="totalAmountSC" />
-			<div class="text-right" v-html="totalAmountCurrency" />
-			<div>Remaining Balance</div>
-			<div class="text-right" v-html="remainingBalanceSC" />
-			<div class="text-right" v-html="remainingBalanceCurrency" />
-			<div class="divider" />
-		</div>
-		<div class="transaction-error text-center text-warning">
-			<transition name="fade" mode="out-in" appear>
-				<div v-if="transactionError" :key="transactionError">{{ transactionError }}</div>
-				<div v-else class="error-hidden">hidden</div>
+		<div class="transaction-detail">
+			<transition name="fade-top" mode="out-in" appear>
+				<transaction-outputs
+					:transaction="transaction"
+					:wallet="wallet"
+					key="outputs"
+					v-if="mode === 'outputs'" />
+				<transaction-summary
+					:transaction="transaction"
+					:wallet="wallet"
+					key="summary"
+					v-else />
 			</transition>
 		</div>
-		<div class="buttons">
-			<transition name="fade" mode="out-in" appear>
-				<div v-if="sending" :key="status">{{ status }}</div>
-				<button class="btn btn-success btn-inline" v-else :disabled="transactionError || sending" @click="onVerifyTxn" key="send">Send</button>
-			</transition>
-		</div>
+		<transition name="fade" mode="out-in" appear>
+			<sign-ledger-transaction
+				v-if="wallet.type === 'ledger' && !transactionSigned"
+				class="ledger-sign"
+				:transaction="siaTransaction"
+				:requiredSignatures="requiredSignatures"
+				@signed="onLedgerSigned" />
+			<div v-else-if="sending" :key="status">{{ status }}</div>
+			<div class="buttons" v-else key="send">
+				<button class="btn btn-success btn-inline" :disabled="sending" @click="onVerifyTxn">Send</button>
+			</div>
+		</transition>
 	</div>
 </template>
 
 <script>
-import BigNumber from 'bignumber.js';
 import { mapState, mapActions } from 'vuex';
-import { formatCurrencyString, formatSiacoinString } from '@/utils/format';
 import { signTransaction } from '@/utils/sia';
-import { scanTransactions } from '@/sync/scanner';
-import { broadcastTransaction } from '@/api/siacentral';
+// import { scanTransactions } from '@/sync/scanner';
+// import { broadcastTransaction } from '@/api/siacentral';
 
-import Identicon from '@/components/Identicon';
+import SignLedgerTransaction from '@/components/ledger/SignLedgerTransaction';
+import TransactionSummary from '@/components/transaction/TransactionSummary';
+import TransactionOutputs from '@/components/transaction/TransactionOutputs';
 
 export default {
 	components: {
-		Identicon
+		SignLedgerTransaction,
+		TransactionOutputs,
+		TransactionSummary
 	},
 	props: {
 		wallet: Object,
-		data: Object
+		transaction: Object
 	},
 	computed: {
 		...mapState(['currency', 'currencies', 'networkFees']),
-		spentOutputs() {
-			if (!this.data || !this.data.transaction)
-				return [];
-
-			return this.data.transaction.siacoininputs.map(a => a.parentid);
-		},
-		walletBalance() {
-			if (!this.data || !this.data.transaction)
-				return new BigNumber(0);
-
-			return this.wallet.unconfirmedBalance().minus(this.sendAmount).plus(this.receiveAmount);
-		},
-		recipients() {
-			if (!this.data || !this.data.transaction)
-				return [];
-
-			return this.data.transaction.siacoinoutputs.filter(o =>
-				o.unlockhash !== this.data.apiFeeAddress && o.unlockhash !== this.data.changeAddress);
-		},
-		receiveAmount() {
-			return this.data.newOwnedOutputs.reduce((v, o) => v.plus(o.value), new BigNumber(0));
-		},
-		sendAmount() {
-			if (!this.data || !this.data.transaction)
-				return new BigNumber(0);
-
-			return this.data.transaction.siacoinoutputs
-				.reduce((v, o) => v.plus(o.value), new BigNumber(0)).minus(this.apiFee);
+		siaTransaction() {
+			return {
+				minerfees: this.transaction.miner_fees,
+				siacoininputs: this.transaction.siacoin_inputs.map(i => ({
+					parentid: i.output_id,
+					unlockconditions: i.unlock_conditions
+				})),
+				siacoinoutputs: this.transaction.siacoin_outputs.map(o => ({
+					unlockhash: o.unlock_hash,
+					value: o.value
+				})),
+				transactionsignatures: this.transaction.siacoin_inputs.map(i => ({
+					parentid: i.output_id,
+					coveredfields: { wholetransaction: true }
+				}))
+			};
 		},
 		requiredSignatures() {
-			if (!this.data || !Array.isArray(this.data.sigIndexes))
-				return 0;
-
-			return this.data.sigIndexes.length;
+			return this.transaction.siacoin_inputs.map(i => i.index);
 		},
-		apiFee() {
-			if (!this.data || !this.data.transaction)
-				return new BigNumber(0);
+		spentOutputs() {
+			if (!this.data || !this.transaction)
+				return [];
 
-			return this.data.transaction.siacoinoutputs
-				.reduce((v, o) => o.unlockhash === this.data.apiFeeAddress ? v.plus(o.value) : v, new BigNumber(0));
-		},
-		siaFee() {
-			if (!this.data || !this.data.transaction)
-				return new BigNumber(0);
-
-			return this.data.transaction.minerfees.reduce((v, o) => v.plus(o), new BigNumber(0));
-		},
-		fees() {
-			return this.apiFee.plus(this.siaFee);
-		},
-		transactionFeeSC() {
-			const siacoins = formatSiacoinString(this.fees);
-
-			return `${siacoins.value} <span class="currency-display">${siacoins.label}</span>`;
-		},
-		transactionFeeCurrency() {
-			const currency = formatCurrencyString(this.fees, this.currency, this.currencies[this.currency]);
-
-			return `${currency.value} <span class="currency-display">${currency.label}</span>`;
-		},
-		sendAmountSC() {
-			const rem = this.sendAmount.minus(this.receiveAmount),
-				siacoins = formatSiacoinString(rem);
-
-			return `${siacoins.value} <span class="currency-display">${siacoins.label}</span>`;
-		},
-		sendAmountCurrency() {
-			const rem = this.sendAmount.minus(this.receiveAmount),
-				currency = formatCurrencyString(rem, this.currency, this.currencies[this.currency]);
-
-			return `${currency.value} <span class="currency-display">${currency.label}</span>`;
-		},
-		totalAmountSC() {
-			const rem = this.sendAmount.minus(this.receiveAmount).plus(this.fees),
-				siacoins = formatSiacoinString(rem);
-
-			return `${siacoins.value} <span class="currency-display">${siacoins.label}</span>`;
-		},
-		totalAmountCurrency() {
-			const rem = this.sendAmount.minus(this.receiveAmount).plus(this.fees),
-				currency = formatCurrencyString(rem, this.currency, this.currencies[this.currency]);
-
-			return `${currency.value} <span class="currency-display">${currency.label}</span>`;
-		},
-		remainingBalanceSC() {
-			const rem = this.walletBalance,
-				siacoins = formatSiacoinString(rem);
-
-			return `${siacoins.value} <span class="currency-display">${siacoins.label}</span>`;
-		},
-		remainingBalanceCurrency() {
-			const rem = this.walletBalance,
-				currency = formatCurrencyString(rem, this.currency, this.currencies[this.currency]);
-
-			return `${currency.value} <span class="currency-display">${currency.label}</span>`;
+			return this.transaction.siacoininputs.map(a => a.parentid);
 		}
 	},
 	data() {
 		return {
+			mode: 'summary',
 			sending: false,
-			transactionError: null,
+			transactionSigned: false,
+			signed: null,
 			status: null
 		};
 	},
 	methods: {
 		...mapActions(['saveWallet']),
+		getSummaryClasses(mode) {
+			return {
+				'btn': true,
+				'btn-inline': true,
+				'btn-enabled': mode === this.mode
+			};
+		},
+		async onLedgerSigned(signed) {
+			try {
+				this.signed = signed;
+				this.transactionSigned = true;
+			} catch (ex) {
+				console.log(ex);
+			}
+		},
 		async onVerifyTxn() {
 			if (this.sending)
 				return;
@@ -175,13 +116,16 @@ export default {
 			this.sending = true;
 
 			try {
-				let signed;
-
 				this.status = 'Signing transaction...';
 
 				switch (this.wallet.type) {
+				case 'ledger':
+					if (!this.signed)
+						throw new Error('transaction not signed');
+					break;
 				case 'default':
-					signed = await signTransaction(this.wallet.seed, this.data.transaction, this.data.requiredSigs);
+					this.signed = await signTransaction(this.wallet.seed,
+						this.siaTransaction, this.requiredSignatures);
 					break;
 				default:
 					throw new Error('unsupported wallet type');
@@ -189,8 +133,15 @@ export default {
 
 				this.status = 'Broadcasting transaction...';
 
-				await broadcastTransaction(signed);
-				await scanTransactions(this.wallet);
+				console.log(this.signed);
+
+				/* await broadcastTransaction({
+					siacoininputs: this.signed.siacoininputs,
+					siacoinoutputs: this.signed.siacoinoutputs,
+					minerfees: this.signed.minerfees,
+					transactionsignatures: this.signed.transactionsignatures
+				});
+				await scanTransactions(this.wallet); */
 
 				this.status = 'Transaction sent...';
 				this.$emit('done');
@@ -200,66 +151,40 @@ export default {
 			} finally {
 				this.sending = false;
 			}
-		},
-		getRecipientSC(recipient) {
-			const siacoins = formatSiacoinString(new BigNumber(recipient.value));
-
-			return `${siacoins.value} <span class="currency-display">${siacoins.label}</span>`;
-		},
-		getRecipientCurrency(recipient) {
-			const currency = formatCurrencyString(new BigNumber(recipient.value), this.currency, this.currencies[this.currency]);
-
-			return `${currency.value} <span class="currency-display">${currency.label}</span>`;
 		}
 	}
 };
 </script>
 
 <style lang="stylus" scoped>
+.transaction-verify {
+	display: grid;
+	grid-template-rows: repeat(2, auto) minmax(0, 1fr) auto;
+	align-content: safe center;
+	grid-gap: 15px;
+
+	.transaction-detail {
+		padding: 15px;
+		overflow-x: hidden;
+		overflow-y: auto;
+		background: bg-dark;
+		border-radius: 4px;
+	}
+}
+
 h2 {
 	color: rgba(255, 255, 255, 0.54);
 	margin: 0 0 45px;
 }
 
-.recipients {
-	display: grid;
-	grid-template-columns: 64px minmax(0, 1fr) repeat(2, auto);
-	grid-gap: 15px;
-	align-items: safe center;
-	margin-bottom: 15px;
+.summary-type {
+	button {
+		opacity: 0.54;
+		transition: all 0.3s linear;
 
-	.recipient-address {
-		display: block;
-		width: 100%;
-		background: none;
-		color: rgba(255, 255, 255, 0.54);
-		font-size: 1.2rem;
-		outline: none;
-		border: none;
-		text-overflow: ellipsis;
-	}
-}
-
-.extras-info {
-	display: grid;
-	grid-template-columns: minmax(0, 1fr) repeat(2, auto);
-	grid-gap: 10px;
-	margin-bottom: 15px;
-
-	.divider {
-		width: 100%;
-		height: 1px;
-		grid-column: 1 / -1;
-		background: dark-gray;
-		margin: 5px 0;
-	}
-}
-
-.transaction-error {
-	margin-bottom: 15px;
-
-	.error-hidden {
-		opacity: 0;
+		&.btn-enabled {
+			opacity: 1;
+		}
 	}
 }
 

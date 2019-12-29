@@ -2,7 +2,7 @@
 	<modal @close="$emit('close')">
 		<transition name="fade-top" mode="out-in" appear>
 			<transaction-setup class="transaction-step" :wallet="wallet" :address="address" v-if="step === 'setup'" key="setup" @built="onTransactionBuilt" />
-			<transaction-verify class="transaction-step" :wallet="wallet" :data="data" v-else-if="step === 'verify'" key="verify" @done="$emit('close')" />
+			<transaction-verify class="transaction-step" :wallet="wallet" :transaction="transaction" v-else-if="step === 'verify'" key="verify" @done="$emit('close')" />
 		</transition>
 	</modal>
 </template>
@@ -25,7 +25,7 @@ export default {
 	data() {
 		return {
 			step: '',
-			data: null,
+			transaction: null,
 			sigIndexes: []
 		};
 	},
@@ -35,9 +35,9 @@ export default {
 		}, 300);
 	},
 	methods: {
-		onTransactionBuilt(data) {
+		onTransactionBuilt(txn) {
 			try {
-				this.data = data;
+				this.transaction = txn;
 				this.step = 'verify';
 			} catch (ex) {
 				console.error('onTransactionBuilt', ex);

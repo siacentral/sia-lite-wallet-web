@@ -40,7 +40,7 @@ import { mapState } from 'vuex';
 import { verifyAddress } from '@/utils';
 import { parseCurrencyString, parseSiacoinString } from '@/utils/parse';
 import { formatCurrencyString, formatSiacoinString } from '@/utils/format';
-import { getAddresses, getWalletUnlockHashes, getWalletChangeAddress } from '@/store/db';
+import { getWalletAddresses } from '@/store/db';
 
 import Identicon from '@/components/Identicon';
 
@@ -55,11 +55,19 @@ export default {
 	computed: {
 		...mapState(['currency', 'currencies', 'networkFees']),
 		walletBalance() {
-			return this.unspent.reduce((v, o) => v.plus(o.value), new BigNumber(0));
+			return this.wallet.unconfirmedBalance();
+		},
+		changeAddress() {
+			let addr = this.ownedAddresses.find(a => a.usage_type !== 'sent');
+
+			if (!addr)
+				addr = this.ownedAddresses[this.ownedAddresses.length - 1];
+
+			return addr;
 		},
 		unspent() {
 			const outputs = this.wallet && Array.isArray(this.wallet.outputs) ? this.wallet.outputs : [],
-				spent = this.wallet && Array.isArray(this.wallet.spent) ? this.wallet.spent : [],
+				spent = this.wallet && Array.isArray(this.wallet.unconfirmed_spent) ? this.wallet.unconfirmed_spent : [],
 				unspent = outputs.filter(o => spent.indexOf(o) === -1);
 
 			if (!Array.isArray(unspent) || unspent.length === 0)
@@ -126,13 +134,13 @@ export default {
 			return null;
 		},
 		minInputs() {
-			return this.fundInputs(this.sendAmount).length + 3;
+			return this.fundTransaction(this.sendAmount).inputs.length;
 		},
 		apiFee() {
-			return new BigNumber(this.networkFees.api.fee).times(this.minInputs * 300);
+			return new BigNumber(this.networkFees.api.fee).times(((this.minInputs * 2) + 3) * 120);
 		},
 		siaFee() {
-			return new BigNumber(this.networkFees.minimum).plus(this.networkFees.maximum).div(2).times(this.minInputs * 300);
+			return new BigNumber(this.networkFees.minimum).plus(this.networkFees.maximum).div(2).times(((this.minInputs * 2) + 3) * 120);
 		},
 		fees() {
 			return this.apiFee.plus(this.siaFee);
@@ -146,95 +154,91 @@ export default {
 			ownedAddresses: []
 		};
 	},
-	mounted() {
+	async mounted() {
 		try {
 			this.onFormatValues();
-			this.loadAddresses();
+			await this.loadAddresses();
 		} catch (ex) {
 			console.error('TransactionSetupMounted', ex);
 		}
 	},
 	methods: {
 		async loadAddresses() {
-			this.ownedAddresses = await getWalletUnlockHashes(this.wallet.id);
+			this.ownedAddresses = await getWalletAddresses(this.wallet.id);
+
+			if (this.ownedAddresses.length === 0)
+				throw new Error('no addresses');
 		},
-		fundInputs(amount) {
+		ownsAddress(address) {
+			return this.ownedAddresses.findIndex(a => a.address === address && a.unlock_conditions) !== -1;
+		},
+		fundTransaction(amount) {
 			const inputs = [];
-			let added = new BigNumber(0),
-				i = 0;
+			let added = new BigNumber(0);
 
-			for (; i < this.unspent.length; i++) {
-				if (added.gte(this.sendAmount))
-					break;
-
-				added = added.plus(this.unspent[i].value);
-				inputs.push(this.unspent[i]);
-			}
-
-			return inputs;
-		},
-		async buildTransaction() {
-			let added = new BigNumber(0),
-				changeAddress;
-
-			const outputs = this.fundInputs(this.sendAmount.plus(this.fees)),
-				addresses = await getAddresses(this.wallet.id, outputs.map(o => o.unlock_hash)),
-				feeAddress = this.networkFees.api.address,
-				sigIndexes = [],
-				inputs = outputs.map(o => {
-					const addr = addresses.find(a => o.unlock_hash === a.address);
-
-					added = added.plus(o.value);
-
-					if (sigIndexes.indexOf(addr.index) === -1)
-						sigIndexes.push(addr.index);
-
-					return {
-						parentid: o.output_id,
-						unlockconditions: addr.unlock_conditions
-					};
-				}),
-				change = added.minus(this.fees).minus(this.sendAmount),
-				txn = {
-					minerfees: [this.siaFee.toString(10)],
-					siacoininputs: inputs,
-					siacoinoutputs: [
-						{
-							unlockhash: this.recipientAddress,
-							value: this.sendAmount.toString(10)
-						},
-						{
-							unlockhash: feeAddress,
-							value: this.apiFee.toString(10)
-						}
-					]
-				};
-
-			if (change.gt(0)) {
-				const addr = await getWalletChangeAddress(this.wallet.id);
+			for (let i = 0; i < this.unspent.length; i++) {
+				const output = this.unspent[i],
+					addr = this.ownedAddresses.find(a => output.unlock_hash === a.address && a.unlock_conditions);
 
 				if (!addr)
-					throw new Error('unable to send transaction. no change address');
+					continue;
 
-				changeAddress = addr.address;
-
-				if (!changeAddress || !verifyAddress(changeAddress) || this.ownedAddresses.indexOf(changeAddress) === -1)
-					throw new Error('unable to send transaction. no change address');
-
-				txn.siacoinoutputs.push({
-					unlockhash: changeAddress,
-					value: change.toString(10)
+				added = added.plus(output.value);
+				inputs.push({
+					...output,
+					...addr
 				});
+
+				if (added.gte(amount))
+					break;
 			}
 
 			return {
-				transaction: txn,
-				requiredSigs: sigIndexes,
-				apiFeeAddress: feeAddress,
-				changeAddress: changeAddress,
-				newOwnedOutputs: txn.siacoinoutputs
-					.filter(o => this.ownedAddresses.indexOf(o.unlockhash) !== -1)
+				inputs,
+				added
 			};
+		},
+		buildTransaction() {
+			const { inputs, added } = this.fundTransaction(this.sendAmount.plus(this.fees)),
+				txn = {
+					miner_fees: [this.siaFee.toString(10)],
+					siacoin_inputs: inputs,
+					siacoin_outputs: []
+				},
+				feeAddress = this.networkFees.api.address,
+				change = added.minus(this.fees).minus(this.sendAmount);
+
+			if (added.lt(this.sendAmount.plus(this.fees)))
+				throw new Error('not enough funds to create transaction');
+
+			txn.siacoin_outputs.push(
+				{
+					unlock_hash: this.recipientAddress,
+					value: this.sendAmount.toString(10),
+					tag: 'Recipient',
+					owned: this.ownsAddress(this.recipientAddress)
+				},
+				{
+					unlock_hash: feeAddress,
+					value: this.apiFee.toString(10),
+					tag: 'API Fee',
+					owned: false
+				}
+			);
+
+			if (change.gt(0)) {
+				if (!this.changeAddress || !this.changeAddress.address || !verifyAddress(this.changeAddress.address))
+					throw new Error('unable to send transaction. no change address');
+
+				txn.siacoin_outputs.push({
+					unlock_hash: this.changeAddress.address,
+					value: change.toString(10),
+					tag: 'Change',
+					owned: this.ownsAddress(this.changeAddress.address)
+				});
+			}
+
+			return txn;
 		},
 		formatCurrencyString(value) {
 			return formatCurrencyString(value, this.currency, this.currencies[this.currency]).value;
@@ -246,9 +250,7 @@ export default {
 			this.sending = true;
 
 			try {
-				const built = await this.buildTransaction();
-
-				this.$emit('built', built);
+				this.$emit('built', this.buildTransaction());
 			} catch (ex) {
 				console.error(ex);
 			} finally {
