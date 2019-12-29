@@ -156,6 +156,9 @@ export default {
 	},
 	async mounted() {
 		try {
+			if (typeof this.address === 'string' && this.address.length > 0)
+				this.recipientAddress = this.address;
+
 			this.onFormatValues();
 			await this.loadAddresses();
 		} catch (ex) {
@@ -289,6 +292,12 @@ export default {
 			} catch (ex) {
 				console.error(ex);
 			}
+		}
+	},
+	watch: {
+		address() {
+			if (typeof this.address === 'string' && this.address.length > 0)
+				this.recipientAddress = this.address;
 		}
 	}
 };

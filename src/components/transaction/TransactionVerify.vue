@@ -160,9 +160,11 @@ export default {
 <style lang="stylus" scoped>
 .transaction-verify {
 	display: grid;
+	height: 100%;
 	grid-template-rows: repeat(2, auto) minmax(0, 1fr) auto;
 	align-content: safe center;
 	grid-gap: 15px;
+	overflow: hidden;
 
 	.transaction-detail {
 		padding: 15px;
