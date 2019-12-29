@@ -37,8 +37,8 @@
 <script>
 import { mapState, mapActions } from 'vuex';
 import { signTransaction } from '@/utils/sia';
-// import { scanTransactions } from '@/sync/scanner';
-// import { broadcastTransaction } from '@/api/siacentral';
+import { scanTransactions } from '@/sync/scanner';
+import { broadcastTransaction } from '@/api/siacentral';
 
 import SignLedgerTransaction from '@/components/ledger/SignLedgerTransaction';
 import TransactionSummary from '@/components/transaction/TransactionSummary';
@@ -106,7 +106,7 @@ export default {
 				this.signed = signed;
 				this.transactionSigned = true;
 			} catch (ex) {
-				console.log(ex);
+				console.error('onLedgerSigned', ex);
 			}
 		},
 		async onVerifyTxn() {
@@ -133,15 +133,13 @@ export default {
 
 				this.status = 'Broadcasting transaction...';
 
-				console.log(this.signed);
-
-				/* await broadcastTransaction({
+				await broadcastTransaction({
 					siacoininputs: this.signed.siacoininputs,
 					siacoinoutputs: this.signed.siacoinoutputs,
 					minerfees: this.signed.minerfees,
 					transactionsignatures: this.signed.transactionsignatures
 				});
-				await scanTransactions(this.wallet); */
+				await scanTransactions(this.wallet);
 
 				this.status = 'Transaction sent...';
 				this.$emit('done');

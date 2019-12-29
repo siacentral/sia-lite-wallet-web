@@ -63,9 +63,6 @@ export default {
 		transaction: Object,
 		wallet: Object
 	},
-	mounted() {
-		console.log(this.transaction);
-	},
 	computed: {
 		...mapState(['currency', 'currencies', 'networkFees']),
 		outputs() {
@@ -203,8 +200,6 @@ export default {
 		totalAmountSC() {
 			const rem = this.inputAmount.minus(this.receiveAmount),
 				siacoins = formatSiacoinString(rem);
-
-			console.log(rem.toString(10));
 
 			return `${siacoins.value} <span class="currency-display">${siacoins.label}</span>`;
 		},

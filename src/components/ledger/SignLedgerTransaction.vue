@@ -76,8 +76,6 @@ export default {
 				const signed = { ...this.transaction },
 					encoded = await encodeTransaction(signed);
 
-				console.log(signed);
-
 				for (; this.signatures < this.requiredSignatures.length; this.signatures++) {
 					const sig = await signTransaction(encoded, this.signatures,
 						this.requiredSignatures[this.signatures]);
