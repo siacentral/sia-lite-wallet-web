@@ -36,7 +36,7 @@ export function generateAddresses(seed, i, n) {
 }
 
 export function getTransactions(addresses) {
-	return defaultSpawnWorker(['getTransactions', addresses], 15000);
+	return defaultSpawnWorker(['getTransactions', addresses], 30000);
 }
 
 export function signTransaction(seed, txn, indexes) {
@@ -47,8 +47,8 @@ export function encodeTransaction(txn) {
 	return defaultSpawnWorker(['encodeTransaction', JSON.stringify(txn)], 15000);
 }
 
-export function encodeUnlockHash(txn) {
-	return defaultSpawnWorker(['encodeUnlockHash', JSON.stringify(txn)], 15000);
+export function encodeUnlockHash(unlockhash) {
+	return defaultSpawnWorker(['encodeUnlockHash', JSON.stringify(unlockhash)], 15000);
 }
 
 export function recoverAddresses(seed, i, n, progress) {
@@ -56,7 +56,7 @@ export function recoverAddresses(seed, i, n, progress) {
 		work = new Promise((resolve, reject) => {
 			let timeout = setTimeout(() => {
 				reject(new Error('response timeout'));
-			}, 60000);
+			}, 30000);
 
 			worker.onmessage = (e) => {
 				const data = e.data;
@@ -73,7 +73,7 @@ export function recoverAddresses(seed, i, n, progress) {
 
 				timeout = setTimeout(() => {
 					reject(new Error('response timeout'));
-				}, 60000);
+				}, 30000);
 			};
 
 			worker.postMessage(['recoverAddresses', seed, i, n]);
