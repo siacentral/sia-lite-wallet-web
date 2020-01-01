@@ -59,6 +59,11 @@ export default {
 				this.connected = true;
 			} catch (ex) {
 				console.error('onConnected', ex);
+				this.pushNotification({
+					severity: 'danger',
+					icon: ['fab', 'usb'],
+					message: ex.message
+				});
 				this.connected = false;
 			}
 		},
@@ -86,6 +91,11 @@ export default {
 				this.$emit('signed', signed);
 			} catch (ex) {
 				console.error('onSignTransaction', ex);
+				this.pushNotification({
+					severity: 'danger',
+					icon: ['fab', 'usb'],
+					message: ex.message
+				});
 			} finally {
 				this.signing = false;
 			}

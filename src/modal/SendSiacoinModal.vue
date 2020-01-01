@@ -9,8 +9,8 @@
 
 <script>
 import Modal from './Modal';
-import TransactionSetup from '@/components/transaction/TransactionSetup';
-import TransactionVerify from '@/components/transaction/TransactionVerify';
+import TransactionSetup from '@/components/transactions/send/TransactionSetup';
+import TransactionVerify from '@/components/transactions/send/TransactionVerify';
 
 export default {
 	components: {
@@ -41,6 +41,10 @@ export default {
 				this.step = 'verify';
 			} catch (ex) {
 				console.error('onTransactionBuilt', ex);
+				this.pushNotification({
+					severity: 'danger',
+					message: ex.message
+				});
 			}
 		}
 	}

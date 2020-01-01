@@ -4,9 +4,26 @@
 			<div class="wallet-title">{{ name }}</div>
 			<div class="wallet-siacoin-balance" v-html="formatSiacoinString(balance)"></div>
 			<div class="wallet-display-balance" v-html="formatCurrencyString(balance)"></div>
-			<div class="wallet-buttons">
-				<button class="btn wallet-btn" @click="modal='send'" v-if="wallet.type !== 'watch'">Send</button>
-				<button class="btn wallet-btn" @click="modal='receive'">Receive</button>
+			<div class="wallet-button-wrapper">
+				<div class="wallet-buttons">
+					<button class="btn wallet-btn" @click="modal='send'" v-if="wallet.type !== 'watch'">Send</button>
+					<button class="btn wallet-btn" @click="modal='receive'">Receive</button>
+					<div class="wallet-more-btn">
+						<button class="more-btn" @click="showMore = !showMore"><icon icon="ellipsis-v" /></button>
+						<transition name="fade-top" mode="out-in">
+							<div class="dropdown" v-if="showMore">
+								<button class="dropdown-item"
+									v-if="wallet.type === 'watch' || wallet.type === 'ledger'"
+									@click="modal = 'add'">
+									Add Addresses</button>
+								<button class="dropdown-item" @click="onExportSeed" v-if="wallet.type === 'default'">
+									Export Seed</button>
+								<button class="dropdown-item" @click="modal = 'delete'">
+									Delete Wallet</button>
+							</div>
+						</transition>
+					</div>
+				</div>
 			</div>
 		</div>
 		<div class="wallet-transactions">
@@ -16,7 +33,7 @@
 						<tr class="group-date" :key="group.date"><td colspan="4">{{ group.date }}</td></tr>
 						<tr v-for="(transaction, i) in group.transactions" :key="`${group.date}-${i}`" :class="getTransactionClasses(transaction)">
 							<td class="transaction-type fit-text">{{ friendlyType(transaction) }}</td>
-							<td class="transaction-spacer"></td>
+							<td class="transaction-spacer" />
 							<td class="transaction-confirms fit-text"><span>{{ friendlyConfirms(transaction.confirmations) }}</span></td>
 							<td class="transaction-amount fit-text">
 								<div v-html="getTransactionSiacoins(transaction)"/>
@@ -28,22 +45,35 @@
 			</table>
 		</div>
 		<transition name="fade" mode="out-in" appear>
-			<send-siacoin-modal v-if="modal === 'send'" :wallet="wallet" @close="modal = null" />
-			<receive-siacoin-modal v-if="modal === 'receive'" :wallet="wallet" @close="modal = null" />
+			<add-addresses-modal v-if="modal === 'add'" :wallet="wallet" @close="modal = null" />
+			<confirm-modal v-else-if="modal === 'delete'"
+				:title="`Delete wallet ${name}?`"
+				:buttons="deleteButtons"
+				@close="modal = null" @selected="onDeleteWallet">
+				<p>Are you sure you want to delete "{{ name }}"? This will remove all data
+					associated with this wallet from your device. Please make sure you have the
+					recovery seed backed up.</p>
+			</confirm-modal>
+			<send-siacoin-modal v-else-if="modal === 'send'" :wallet="wallet" @close="modal = null" />
+			<receive-siacoin-modal v-else-if="modal === 'receive'" :wallet="wallet" @close="modal = null" />
 		</transition>
 	</div>
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import { mapState, mapActions } from 'vuex';
 import BigNumber from 'bignumber.js';
 import { formatSiacoinString, formatCurrencyString } from '@/utils/format';
 
+import AddAddressesModal from '@/modal/AddAddressesModal';
+import ConfirmModal from '@/modal/ConfirmModal';
 import SendSiacoinModal from '@/modal/SendSiacoinModal';
 import ReceiveSiacoinModal from '@/modal/ReceiveSiacoinModal';
 
 export default {
 	components: {
+		AddAddressesModal,
+		ConfirmModal,
 		ReceiveSiacoinModal,
 		SendSiacoinModal
 	},
@@ -52,7 +82,8 @@ export default {
 	},
 	data() {
 		return {
-			modal: null
+			modal: null,
+			showMore: false
 		};
 	},
 	computed: {
@@ -117,9 +148,60 @@ export default {
 			});
 
 			return groupedTxns;
+		},
+		deleteButtons() {
+			return [
+				{
+					text: 'Delete',
+					type: 'danger'
+				},
+				{
+					text: 'Cancel'
+				}
+			];
 		}
 	},
 	methods: {
+		...mapActions(['deleteWallet']),
+		onExportSeed() {
+			try {
+				const link = document.createElement('a');
+
+				link.style.display = 'none';
+
+				link.setAttribute('href',
+					`data:text/plan;charset=utf-8,${encodeURIComponent(this.wallet.seed)}`);
+				link.setAttribute('download', `${this.name.toLowerCase()}.siaseed`);
+				document.body.appendChild(link);
+				link.click();
+				document.body.removeChild(link);
+			} catch (ex) {
+				console.error('onExportSeed', ex);
+				this.pushNotification({
+					severity: 'danger',
+					icon: 'file-export',
+					message: ex.message
+				});
+			}
+		},
+		async onDeleteWallet(button) {
+			try {
+				this.modal = null;
+
+				if (button !== 'Delete')
+					return;
+
+				await this.deleteWallet(this.wallet.id);
+				this.$emit('deleted');
+			} catch (ex) {
+				console.error('onDeleteWallet', ex);
+				this.pushNotification({
+					severity: 'danger',
+					icon: 'trash',
+					message: ex.message
+				});
+			}
+		},
 		getTransactionClasses(transaction) {
 			const classes = {};
 
@@ -220,6 +302,60 @@ export default {
 	padding: 12px;
 }
 
+.wallet-more-btn {
+	position: relative;
+	display: inline-block;
+
+	.more-btn {
+		font-size: 1.2rem;
+		color: rgba(255, 255, 255, 0.54);
+		background: transparent;
+		border: none;
+		outline: none;
+		cursor: pointer;
+	}
+
+	.dropdown {
+		display: inline-block;
+		position: absolute;
+		top: calc(100% + 20px);
+		right: 0;
+		background: bg-dark-accent;
+		border-radius: 4px;
+		border-top-right-radius: 0;
+		z-index: 999;
+		box-shadow: global-shadow;
+
+		&:before {
+			position: absolute;
+			top: -8px;
+			right: 3px;
+			content: '';
+			width: 16px;
+			height: 16px;
+			background: #25272a;
+			-webkit-transform: rotateZ(45deg);
+			transform: rotateZ(45deg);
+			z-index: 998;
+		}
+
+		.dropdown-item {
+			padding: 15px;
+			font-size: 1rem;
+			color: rgba(255, 255, 255, 0.54);
+			white-space: nowrap;
+			border: none;
+			background: transparent;
+			outline: none;
+			cursor: pointer;
+
+			&:hover, &:active, &:focus {
+				color: primary;
+			}
+		}
+	}
+}
+
 .wallet-title {
 	font-size: 1.3rem;
 	text-align: center;
@@ -239,15 +375,25 @@ export default {
 	margin-bottom: 15px;
 }
 
+.wallet-button-wrapper {
+	margin: auto;
+	max-width: 700px;
+}
+
 .wallet-buttons {
-	display: grid;
-    grid-template-columns: repeat(2, minmax(auto, 1fr));
-    max-width: 700px;
-    margin: auto;
-    grid-gap: 30px;
+	display: flex;
     padding: 15px;
     align-items: center;
     justify-items: center;
+
+	.wallet-btn {
+		flex: 1;
+		margin-right: 15px;
+
+		&:last-child {
+			margin-right: 0;
+		}
+	}
 }
 
 .wallet-transactions {

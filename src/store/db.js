@@ -10,7 +10,7 @@ const db = new Dexie('sia-lite');
 
 db.version(1).stores({
 	wallets: 'id',
-	addresses: 'address,wallet_id,index'
+	addresses: '[address+wallet_id],wallet_id,index'
 });
 
 function encrypt(str, key) {
@@ -95,6 +95,10 @@ export async function loadWallets(password) {
 	return Promise.all(promises);
 }
 
+export function walletCount() {
+	return db.wallets.count();
+}
+
 export function saveAddresses(addresses) {
 	if (!Array.isArray(addresses))
 		return;
@@ -134,9 +138,9 @@ export function getLastWalletAddresses(walletID, limit, offset) {
 	return db.addresses.orderBy('index').filter(a => a.wallet_id === walletID).reverse().offset(offset).limit(limit).toArray();
 }
 
-export function deleteWallet(walletID) {
+export async function deleteWallet(walletID) {
 	return Promise.all([
 		db.addresses.filter(a => a.wallet_id === walletID).delete(),
-		db.wallets.filter(a => a.wallet_id === walletID).delete()
+		db.wallets.filter(w => w.id === walletID).delete()
 	]);
 }

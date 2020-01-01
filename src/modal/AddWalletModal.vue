@@ -25,10 +25,12 @@
 					<p>Creates a new watch-only wallet. Addresses must be added manually and transactions cannot be sent.</p>
 				</div>
 			</div>
-			<div class="wallet-step" v-else-if="step === 'ledger' || step === 'create'">
+			<div class="wallet-step" v-else-if="step === 'ledger' || step === 'create' || step === 'watch'">
 				<p v-if="step === 'ledger'">A new wallet will be created. Addresses must be manually
 					imported from a connected Ledger device. Transactions must be signed by the same
 					device. Only one hardware wallet can be created.</p>
+				<p v-else-if="step === 'watch'">A new watch-only wallet will be created. addresses
+					must be imported manually. Transactions cannot be creted or broadcast.</p>
 				<p v-else>A new unique 29 word wallet seed will be generated and encrypted. This seed
 					should be saved in a secure location. You can use this seed to recover your funds from any Sia wallet.</p>
 				<div class="control">
@@ -37,7 +39,8 @@
 				</div>
 				<div class="controls">
 					<button v-if="step === 'ledger'" class="btn btn-success btn-inline" @click="onCreateLedger">Import Addresses</button>
-					<button v-else class="btn btn-success btn-inline" @click="onCreateWallet">Create</button>
+					<button v-else-if="step === 'watch'" class="btn btn-success btn-inline" @click="onCreateWatch">Import Addresses</button>
+					<button v-else class="btn btn-success btn-inline" @click="onCreateWallet" :disabled="creating">Create</button>
 				</div>
 			</div>
 			<div class="wallet-step" v-else-if="step === 'recover'" key="recover">
@@ -49,18 +52,20 @@
 				</div>
 				<div class="control">
 					<label>Recovery Seed</label>
-					<input type="text" v-model="recoverySeed" />
+					<textarea v-model="recoverySeed" />
 				</div>
 				<div class="controls">
-					<button class="btn btn-success btn-inline" @click="onRecoverWallet">Recover</button>
+					<button class="btn btn-success btn-inline" @click="onRecoverWallet" :disabled="creating">Recover</button>
 				</div>
 			</div>
 			<import-ledger-addresses v-else-if="step === 'import-ledger'" key="ledger" :wallet="wallet" @imported="$emit('close')" />
+			<import-watch-addresses v-else-if="step === 'import-watch'" key="watch" :wallet="wallet" @imported="$emit('close')" />
 		</transition>
 	</modal>
 </template>
 
 <script>
+import { encode } from '@stablelib/base64';
 import { mapState, mapActions } from 'vuex';
 import { generateSeed, generateAddresses } from '@/utils/sia';
 import { queueWallet } from '@/sync/scanner';
@@ -68,11 +73,13 @@ import { saveAddresses } from '@/store/db';
 import { ledgerSupported } from '@/utils/ledger';
 
 import ImportLedgerAddresses from '@/components/ledger/ImportLedgerAddresses';
+import ImportWatchAddresses from '@/components/watch/ImportWatchAddresses';
 import Modal from './Modal';
 
 export default {
 	components: {
 		ImportLedgerAddresses,
+		ImportWatchAddresses,
 		Modal
 	},
 	computed: {
@@ -89,6 +96,7 @@ export default {
 	},
 	data() {
 		return {
+			creating: false,
 			step: '',
 			walletName: '',
 			recoverySeed: '',
@@ -101,33 +109,62 @@ export default {
 		}, 300);
 	},
 	methods: {
-		...mapActions(['saveWallet']),
-		async createWallet(seed, type) {
+		...mapActions(['createWallet']),
+		async saveWallet(seed, type) {
 			this.wallet = {
 				seed,
 				type,
 				title: this.walletName || 'Wallet'
 			};
 
-			const id = await this.saveWallet(this.wallet, this.password);
+			const id = await this.createWallet(this.wallet, this.password);
 
 			this.wallet.id = id;
 		},
+		randomID() {
+			const rand = new Uint8Array(64);
+
+			window.crypto.getRandomValues(rand);
+
+			return encode(rand);
+		},
 		async onCreateLedger() {
 			try {
-				await this.createWallet('ledger-hardware-wallet', 'ledger');
+				await this.saveWallet(this.randomID(), 'ledger');
 
 				this.step = 'import-ledger';
 			} catch (ex) {
-				console.error(ex);
+				console.error('onCreateLedger', ex);
+				this.pushNotification({
+					severity: 'danger',
+					message: ex.message
+				});
+			}
+		},
+		async onCreateWatch() {
+			try {
+				await this.saveWallet(this.randomID(), 'watch');
+
+				this.step = 'import-watch';
+			} catch (ex) {
+				console.error('onCreateWatch', ex);
+				this.pushNotification({
+					severity: 'danger',
+					message: ex.message
+				});
 			}
 		},
 		async onCreateWallet() {
+			if (this.creating)
+				return;
+
+			this.creating = true;
+
 			try {
 				const seed = await generateSeed(),
 					addresses = await generateAddresses(seed, 0, 100);
 
-				await this.createWallet(seed, 'default');
+				await this.saveWallet(seed, 'default');
 
 				await saveAddresses(addresses.map(a => ({
 					...a,
@@ -136,16 +173,33 @@ export default {
 				this.$emit('close');
 			} catch (ex) {
 				console.error('onCreateWallet', ex);
+				this.pushNotification({
+					severity: 'danger',
+					message: ex.message
+				});
+			} finally {
+				this.creating = false;
 			}
 		},
 		async onRecoverWallet() {
-			try {
-				await this.createWallet(this.recoverySeed, 'default');
+			if (this.creating)
+				return;
 
-				queueWallet(this.wallet, true);
+			this.creating = true;
+
+			try {
+				await this.saveWallet(this.recoverySeed, 'default');
+
+				queueWallet(this.wallet.id, true);
 				this.$emit('close');
 			} catch (ex) {
-				console.error(ex);
+				console.error('onRecoverWallet', ex);
+				this.pushNotification({
+					severity: 'danger',
+					message: ex.message
+				});
+			} finally {
+				this.creating = false;
 			}
 		}
 	}

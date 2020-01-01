@@ -34,6 +34,10 @@ export default {
 			}, 300);
 		} catch (ex) {
 			console.error('receiveModalBeforeMount', ex);
+			this.pushNotification({
+				severity: 'danger',
+				message: ex.message
+			});
 		}
 	},
 	props: {
@@ -68,6 +72,10 @@ export default {
 				this.current = v;
 			} catch (ex) {
 				console.error('onChangeAddress', ex);
+				this.pushNotification({
+					severity: 'danger',
+					message: ex.message
+				});
 			}
 		}
 	}

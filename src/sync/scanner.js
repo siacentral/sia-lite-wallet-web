@@ -11,14 +11,14 @@ const scanQueue = [],
 
 let scanning = false;
 
-export function queueWallet(wallet, full) {
+export function queueWallet(walletID, full) {
 	full = typeof full === 'boolean' ? full : false;
 
-	if (scanQueue.findIndex(w => w.id === wallet.id && w.full === full) !== -1)
+	if (scanQueue.findIndex(w => w.id === walletID && w.full === full) !== -1)
 		return;
 
 	scanQueue.push({
-		wallet,
+		walletID,
 		full
 	});
 
@@ -35,14 +35,14 @@ async function scanner() {
 		const scan = scanQueue.shift();
 
 		Store.dispatch('saveWallet', {
-			id: scan.wallet.id,
+			id: scan.walletID,
 			scanning: true
 		});
 
-		await scanWallet(scan.wallet, scan.full);
+		await scanWallet(scan.walletID, scan.full);
 
 		Store.dispatch('saveWallet', {
-			id: scan.wallet.id,
+			id: scan.walletID,
 			scanning: false
 		});
 	} finally {
@@ -53,7 +53,12 @@ async function scanner() {
 		scanner();
 }
 
-export async function scanWallet(wallet, full) {
+export async function scanWallet(walletID, full) {
+	const wallet = Store.state.wallets.find(w => w.id === walletID);
+
+	if (!wallet)
+		return;
+
 	try {
 		switch (wallet.type) {
 		case 'ledger':
@@ -83,14 +88,14 @@ export async function scanWallet(wallet, full) {
 	clearTimeout(quickTimeouts[wallet.id]);
 
 	quickTimeouts[wallet.id] = setTimeout(() => {
-		queueWallet(wallet, false);
+		queueWallet(wallet.id, false);
 	}, 300000);
 
 	if (full) {
 		clearTimeout(fullTimeouts[wallet.id]);
 
 		fullTimeouts[wallet.id] = setTimeout(() => {
-			queueWallet(wallet, true);
+			queueWallet(wallet.id, true);
 		}, 1.8e+6);
 	}
 }

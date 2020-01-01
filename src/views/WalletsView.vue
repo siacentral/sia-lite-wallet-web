@@ -3,10 +3,11 @@
 		<mobile-nav></mobile-nav>
 		<div class="wallets-list">
 			<div class="wallets">
-				<div :class="{ 'wallet': true, 'active-wallet': selectedWallet === idx }" @click="selectedWallet = idx" v-for="(wallet, idx) in wallets" :key="wallet.id">
-					<div class="wallet-name">{{ wallet.title || 'Wallet' }}</div>
-					<div class="wallet-balance" v-html="getDisplayBalance(wallet)"></div>
-				</div>
+				<wallet-item
+					v-for="(wallet, i) in wallets" :key="wallet.id"
+					:wallet="wallet"
+					:active="walletActive(i)"
+					@click.native="onSelectWallet(i)"/>
 			</div>
 			<div class="wallet-buttons">
 				<button class="btn wallet-btn" @click="walletModal = 'addWallet'"><icon icon="plus" /> Add Wallet</button>
@@ -14,7 +15,8 @@
 		</div>
 		<div class="wallets-detail">
 			<transition name="fade-top" mode="out-in" appear>
-				<wallet-display v-if="currentWallet" :wallet="currentWallet" :key="currentWallet.id" />
+				<wallet-display v-if="currentWallet" :wallet="currentWallet"
+					:key="currentWallet.id" @deleted="onDeleted" />
 				<div v-else>
 					No wallets found :(
 				</div>
@@ -28,17 +30,18 @@
 
 <script>
 import { mapState } from 'vuex';
-import { formatSiacoinString } from '@/utils/format';
 
 import AddWalletModal from '@/modal/AddWalletModal';
+import WalletItem from '@/components/wallet/WalletItem';
 import WalletDisplay from '@/components/wallet/WalletDisplay';
 import MobileNav from '@/components/MobileNav';
 
 export default {
 	components: {
 		AddWalletModal,
+		MobileNav,
 		WalletDisplay,
-		MobileNav
+		WalletItem
 	},
 	computed: {
 		...mapState(['wallets', 'outputs']),
@@ -56,13 +59,30 @@ export default {
 		};
 	},
 	methods: {
-		getDisplayBalance(wallet) {
-			if (!wallet)
-				return `0 <span class="currency-display">SC</span>`;
-
-			const format = formatSiacoinString(wallet.unconfirmedBalance());
-
-			return `${format.value} <span class="currency-display">${format.label}</span>`;
+		walletActive(i) {
+			return this.selectedWallet === i;
+		},
+		onSelectWallet(i) {
+			try {
+				this.selectedWallet = i;
+			} catch (ex) {
+				console.error('onSelectWallet', ex);
+				this.pushNotification({
+					severity: 'danger',
+					message: ex.message
+				});
+			}
+		},
+		onDeleted() {
+			try {
+				this.selectedWallet = 0;
+			} catch (ex) {
+				console.error('onDeleted', ex);
+				this.pushNotification({
+					severity: 'danger',
+					message: ex.message
+				});
+			}
 		}
 	}
 };
@@ -98,36 +118,6 @@ export default {
 .wallets {
 	overflow-x: hidden;
 	overflow-y: auto;
-}
-
-.wallet {
-	position: relative;
-    font-size: 1rem;
-    text-align: right;
-    padding: 15px;
-	transition: all 0.3s linear;
-	cursor: pointer;
-	overflow: hidden;
-
-	.wallet-name {
-		font-size: 1.2rem;
-		margin-bottom: 3px;
-		color: rgba(255, 255, 255, 0.75);
-	}
-
-	.wallet-balance {
-		color: rgba(255, 255, 255, 0.54);
-	}
-
-	&.active-wallet, &:hover, &:focus {
-		.wallet-name {
-			color: primary;
-		}
-
-		.wallet-balance {
-			color: rgba(255, 255, 255, 0.75);
-		}
-	}
 }
 
 .wallet-buttons {

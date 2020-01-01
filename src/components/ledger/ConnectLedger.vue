@@ -25,6 +25,11 @@ export default {
 				this.$emit('connected', null);
 			} catch (ex) {
 				console.error('onConnect', ex);
+				this.pushNotification({
+					severity: 'danger',
+					icon: ['fab', 'usb'],
+					message: ex.message
+				});
 				this.$emit('connected', ex.message);
 			}
 		}

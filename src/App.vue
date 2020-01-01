@@ -4,36 +4,34 @@
 		<primary-nav />
 		<div class="page-wrapper">
 			<transition name="fade" mode="out-in" appear>
-				<router-view v-if="loaded" />
+				<setup v-if="!setup" />
+				<unlock-wallet v-else-if="!unlocked" />
+				<router-view v-else />
 			</transition>
 		</div>
+		<notification-queue />
 	</div>
 </template>
 
 <script>
-import { mapActions } from 'vuex';
+import { mapState } from 'vuex';
+import NotificationQueue from '@/components/NotificationQueue';
 import PrimaryNav from '@/components/PrimaryNav';
+import UnlockWallet from '@/views/UnlockWallet';
+import Setup from '@/views/Setup';
 
 export default {
 	components: {
-		PrimaryNav
+		NotificationQueue,
+		PrimaryNav,
+		Setup,
+		UnlockWallet
 	},
-	data() {
-		return {
-			loaded: false
-		};
-	},
-	async beforeMount() {
-		try {
-			await this.unlockWallets('password');
-
-			this.loaded = true;
-		} catch (ex) {
-			console.error(ex);
+	computed: {
+		...mapState(['setup', 'wallets']),
+		unlocked() {
+			return Array.isArray(this.wallets) && this.wallets.length !== 0;
 		}
-	},
-	methods: {
-		...mapActions(['unlockWallets'])
 	}
 };
 </script>

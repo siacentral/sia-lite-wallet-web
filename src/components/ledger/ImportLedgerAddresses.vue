@@ -99,6 +99,11 @@ export default {
 			this.loaded = true;
 		} catch (ex) {
 			console.error(ex);
+			this.pushNotification({
+				severity: 'danger',
+				icon: ['fab', 'usb'],
+				message: ex.message
+			});
 		}
 	},
 	methods: {
@@ -115,6 +120,11 @@ export default {
 				this.connected = true;
 			} catch (ex) {
 				console.error('onConnected', ex);
+				this.pushNotification({
+					severity: 'danger',
+					icon: ['fab', 'usb'],
+					message: ex.message
+				});
 				this.connected = false;
 			}
 		},
@@ -133,10 +143,15 @@ export default {
 					wallet_id: this.wallet.id
 				})));
 
-				queueWallet(this.wallet);
+				queueWallet(this.wallet.id);
 				this.$emit('imported', this.addresses);
 			} catch (ex) {
 				console.error('onAddAddresses', ex.message);
+				this.pushNotification({
+					severity: 'danger',
+					icon: 'redo',
+					message: ex.message
+				});
 			}
 		},
 		async onAddPublicKey() {
@@ -166,7 +181,11 @@ export default {
 				await this.refreshWalletBalance();
 			} catch (ex) {
 				console.error('onAddPublicKey', ex);
-				this.error = ex.message;
+				this.pushNotification({
+					severity: 'danger',
+					icon: ['fab', 'usb'],
+					message: ex.message
+				});
 			} finally {
 				this.adding = false;
 			}

@@ -73,14 +73,6 @@ html, body {
 	overflow-x: hidden;
 	overflow-y: auto;
 
-	.page-content {
-		display: grid;
-		margin: auto;
-		justify-content: center;
-    	align-content: center;
-		grid-gap: 15px;
-	}
-
 	@media screen and (min-width: 767px) {
 		padding-top: 0;	
 	}
@@ -89,6 +81,14 @@ html, body {
 body.win32 {
 	.page {
 		padding-top: 32px;
+	}	
+}
+
+.buttons {
+	text-align: center;
+
+	> button:last-child, > a:last-child {
+		margin-right: 0;
 	}	
 }
 
