@@ -5,13 +5,15 @@
 			<h2 class="text-center">Unlock Wallet</h2>
 			<p>Your wallets are currently encrypted and locked. Enter your password to unlock your
 				wallets and access your funds.</p>
-			<div class="control">
-				<label>Wallet Password</label>
-				<input type="password" v-model="password" />
-			</div>
-			<div class="buttons">
-				<button class="btn btn-success btn-inline" @click="onUnlockWallets" :disabled="unlocking">Unlock</button>
-			</div>
+			<form @submit.prevent="onUnlockWallets">
+				<div class="control">
+					<label>Wallet Password</label>
+					<input type="password" v-model="password" />
+				</div>
+				<div class="buttons">
+					<button class="btn btn-success btn-inline" :disabled="unlocking">Unlock</button>
+				</div>
+			</form>
 		</div>
 	</div>
 </template>
