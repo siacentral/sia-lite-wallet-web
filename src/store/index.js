@@ -91,6 +91,9 @@ const store = new Vuex.Store({
 		setSetup({ commit }, setup) {
 			commit('setSetup', setup);
 		},
+		setPassword({ commit }, password) {
+			commit('setPassword', password);
+		},
 		async unlockWallets({ commit, dispatch }, password) {
 			const wallets = await loadWallets(password);
 

@@ -1,5 +1,5 @@
 <template>
-	<transition name="fade-top" mode="out-in" appear>
+	<transition name="fade-top" mode="out-in">
 		<div class="wallet-step wallet-mode" v-if="step === 'pickMode'" key="pickMode">
 			<div class="create-wallet-button" @click="step = 'create'">
 				<div class="button-icon"><icon icon="plus" /></div>
@@ -54,6 +54,16 @@
 			</div>
 			<div class="controls">
 				<button class="btn btn-success btn-inline" @click="onRecoverWallet" :disabled="creating">Recover</button>
+			</div>
+		</div>
+		<div class="wallet-step" v-else-if="step === 'review'" key="review">
+			<p>A new wallet has been created. Please backup your recovery seed to a safe location</p>
+			<div class="control">
+				<label>Recovery Seed</label>
+				<textarea v-model="recoverySeed" readonly/>
+			</div>
+			<div class="controls">
+				<button class="btn btn-success btn-inline" @click="$emit('created')">Done</button>
 			</div>
 		</div>
 		<import-ledger-addresses v-else-if="step === 'import-ledger'" key="ledger" :wallet="wallet" @imported="$emit('created')" />
@@ -163,7 +173,9 @@ export default {
 					...a,
 					wallet_id: this.wallet.id
 				})));
-				this.$emit('created');
+
+				this.recoverySeed = seed;
+				this.step = 'review';
 			} catch (ex) {
 				console.error('onCreateWallet', ex);
 				this.pushNotification({
@@ -216,9 +228,13 @@ export default {
 	display: grid;
 	height: 100%;
 	width: 100%;
-	grid-template-rows: auto;
+	padding: 15px;
 	align-content: safe center;
 	justify-content: center;
+
+	textarea {
+		height: 80px;
+	}
 }
 
 p {

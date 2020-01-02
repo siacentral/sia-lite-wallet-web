@@ -7,9 +7,6 @@
 			<router-link :to="{ name: 'wallets' }" class="menu-item">
 				<icon icon="wallet" />
 			</router-link>
-			<router-link :to="{ name: 'address-book' }" class="menu-item">
-				<icon icon="address-book" />
-			</router-link>
 		</div>
 		<div class="lower">
 			<router-link :to="{ name: 'settings' }" class="menu-item">
@@ -32,7 +29,7 @@ export default {
 <style lang="stylus" scoped>
 	.primary-nav {
 		display: none;
-		padding: 30px 0 15px;
+		padding: 15px 0 0;
 		grid-template-rows: repeat(2, auto);
 		align-content: space-between;
 		background: bg-dark-accent;
@@ -43,15 +40,9 @@ export default {
 		}
 	}
 
-	body.linux {
+	body.mac {
 		.primary-nav {
-			padding-top: 0;
-		}
-	}
-
-	body.win32 {
-		.primary-nav {
-			padding: 15px 0;
+			padding-top: 30px;
 		}
 	}
 
