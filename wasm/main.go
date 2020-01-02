@@ -16,10 +16,6 @@ import (
 	siatypes "gitlab.com/NebulousLabs/Sia/types"
 )
 
-var (
-	c = make(chan bool, 1)
-)
-
 type (
 	processedTransaction struct {
 		TransactionID  string            `json:"transaction_id"`
@@ -63,6 +59,8 @@ func main() {
 		"signTransaction":   js.FuncOf(signTransaction),
 		"encodeUnlockHash":  js.FuncOf(encodeUnlockHash),
 	})
+
+	c := make(chan bool, 1)
 
 	<-c
 }
