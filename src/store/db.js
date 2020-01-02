@@ -135,7 +135,7 @@ export function getLastWalletAddresses(walletID, limit, offset) {
 	offset = offset || 0;
 	limit = limit || 20;
 
-	return db.addresses.orderBy('index').filter(a => a.wallet_id === walletID).reverse().offset(offset).limit(limit).toArray();
+	return db.addresses.orderBy('index').filter(a => a.wallet_id === walletID).offset(offset).limit(limit).toArray();
 }
 
 export async function deleteWallet(walletID) {
