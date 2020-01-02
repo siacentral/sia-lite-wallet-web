@@ -23,6 +23,9 @@ Vue.mixin({
 	methods: {
 		pushNotification(notification) {
 			store.dispatch('pushNotification', notification);
+		},
+		queueWallet(walletID, full) {
+			store.dispatch('queueWallet', { walletID, full });
 		}
 	}
 });
