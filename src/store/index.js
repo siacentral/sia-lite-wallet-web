@@ -4,7 +4,7 @@ import { hash } from 'tweetnacl';
 import { encode as encodeB64 } from '@stablelib/base64';
 import { encode as encodeUTF8 } from '@stablelib/utf8';
 import { saveWallet, loadWallets, deleteWallet } from './db';
-import { queueWallet } from '@/sync/scanner';
+import { scanner } from '@/sync/scanner';
 import { getCoinPrice, getNetworkFees } from '@/api/siacentral';
 import Wallet from '@/types/wallet';
 
@@ -17,6 +17,7 @@ const store = new Vuex.Store({
 		password: null,
 		wallets: [],
 		notifications: [],
+		scanQueue: [],
 		currency: 'usd',
 		networkFees: {},
 		currencies: {}
@@ -70,20 +71,34 @@ const store = new Vuex.Store({
 				return;
 
 			state.notifications.shift();
+		},
+		queueWallet(state, { walletID, full }) {
+			full = typeof full === 'boolean' ? full : false;
+
+			if (state.scanQueue.findIndex(w => w.id === walletID && w.full === full) !== -1)
+				return;
+
+			state.scanQueue.push({
+				walletID,
+				full
+			});
+		},
+		shiftWallet(state) {
+			return state.scanQueue.shift();
 		}
 	},
 	actions: {
-		setSetup(context, setup) {
-			context.commit('setSetup', setup);
+		setSetup({ commit }, setup) {
+			commit('setSetup', setup);
 		},
-		async unlockWallets({ commit }, password) {
+		async unlockWallets({ commit, dispatch }, password) {
 			const wallets = await loadWallets(password);
 
 			commit('setWallets', wallets);
 			commit('setPassword', password);
 
-			wallets.forEach(w => queueWallet(w.id, false));
-			wallets.forEach(w => queueWallet(w.id, true));
+			wallets.forEach(w => dispatch('queueWallet', { walletID: w.id, full: false }));
+			wallets.forEach(w => dispatch('queueWallet', { walletID: w.id, full: false }));
 		},
 		async saveWallet({ commit, state }, wallet) {
 			const existing = state.wallets.find(w => w.id === wallet.id);
@@ -122,20 +137,29 @@ const store = new Vuex.Store({
 
 			commit('deleteWallet', walletID);
 		},
-		setExchangeRate(context, rates) {
-			context.commit('setExchangeRate', rates);
+		setExchangeRate({ commit }, rates) {
+			commit('setExchangeRate', rates);
 		},
-		setNetworkFees(context, fees) {
-			context.commit('setNetworkFees', fees);
+		setNetworkFees({ commit }, fees) {
+			commit('setNetworkFees', fees);
 		},
-		pushNotification(context, notification) {
-			context.commit('pushNotification', notification);
+		pushNotification({ commit }, notification) {
+			commit('pushNotification', notification);
 		},
-		clearNotification(context) {
-			context.commit('clearNotification');
+		clearNotification({ commit }) {
+			commit('clearNotification');
+		},
+		queueWallet({ commit }, scan) {
+			commit('queueWallet', scan);
+			setTimeout(scanner, 0);
+		},
+		shiftWallet({ commit, state }) {
+			const item = state.scanQueue[0];
+
+			commit('shiftWallet');
+
+			return item;
 		}
-	},
-	modules: {
 	}
 });
 

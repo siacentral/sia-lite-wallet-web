@@ -39,7 +39,6 @@ import { verifyAddress } from '@/utils';
 import { getTransactions } from '@/utils/sia';
 import { formatSiacoinString, formatCurrencyString, formatNumber } from '@/utils/format';
 import { getWalletAddresses, saveAddresses } from '@/store/db';
-import { queueWallet } from '@/sync/scanner';
 
 export default {
 	props: {
@@ -157,7 +156,7 @@ export default {
 					return addrs;
 				}, []));
 
-				queueWallet(this.wallet.id);
+				this.queueWallet(this.wallet.id);
 				this.$emit('imported', this.addresses);
 			} catch (ex) {
 				console.error('onAddAddresses', ex.message);

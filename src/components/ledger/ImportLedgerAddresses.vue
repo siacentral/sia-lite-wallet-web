@@ -38,7 +38,6 @@ import { ledgerSupported, getVersion, getPublicKey } from '@/utils/ledger';
 import { encodeUnlockHash, getTransactions } from '@/utils/sia';
 import { formatSiacoinString, formatCurrencyString, formatNumber } from '@/utils/format';
 import { getWalletAddresses, saveAddresses } from '@/store/db';
-import { queueWallet } from '@/sync/scanner';
 
 import ConnectLedger from '@/components/ledger/ConnectLedger';
 
@@ -143,7 +142,7 @@ export default {
 					wallet_id: this.wallet.id
 				})));
 
-				queueWallet(this.wallet.id);
+				this.queueWallet(this.wallet.id);
 				this.$emit('imported', this.addresses);
 			} catch (ex) {
 				console.error('onAddAddresses', ex.message);

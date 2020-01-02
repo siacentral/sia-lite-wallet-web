@@ -12,14 +12,17 @@
 						<button class="more-btn" @click="showMore = !showMore"><icon icon="ellipsis-v" /></button>
 						<transition name="fade-top" mode="out-in">
 							<div class="dropdown" v-if="showMore">
+								<button class="dropdown-item" @click="onQueueWallet"
+									:disabled="walletQueued">
+									<icon icon="redo" />Rescan Wallet</button>
 								<button class="dropdown-item"
 									v-if="wallet.type === 'watch' || wallet.type === 'ledger'"
-									@click="modal = 'add'">
-									Add Addresses</button>
+									@click="onDropdownModal('add')">
+									<icon icon="plus" />Add Addresses</button>
 								<button class="dropdown-item" @click="onExportSeed" v-if="wallet.type === 'default'">
-									Export Seed</button>
-								<button class="dropdown-item" @click="modal = 'delete'">
-									Delete Wallet</button>
+									<icon icon="file-export" />Export Seed</button>
+								<button class="dropdown-item" @click="onDropdownModal('delete')">
+									<icon icon="trash" />Delete Wallet</button>
 							</div>
 						</transition>
 					</div>
@@ -47,10 +50,10 @@
 		<transition name="fade" mode="out-in" appear>
 			<add-addresses-modal v-if="modal === 'add'" :wallet="wallet" @close="modal = null" />
 			<confirm-modal v-else-if="modal === 'delete'"
-				:title="`Delete wallet ${name}?`"
+				:title="deleteTitle"
 				:buttons="deleteButtons"
 				@close="modal = null" @selected="onDeleteWallet">
-				<p>Are you sure you want to delete "{{ name }}"? This will remove all data
+				<p>Are you sure you want to delete the wallet named "{{ name }}"? This will remove all data
 					associated with this wallet from your device. Please make sure you have the
 					recovery seed backed up.</p>
 			</confirm-modal>
@@ -87,7 +90,10 @@ export default {
 		};
 	},
 	computed: {
-		...mapState(['currency', 'currencies']),
+		...mapState(['currency', 'currencies', 'scanQueue']),
+		walletQueued() {
+			return this.wallet.scanning || this.scanQueue.filter(s => s.walletID === this.wallet.id).length !== 0;
+		},
 		balance() {
 			if (!this.wallet)
 				return new BigNumber(0);
@@ -159,10 +165,45 @@ export default {
 					text: 'Cancel'
 				}
 			];
+		},
+		deleteTitle() {
+			return `Delete "${this.name}"?`;
 		}
 	},
 	methods: {
 		...mapActions(['deleteWallet']),
+		onQueueWallet() {
+			try {
+				this.queueWallet(this.wallet.id, true);
+
+				this.pushNotification({
+					icon: 'redo',
+					message: 'Wallet has been queued for rescan'
+				});
+			} catch (ex) {
+				this.pushNotification({
+					severity: 'danger',
+					icon: 'redo',
+					message: ex.message
+				});
+				console.error('onQueueWallet', ex);
+			} finally {
+				this.showMore = false;
+			}
+		},
+		onDropdownModal(modal) {
+			try {
+				this.modal = modal;
+			} catch (ex) {
+				this.pushNotification({
+					severity: 'danger',
+					message: ex.message
+				});
+				console.error('onDropdownModal', ex);
+			} finally {
+				this.showMore = false;
+			}
+		},
 		onExportSeed() {
 			try {
 				const link = document.createElement('a');
@@ -182,6 +223,8 @@ export default {
 					icon: 'file-export',
 					message: ex.message
 				});
+			} finally {
+				this.showMore = false;
 			}
 		},
 		async onDeleteWallet(button) {
@@ -348,6 +391,14 @@ export default {
 			background: transparent;
 			outline: none;
 			cursor: pointer;
+
+			svg {
+				margin-right: 15px;
+			}
+
+			&:disabled {
+				opacity: 0.28;
+			}
 
 			&:hover, &:active, &:focus {
 				color: primary;
