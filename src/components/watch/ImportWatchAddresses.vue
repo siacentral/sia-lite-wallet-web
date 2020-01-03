@@ -37,7 +37,7 @@ import { mapState } from 'vuex';
 import BigNumber from 'bignumber.js';
 import { verifyAddress } from '@/utils';
 import { getTransactions } from '@/utils/sia';
-import { formatSiacoinString, formatCurrencyString, formatNumber } from '@/utils/format';
+import { formatPriceString, formatNumber } from '@/utils/format';
 import { getWalletAddresses, saveAddresses } from '@/store/db';
 
 export default {
@@ -57,12 +57,12 @@ export default {
 	computed: {
 		...mapState(['currency', 'currencies']),
 		balanceSC() {
-			const format = formatSiacoinString(this.balance, 2);
+			const format = formatPriceString(this.balance, 2);
 
 			return `${format.value} <span class="currency-display">${format.label}</span>`;
 		},
 		balanceCurrency() {
-			const format = formatCurrencyString(this.balance, this.currency, this.currencies[this.currency]);
+			const format = formatPriceString(this.balance, 2, this.currency, this.currencies[this.currency]);
 
 			return `${format.value} <span class="currency-display">${format.label}</span>`;
 		},

@@ -33,7 +33,7 @@
 <script>
 import { mapState } from 'vuex';
 import BigNumber from 'bignumber.js';
-import { formatCurrencyString, formatSiacoinString } from '@/utils/format';
+import { formatPriceString } from '@/utils/format';
 
 import Identicon from '@/components/Identicon';
 
@@ -62,12 +62,12 @@ export default {
 	},
 	methods: {
 		getOutputSC(recipient) {
-			const siacoins = formatSiacoinString(new BigNumber(recipient.value));
+			const siacoins = formatPriceString(new BigNumber(recipient.value), 2);
 
 			return `${siacoins.value} <span class="currency-display">${siacoins.label}</span>`;
 		},
 		getOutputCurrency(recipient) {
-			const currency = formatCurrencyString(new BigNumber(recipient.value), this.currency, this.currencies[this.currency]);
+			const currency = formatPriceString(new BigNumber(recipient.value), 2, this.currency, this.currencies[this.currency]);
 
 			return `${currency.value} <span class="currency-display">${currency.label}</span>`;
 		}

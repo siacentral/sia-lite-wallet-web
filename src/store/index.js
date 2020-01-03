@@ -18,7 +18,7 @@ const store = new Vuex.Store({
 		wallets: [],
 		notifications: [],
 		scanQueue: [],
-		currency: 'usd',
+		currency: localStorage.getItem('displayCurrency') || 'usd',
 		networkFees: {},
 		currencies: {}
 	},
@@ -31,6 +31,9 @@ const store = new Vuex.Store({
 		},
 		setPassword(state, password) {
 			state.password = password;
+		},
+		setCurrency(state, currency) {
+			state.currency = currency;
 		},
 		saveWallet(state, wallet) {
 			if (!wallet || !wallet.seed)
@@ -93,6 +96,10 @@ const store = new Vuex.Store({
 		},
 		setPassword({ commit }, password) {
 			commit('setPassword', password);
+		},
+		setCurrency({ commit }, currency) {
+			localStorage.setItem('displayCurrency', currency);
+			commit('setCurrency', currency);
 		},
 		async unlockWallets({ commit, dispatch }, password) {
 			const wallets = await loadWallets(password);

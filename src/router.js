@@ -1,15 +1,18 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
 
-import WalletsView from '@/views/WalletsView.vue';
-
 Vue.use(VueRouter);
 
 const routes = [
 	{
 		path: '/',
 		name: 'wallets',
-		component: WalletsView
+		component: () => import('@/views/Wallets.vue')
+	},
+	{
+		path: '/settings',
+		name: 'settings',
+		component: () => import('@/views/Settings.vue')
 	}
 ];
 

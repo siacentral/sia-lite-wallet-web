@@ -170,7 +170,7 @@ function roundNumber(val, dec) {
 	return num;
 }
 
-export function formatSiacoinString(val, dec) {
+function formatSiacoinString(val, dec) {
 	if (!isFinite(dec))
 		dec = 2;
 
@@ -191,7 +191,7 @@ export function formatSiacoinString(val, dec) {
 	};
 };
 
-export function formatCryptoString(val, dec, currency, rate) {
+function formatCryptoString(val, dec, currency, rate) {
 	dec = dec || 4;
 
 	if (val.isEqualTo(0) || !rate) {
@@ -207,11 +207,11 @@ export function formatCryptoString(val, dec, currency, rate) {
 			minimumFractionDigits: dec,
 			maximumFractionDigits: 20
 		}).format(roundNumber(val.dividedBy(1e24).times(rate), dec)),
-		label: 'SC'
+		label: currency.toUpperCase()
 	};
 }
 
-export function formatCurrencyString(val, currency, rate) {
+function formatCurrencyString(val, currency, rate) {
 	const formatter = new Intl.NumberFormat([], { style: 'currency', currency: currency || 'usd', maximumFractionDigits: 20 });
 
 	if (val.isEqualTo(0) || !rate) {
@@ -255,7 +255,7 @@ export function formatDataPriceString(val, dec, unit, currency, rate) {
 		return formatCryptoString(val.times(byteFactor), dec, currency, rate);
 
 	if (supportedCurrency.indexOf(currency) >= 0 && rate)
-		return formatCurrencyString(val.times(byteFactor), dec, currency, rate);
+		return formatCurrencyString(val.times(byteFactor), currency, rate);
 
 	return formatSiacoinString(val.times(byteFactor), dec);
 };
@@ -270,7 +270,7 @@ export function formatMonthlyPriceString(val, dec, unit, currency, rate) {
 		return formatCryptoString(val.times(byteFactor).times(4320), dec, currency, rate);
 
 	if (supportedCurrency.indexOf(currency) >= 0 && rate)
-		return formatCurrencyString(val.times(byteFactor).times(4320), dec, currency, rate);
+		return formatCurrencyString(val.times(byteFactor).times(4320), currency, rate);
 
 	return formatSiacoinString(val.times(byteFactor).times(4320), dec, currency, rate);
 };
@@ -283,7 +283,7 @@ export function formatPriceString(val, dec, currency, rate) {
 		return formatCryptoString(val, dec, currency, rate);
 
 	if (supportedCurrency.indexOf(currency) >= 0 && rate)
-		return formatCurrencyString(val, dec, currency, rate);
+		return formatCurrencyString(val, currency, rate);
 
 	return formatSiacoinString(val, dec);
 }

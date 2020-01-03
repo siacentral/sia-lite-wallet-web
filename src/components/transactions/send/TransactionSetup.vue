@@ -39,7 +39,7 @@ import BigNumber from 'bignumber.js';
 import { mapState } from 'vuex';
 import { verifyAddress } from '@/utils';
 import { parseCurrencyString, parseSiacoinString } from '@/utils/parse';
-import { formatCurrencyString, formatSiacoinString } from '@/utils/format';
+import { formatPriceString } from '@/utils/format';
 import { getWalletAddresses } from '@/store/db';
 
 import Identicon from '@/components/Identicon';
@@ -89,12 +89,12 @@ export default {
 			return unspent;
 		},
 		transactionFeeSC() {
-			const siacoins = formatSiacoinString(this.fees);
+			const siacoins = formatPriceString(this.fees, 2);
 
 			return `${siacoins.value} <span class="currency-display">${siacoins.label}</span>`;
 		},
 		transactionFeeCurrency() {
-			const currency = formatCurrencyString(this.fees, this.currency, this.currencies[this.currency]);
+			const currency = formatPriceString(this.fees, 2, this.currency, this.currencies[this.currency]);
 
 			return `${currency.value} <span class="currency-display">${currency.label}</span>`;
 		},
@@ -108,13 +108,13 @@ export default {
 		},
 		remainingBalanceSC() {
 			const rem = this.walletBalance.minus(this.calculatedAmount).minus(this.fees),
-				siacoins = formatSiacoinString(rem);
+				siacoins = formatPriceString(rem, 2);
 
 			return `${siacoins.value} <span class="currency-display">${siacoins.label}</span>`;
 		},
 		remainingBalanceCurrency() {
 			const rem = this.walletBalance.minus(this.calculatedAmount).minus(this.fees),
-				currency = formatCurrencyString(rem, this.currency, this.currencies[this.currency]);
+				currency = formatPriceString(rem, 2, this.currency, this.currencies[this.currency]);
 
 			return `${currency.value} <span class="currency-display">${currency.label}</span>`;
 		},
@@ -248,7 +248,7 @@ export default {
 			return txn;
 		},
 		formatCurrencyString(value) {
-			return formatCurrencyString(value, this.currency, this.currencies[this.currency]).value;
+			return formatPriceString(value, 2, this.currency, this.currencies[this.currency]).value;
 		},
 		async onSendTxn() {
 			if (this.sending)
@@ -270,7 +270,7 @@ export default {
 		},
 		onFormatValues() {
 			try {
-				const siacoins = formatSiacoinString(this.sendAmount);
+				const siacoins = formatPriceString(this.sendAmount, 2);
 
 				this.$refs.txtCurrency.value = this.formatCurrencyString(this.sendAmount);
 				this.$refs.txtSiacoin.value = siacoins.value;
@@ -301,7 +301,7 @@ export default {
 			try {
 				const value = this.$refs.txtCurrency.value,
 					parsed = parseCurrencyString(value, this.currencies[this.currency]),
-					siacoins = formatSiacoinString(parsed);
+					siacoins = formatPriceString(parsed, 2);
 
 				this.sendAmount = parsed;
 				this.$refs.txtSiacoin.value = siacoins.value;

@@ -39,8 +39,8 @@
 							<td class="transaction-spacer" />
 							<td class="transaction-confirms fit-text"><span>{{ friendlyConfirms(transaction.confirmations) }}</span></td>
 							<td class="transaction-amount fit-text">
-								<div v-html="getTransactionSiacoins(transaction)"/>
-								<div class="transaction-currency" v-html="getTransactionCurrency(transaction)" />
+								<div v-html="transaction.siacoins"/>
+								<div class="transaction-currency" v-html="transaction.currency" />
 							</td>
 						</tr>
 					</template>
@@ -66,7 +66,7 @@
 <script>
 import { mapState, mapActions } from 'vuex';
 import BigNumber from 'bignumber.js';
-import { formatSiacoinString, formatCurrencyString } from '@/utils/format';
+import { formatPriceString } from '@/utils/format';
 
 import AddAddressesModal from '@/modal/AddAddressesModal';
 import ConfirmModal from '@/modal/ConfirmModal';
@@ -256,12 +256,12 @@ export default {
 			return classes;
 		},
 		formatSiacoinString(val) {
-			const format = formatSiacoinString(val, 2);
+			const format = formatPriceString(val, 2);
 
 			return `${format.value} <span class="currency-display">${format.label}</span>`;
 		},
 		formatCurrencyString(val) {
-			const format = formatCurrencyString(val, this.currency, this.currencies[this.currency]);
+			const format = formatPriceString(val, 2, this.currency, this.currencies[this.currency]);
 
 			return `${format.value} <span class="currency-display">${format.label}</span>`;
 		},
@@ -303,7 +303,7 @@ export default {
 			if (value.isNaN() || !value.isFinite())
 				value = new BigNumber(0);
 
-			const format = formatSiacoinString(value);
+			const format = formatPriceString(value, 2);
 
 			if (txn.direction === 'sent')
 				return `-${format.value} <span class="currency-display">${format.label}</span>`;
@@ -316,7 +316,7 @@ export default {
 			if (value.isNaN() || !value.isFinite())
 				value = new BigNumber(0);
 
-			const format = formatCurrencyString(value, this.currency, this.currencies[this.currency]);
+			const format = formatPriceString(value, 2, this.currency, this.currencies[this.currency]);
 
 			if (txn.direction === 'sent')
 				return `-${format.value} <span class="currency-display">${format.label}</span>`;
