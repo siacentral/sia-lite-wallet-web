@@ -70,8 +70,6 @@ export default {
 				spent = this.wallet && Array.isArray(this.wallet.unconfirmed_spent) ? this.wallet.unconfirmed_spent : [],
 				unspent = outputs.filter(o => spent.indexOf(o.output_id) === -1);
 
-			console.log(spent);
-
 			if (!Array.isArray(unspent) || unspent.length === 0)
 				return [];
 
@@ -246,8 +244,6 @@ export default {
 					owned: this.ownsAddress(this.changeAddress.address)
 				});
 			}
-
-			console.log(txn);
 
 			return txn;
 		},

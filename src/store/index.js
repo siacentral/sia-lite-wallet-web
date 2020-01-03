@@ -64,10 +64,7 @@ const store = new Vuex.Store({
 				return;
 			}
 
-			Vue.set(state.wallets, idx, new Wallet({
-				...state.wallets[idx],
-				...wallet
-			}));
+			Vue.set(state.wallets, idx, new Wallet(wallet));
 		},
 		deleteWallet(state, id) {
 			const idx = state.wallets.findIndex(w => w.id === id);
@@ -146,6 +143,7 @@ const store = new Vuex.Store({
 			}, state.password);
 
 			commit('saveWallet', {
+				...existing,
 				...wallet,
 				id
 			});
