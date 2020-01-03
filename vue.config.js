@@ -2,6 +2,16 @@ const path = require('path');
 
 module.exports = {
 	parallel: false,
+	pwa: {
+		name: 'Sia Lite Wallet',
+		themeColor: '#1d1e21',
+		msTileColor: '#1d1e21',
+		appleMobileWebAppCapable: 'yes',
+		appleMobileWebAppStatusBarStyle: 'black-translucent',
+		manifestOptions: {
+			background_color: '#1d1e21'
+		}
+	},
 	chainWebpack: config => {
 		config.output.publicPath = `${process.cwd()}/dist/`;
 
