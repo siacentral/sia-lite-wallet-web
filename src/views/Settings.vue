@@ -62,7 +62,7 @@ export default {
 	max-width: 700px;
 	margin: auto;
 	padding: 15px;
-	align-items: safe center;
+	align-content: safe center;
 	overflow-x: hidden;
 	overflow-y: auto;
 }
