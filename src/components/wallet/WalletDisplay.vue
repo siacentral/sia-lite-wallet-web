@@ -1,7 +1,16 @@
 <template>
 	<div class="wallet-display">
 		<div class="wallet-balance">
-			<div class="wallet-title">{{ name }}</div>
+			<div class="wallet-title">{{ name }}
+				<transition name="fade" mode="out-in">
+					<div class="wallet-scanning" v-if="wallet.scanning" key="scanning">
+						<icon icon="redo" /> Scanning...
+					</div>
+					<div class="wallet-scanning" v-else-if="walletQueued" key="queued">
+						<icon icon="redo" /> Scan Queued...
+					</div>
+				</transition>
+			</div>
 			<div class="wallet-siacoin-balance" v-html="formatSiacoinString(balance)"></div>
 			<div class="wallet-display-balance" v-html="formatCurrencyString(balance)"></div>
 			<div class="wallet-button-wrapper">
@@ -328,6 +337,27 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
+.wallet-title {
+	position: relative;
+	font-size: 1.3rem;
+	text-align: center;
+	margin-bottom: 30px;
+
+	.wallet-scanning {
+		position: absolute;
+		bottom: -25px;
+		left: 0;
+		right: 0;
+		text-align: center;
+		font-size: 0.8rem;
+		color: rgba(255, 255, 255, 0.2);
+
+		svg {
+			margin-right: 5px;
+		}
+	}
+}
+
 .wallet-display {
 	display: grid;
 	grid-template-rows: auto minmax(0, 1fr);
@@ -405,12 +435,6 @@ export default {
 			}
 		}
 	}
-}
-
-.wallet-title {
-	font-size: 1.3rem;
-	text-align: center;
-	margin-bottom: 15px;
 }
 
 .wallet-siacoin-balance {

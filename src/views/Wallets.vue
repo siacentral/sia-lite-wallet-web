@@ -14,7 +14,7 @@
 			</div>
 		</div>
 		<div class="wallets-detail">
-			<transition name="fade-top" mode="out-in" appear>
+			<transition name="fade-top" mode="out-in">
 				<wallet-display v-if="currentWallet" :wallet="currentWallet"
 					:key="currentWallet.id" @deleted="onDeleted" />
 				<div v-else>

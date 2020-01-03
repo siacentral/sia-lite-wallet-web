@@ -63,11 +63,11 @@
 				<textarea v-model="recoverySeed" readonly/>
 			</div>
 			<div class="controls">
-				<button class="btn btn-success btn-inline" @click="$emit('created')">Done</button>
+				<button class="btn btn-success btn-inline" @click="walletCreated">Done</button>
 			</div>
 		</div>
-		<import-ledger-addresses v-else-if="step === 'import-ledger'" key="ledger" :wallet="wallet" @imported="$emit('created')" />
-		<import-watch-addresses v-else-if="step === 'import-watch'" key="watch" :wallet="wallet" @imported="$emit('created')" />
+		<import-ledger-addresses v-else-if="step === 'import-ledger'" key="ledger" :wallet="wallet" @imported="walletCreated" />
+		<import-watch-addresses v-else-if="step === 'import-watch'" key="watch" :wallet="wallet" @imported="walletCreated" />
 	</transition>
 </template>
 
@@ -202,7 +202,7 @@ export default {
 				})));
 
 				this.queueWallet(this.wallet.id, true);
-				this.$emit('created');
+				this.walletCreated();
 			} catch (ex) {
 				console.error('onRecoverWallet', ex);
 				this.pushNotification({
@@ -212,6 +212,12 @@ export default {
 			} finally {
 				this.creating = false;
 			}
+		},
+		walletCreated() {
+			this.pushNotification({
+				message: 'New wallet created.'
+			});
+			this.$emit('created');
 		}
 	}
 };
