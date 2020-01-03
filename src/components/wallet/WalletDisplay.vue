@@ -3,7 +3,7 @@
 		<div class="wallet-balance">
 			<div class="wallet-title">{{ name }}
 				<transition name="fade" mode="out-in">
-					<div class="wallet-scanning" v-if="wallet.scanning" key="scanning">
+					<div class="wallet-scanning" v-if="wallet.scanning === 'full'" key="scanning">
 						<icon icon="redo" /> Scanning...
 					</div>
 					<div class="wallet-scanning" v-else-if="walletQueued" key="queued">
@@ -101,7 +101,7 @@ export default {
 	computed: {
 		...mapState(['currency', 'currencies', 'scanQueue']),
 		walletQueued() {
-			return this.wallet.scanning || this.scanQueue.filter(s => s.walletID === this.wallet.id).length !== 0;
+			return this.wallet.scanning === 'full' || this.scanQueue.filter(s => s.walletID === this.wallet.id && s.full).length !== 0;
 		},
 		balance() {
 			if (!this.wallet)

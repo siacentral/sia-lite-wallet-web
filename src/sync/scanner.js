@@ -24,14 +24,14 @@ export async function scanner() {
 
 		Store.dispatch('saveWallet', {
 			id: scan.walletID,
-			scanning: true
+			scanning: scan.full ? 'full' : 'quick'
 		});
 
 		await scanWallet(scan.walletID, scan.full);
 
 		Store.dispatch('saveWallet', {
 			id: scan.walletID,
-			scanning: false
+			scanning: null
 		});
 	} finally {
 		scanning = false;
