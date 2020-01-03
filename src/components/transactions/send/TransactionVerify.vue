@@ -157,7 +157,11 @@ export default {
 				});
 			} catch (ex) {
 				console.error('onVerifyTxn', ex);
-				this.status = ex.message;
+				this.pushNotification({
+					severity: 'danger',
+					icon: 'wallet',
+					message: ex.message
+				});
 			} finally {
 				this.sending = false;
 			}

@@ -68,7 +68,9 @@ export default {
 		unspent() {
 			const outputs = this.wallet && Array.isArray(this.wallet.outputs) ? this.wallet.outputs : [],
 				spent = this.wallet && Array.isArray(this.wallet.unconfirmed_spent) ? this.wallet.unconfirmed_spent : [],
-				unspent = outputs.filter(o => spent.indexOf(o) === -1);
+				unspent = outputs.filter(o => spent.indexOf(o.output_id) === -1);
+
+			console.log(spent);
 
 			if (!Array.isArray(unspent) || unspent.length === 0)
 				return [];
@@ -137,10 +139,10 @@ export default {
 			return this.fundTransaction(this.sendAmount).inputs.length;
 		},
 		apiFee() {
-			return new BigNumber(this.networkFees.api.fee).times(((this.minInputs * 2) + 3) * 120);
+			return new BigNumber(this.networkFees.api.fee).times((this.minInputs + 3) * 240);
 		},
 		siaFee() {
-			return new BigNumber(this.networkFees.minimum).plus(this.networkFees.maximum).div(2).times(((this.minInputs * 2) + 3) * 120);
+			return new BigNumber(this.networkFees.minimum).plus(this.networkFees.maximum).div(2).times((this.minInputs + 3) * 240);
 		},
 		fees() {
 			return this.apiFee.plus(this.siaFee);
@@ -244,6 +246,8 @@ export default {
 					owned: this.ownsAddress(this.changeAddress.address)
 				});
 			}
+
+			console.log(txn);
 
 			return txn;
 		},
