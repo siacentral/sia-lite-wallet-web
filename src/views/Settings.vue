@@ -23,6 +23,10 @@
 					</optgroup>
 				</select>
 			</div>
+			<div class="control">
+				<label>Automatic Lock Timeout (Minutes)</label>
+				<input type="number" v-model.number="newAutoLock" min="1" max="30" @change="setAutoLock(newAutoLock)" />
+			</div>
 		</div>
 	</div>
 </template>
@@ -32,18 +36,20 @@ import { mapActions, mapState } from 'vuex';
 
 export default {
 	computed: {
-		...mapState(['currency'])
+		...mapState(['currency', 'autoLock'])
 	},
 	data() {
 		return {
-			newCurrency: 'usd'
+			newCurrency: 'usd',
+			newAutoLock: 5
 		};
 	},
 	mounted() {
 		this.newCurrency = this.currency;
+		this.newAutoLock = this.autoLock;
 	},
 	methods: {
-		...mapActions(['setCurrency'])
+		...mapActions(['setCurrency', 'setAutoLock'])
 	}
 };
 </script>

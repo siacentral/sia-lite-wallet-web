@@ -14,7 +14,7 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import { mapState, mapActions } from 'vuex';
 import NotificationQueue from '@/components/NotificationQueue';
 import PrimaryNav from '@/components/PrimaryNav';
 import UnlockWallet from '@/views/UnlockWallet';
@@ -28,9 +28,41 @@ export default {
 		UnlockWallet
 	},
 	computed: {
-		...mapState(['setup', 'wallets']),
+		...mapState(['setup', 'wallets', 'autoLock']),
 		unlocked() {
 			return Array.isArray(this.wallets) && this.wallets.length !== 0;
+		}
+	},
+	data() {
+		return {
+			autoLockTimeout: null
+		};
+	},
+	mounted() {
+		window.addEventListener('mousemove', this.resetAutoLock);
+	},
+	beforeDestroy() {
+		window.removeEventListener('mousemove', this.resetAutoLock);
+	},
+	methods: {
+		...mapActions(['lockWallets']),
+		resetAutoLock() {
+			let lockms = this.autoLock * 60000;
+
+			if (lockms <= 0)
+				lockms = 60000;
+
+			clearTimeout(this.autoLockTimeout);
+
+			this.autoLockTimeout = setTimeout(() => {
+				if (!this.unlocked)
+					return;
+
+				this.lockWallets();
+				this.pushNotification({
+					message: 'Wallets automatically locked due to inactivity'
+				});
+			}, lockms);
 		}
 	}
 };

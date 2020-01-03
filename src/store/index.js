@@ -10,10 +10,19 @@ import Wallet from '@/types/wallet';
 
 Vue.use(Vuex);
 
+function getLocalStorageNumeric(key, def) {
+	let v = localStorage.getItem(key);
+
+	if (!v || isNaN(v) || !isFinite(v))
+		return def;
+
+	return parseInt(v, 10);
+}
+
 const store = new Vuex.Store({
 	state: {
 		setup: false,
-		unlocked: false,
+		autoLock: getLocalStorageNumeric('autoLock', 5),
 		password: null,
 		wallets: [],
 		notifications: [],
@@ -29,11 +38,19 @@ const store = new Vuex.Store({
 		setWallets(state, wallets) {
 			state.wallets = wallets.map(w => new Wallet(w));
 		},
+		lockWallets(state) {
+			state.wallets = [];
+			state.scanQueue = [];
+			state.password = null;
+		},
 		setPassword(state, password) {
 			state.password = password;
 		},
 		setCurrency(state, currency) {
 			state.currency = currency;
+		},
+		setAutoLock(state, autoLock) {
+			state.autoLock = autoLock;
 		},
 		saveWallet(state, wallet) {
 			if (!wallet || !wallet.seed)
@@ -101,6 +118,10 @@ const store = new Vuex.Store({
 			localStorage.setItem('displayCurrency', currency);
 			commit('setCurrency', currency);
 		},
+		setAutoLock({ commit }, lockMin) {
+			localStorage.setItem('autoLock', lockMin);
+			commit('setAutoLock', lockMin);
+		},
 		async unlockWallets({ commit, dispatch }, password) {
 			const wallets = await loadWallets(password);
 
@@ -109,6 +130,9 @@ const store = new Vuex.Store({
 
 			wallets.forEach(w => dispatch('queueWallet', { walletID: w.id, full: false }));
 			wallets.forEach(w => dispatch('queueWallet', { walletID: w.id, full: false }));
+		},
+		async lockWallets({ commit }) {
+			commit('lockWallets');
 		},
 		async saveWallet({ commit, state }, wallet) {
 			const existing = state.wallets.find(w => w.id === wallet.id);
