@@ -52,7 +52,7 @@ h2 {
 .modal-content {
 	height: 100%;
 	width: 100%;
-	max-width: 600px;
+	max-width: 700px;
 	margin: auto;
 	overflow-x: hidden;
 	overflow-y: auto;
