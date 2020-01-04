@@ -7,5 +7,5 @@ Simple GoLang WASM wrapper around some Sia wallet functions to access them secur
 To build the WASM library 
 
 ```sh
-GOARCH=wasm GOOS=js go build -o sia.wasm lib/main.go
+GOARCH=wasm GOOS=js go build -o sia.wasm main.go
 ```
