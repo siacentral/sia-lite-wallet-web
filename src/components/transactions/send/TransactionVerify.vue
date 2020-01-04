@@ -177,7 +177,6 @@ export default {
 	overflow: hidden;
 
 	.transaction-detail {
-		padding: 7px;
 		overflow-x: hidden;
 		overflow-y: auto;
 		background: bg-dark;
