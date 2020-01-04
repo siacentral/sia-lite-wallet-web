@@ -9,12 +9,10 @@
 			<transition name="fade-top" mode="out-in" appear>
 				<transaction-outputs
 					:transaction="transaction"
-					:wallet="wallet"
 					key="outputs"
 					v-if="mode === 'outputs'" />
 				<transaction-summary
 					:transaction="transaction"
-					:wallet="wallet"
 					key="summary"
 					v-else />
 			</transition>
@@ -36,14 +34,14 @@
 </template>
 
 <script>
-import { mapState, mapActions } from 'vuex';
+import { mapState } from 'vuex';
 import { signTransaction } from '@/utils/sia';
 import { scanTransactions } from '@/sync/scanner';
 import { broadcastTransaction } from '@/api/siacentral';
 
 import SignLedgerTransaction from '@/components/ledger/SignLedgerTransaction';
-import TransactionSummary from '@/components/transactions/send/TransactionSummary';
-import TransactionOutputs from '@/components/transactions/send/TransactionOutputs';
+import TransactionSummary from '@/components/transactions/TransactionSummary';
+import TransactionOutputs from '@/components/transactions/TransactionOutputs';
 import TransactionTotals from '@/components/transactions/send/TransactionTotals';
 
 export default {
@@ -96,7 +94,6 @@ export default {
 		};
 	},
 	methods: {
-		...mapActions(['saveWallet']),
 		getSummaryClasses(mode) {
 			return {
 				'btn': true,

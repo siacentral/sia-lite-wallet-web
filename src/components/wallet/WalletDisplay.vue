@@ -43,7 +43,10 @@
 				<tbody>
 					<template v-for="group in transactions">
 						<tr class="group-date" :key="group.date"><td colspan="4">{{ group.date }}</td></tr>
-						<tr v-for="(transaction, i) in group.transactions" :key="`${group.date}-${i}`" :class="getTransactionClasses(transaction)">
+						<tr v-for="(transaction, i) in group.transactions"
+							:key="`${group.date}-${i}`"
+							:class="getTransactionClasses(transaction)"
+							@click="onSelectTransaction(transaction.transaction_id)">
 							<td class="transaction-type fit-text">{{ friendlyType(transaction) }}</td>
 							<td class="transaction-spacer" />
 							<td class="transaction-confirms fit-text"><span>{{ friendlyConfirms(transaction.confirmations) }}</span></td>
@@ -68,6 +71,7 @@
 			</confirm-modal>
 			<send-siacoin-modal v-else-if="modal === 'send'" :wallet="wallet" @close="modal = null" />
 			<receive-siacoin-modal v-else-if="modal === 'receive'" :wallet="wallet" @close="modal = null" />
+			<transaction-detail-modal v-else-if="modal === 'transaction'" :transaction="walletTransactions[selectedTransaction]" @close="modal = null" />
 		</transition>
 	</div>
 </template>
@@ -79,15 +83,17 @@ import { formatPriceString } from '@/utils/format';
 
 import AddAddressesModal from '@/modal/AddAddressesModal';
 import ConfirmModal from '@/modal/ConfirmModal';
-import SendSiacoinModal from '@/modal/SendSiacoinModal';
 import ReceiveSiacoinModal from '@/modal/ReceiveSiacoinModal';
+import SendSiacoinModal from '@/modal/SendSiacoinModal';
+import TransactionDetailModal from '@/modal/TransactionDetailModal';
 
 export default {
 	components: {
 		AddAddressesModal,
 		ConfirmModal,
 		ReceiveSiacoinModal,
-		SendSiacoinModal
+		SendSiacoinModal,
+		TransactionDetailModal
 	},
 	props: {
 		wallet: Object
@@ -95,6 +101,7 @@ export default {
 	data() {
 		return {
 			modal: null,
+			selectedTransaction: 0,
 			showMore: false
 		};
 	},
@@ -114,6 +121,18 @@ export default {
 				return 'Wallet';
 
 			return this.wallet.title;
+		},
+		walletTransactions() {
+			const transactions = this.wallet ? this.wallet.transactions : null;
+
+			if (!Array.isArray(transactions))
+				return [];
+
+			return transactions.reduce((v, t) => {
+				v[t.transaction_id] = t;
+
+				return v;
+			}, {});
 		},
 		transactions() {
 			const transactions = this.wallet ? this.wallet.transactions : null,
@@ -181,6 +200,21 @@ export default {
 	},
 	methods: {
 		...mapActions(['deleteWallet']),
+		onSelectTransaction(id) {
+			try {
+				if (!this.walletTransactions[id])
+					return;
+
+				this.selectedTransaction = id;
+				this.modal = 'transaction';
+			} catch (ex) {
+				console.error(ex);
+				this.pushNotification({
+					severity: 'danger',
+					message: ex.message
+				});
+			}
+		},
 		onQueueWallet() {
 			try {
 				this.queueWallet(this.wallet.id, true);

@@ -109,11 +109,13 @@ export default {
 	margin-bottom: 15px;
 }
 
-.buttons {
-	text-align: center;
-
-	button {
-		margin: 0;
-	}
+.app-status {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) repeat(2, auto);
+	grid-gap: 15px;
+	padding: 15px 0;
+	border-top: 1px solid dark-gray;
+	border-bottom: 1px solid dark-gray;
+	margin-bottom: 15px;
 }
 </style>

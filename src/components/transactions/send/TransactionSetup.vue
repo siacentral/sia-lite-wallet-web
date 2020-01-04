@@ -193,7 +193,8 @@ export default {
 				added = added.plus(output.value);
 				inputs.push({
 					...output,
-					...addr
+					...addr,
+					owned: true
 				});
 
 				if (added.gte(amount))
