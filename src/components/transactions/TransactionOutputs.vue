@@ -71,7 +71,7 @@ export default {
 	background: bg-dark;
 	overflow: hidden;
 
-	/deep/ table tbody tr {
+	table tbody tr {
 		background: bg-dark;
 	}
 

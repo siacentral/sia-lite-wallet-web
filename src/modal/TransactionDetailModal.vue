@@ -78,9 +78,6 @@ export default {
 			mode: 'summary'
 		};
 	},
-	mounted() {
-		console.log(this.transaction);
-	},
 	methods: {
 		siacoinDisplay(value) {
 			const siacoins = formatPriceString(new BigNumber(value), 2);
