@@ -16,7 +16,7 @@
 				<button @click="mode = 'outputs'" :class="summaryClasses('outputs')">Outputs</button>
 			</div>
 			<div class="transaction-mode">
-				<transition name="fade-top" mode="out-in" appear>
+				<transition name="fade-top" mode="out-in">
 					<transaction-outputs
 						:transaction="transaction"
 						key="outputs"

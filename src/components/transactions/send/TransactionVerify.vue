@@ -18,7 +18,7 @@
 			</transition>
 		</div>
 		<transaction-totals :transaction="transaction" :wallet="wallet" :mode="mode" />
-		<transition name="fade" mode="out-in" appear>
+		<transition name="fade" mode="out-in">
 			<sign-ledger-transaction
 				v-if="wallet.type === 'ledger' && !transactionSigned"
 				class="ledger-sign"
