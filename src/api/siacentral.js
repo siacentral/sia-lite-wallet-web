@@ -39,6 +39,17 @@ export async function getNetworkFees() {
 	};
 }
 
+export async function getFeeAddresses() {
+	const resp = await sendJSONRequest('https://api.siacentral.com/v2/wallet/fees/collected', {
+		method: 'GET'
+	});
+
+	if (resp.type !== 'success')
+		throw new Error(resp.message);
+
+	return resp.collected.map(a => a.address);
+}
+
 export async function broadcastTransaction(transaction, parents) {
 	const resp = await sendJSONRequest(`https://api.siacentral.com/v2/wallet/broadcast`, {
 		method: 'POST',

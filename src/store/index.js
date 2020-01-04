@@ -5,7 +5,7 @@ import { encode as encodeB64 } from '@stablelib/base64';
 import { encode as encodeUTF8 } from '@stablelib/utf8';
 import { saveWallet, loadWallets, deleteWallet } from './db';
 import { scanner } from '@/sync/scanner';
-import { getCoinPrice, getNetworkFees } from '@/api/siacentral';
+import { getCoinPrice, getNetworkFees, getFeeAddresses } from '@/api/siacentral';
 import Wallet from '@/types/wallet';
 
 Vue.use(Vuex);
@@ -29,6 +29,7 @@ const store = new Vuex.Store({
 		scanQueue: [],
 		currency: localStorage.getItem('displayCurrency') || 'usd',
 		networkFees: {},
+		feeAddresses: [],
 		currencies: {}
 	},
 	mutations: {
@@ -37,6 +38,9 @@ const store = new Vuex.Store({
 		},
 		setWallets(state, wallets) {
 			state.wallets = wallets.map(w => new Wallet(w));
+		},
+		setFeeAddresses(state, addresses) {
+			state.feeAddresses = addresses;
 		},
 		lockWallets(state) {
 			state.wallets = [];
@@ -175,6 +179,9 @@ const store = new Vuex.Store({
 		setNetworkFees({ commit }, fees) {
 			commit('setNetworkFees', fees);
 		},
+		setFeeAddresses({ commit }, addresses) {
+			commit('setFeeAddresses', addresses);
+		},
 		pushNotification({ commit }, notification) {
 			commit('pushNotification', notification);
 		},
@@ -198,10 +205,12 @@ const store = new Vuex.Store({
 async function updateMetadata() {
 	try {
 		const price = await getCoinPrice(),
-			fees = await getNetworkFees();
+			fees = await getNetworkFees(),
+			addresses = await getFeeAddresses();
 
 		store.dispatch('setNetworkFees', fees);
 		store.dispatch('setExchangeRate', price);
+		store.dispatch('setFeeAddresses', addresses);
 	} catch (ex) {
 		console.error('updatingMeta', ex);
 	}
