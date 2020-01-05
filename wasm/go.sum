@@ -33,8 +33,8 @@ github.com/pkg/errors v0.8.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINE
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/rogpeppe/go-internal v1.3.0/go.mod h1:M8bDsm7K2OlrFYOpmOWEs/qY81heoFRclV5y23lUDJ4=
 github.com/russross/blackfriday v1.5.2/go.mod h1:JO/DiYxRf+HjHt06OyowR9PTA263kcR/rfWxYHBV53g=
-github.com/siacentral/apiclient v0.0.0-20200104031733-bc723ac6a6b9 h1:ithq1B54ciFzqscGkZkREZueyIKWO6m3G+GE8o/cbIQ=
-github.com/siacentral/apiclient v0.0.0-20200104031733-bc723ac6a6b9/go.mod h1:mytrnwM7N159Rt1YiSqBjwL1I94EP0XlmB9lJlxYUTQ=
+github.com/siacentral/apisdkgo v0.0.0-20200105001013-f59847e729a2 h1:AVkZQCK8uGlIpeAyBjfriPz4D6TSbhiXPCq/X6AvXWU=
+github.com/siacentral/apisdkgo v0.0.0-20200105001013-f59847e729a2/go.mod h1:E40Zwh4GNrYurMpjSEwAJduAl8pxSjx4jPYmU4rc3FM=
 github.com/spf13/afero v1.1.2/go.mod h1:j4pytiNVoe2o6bmDsKpLACNPDBIoEAkihy7loJ1B0CQ=
 github.com/spf13/cast v1.3.0/go.mod h1:Qx5cxh0v+4UWYiBimWS+eyWzqEqokIECu5etghLkUJE=
 github.com/spf13/cobra v0.0.4/go.mod h1:3K3wKZymM7VvHMDS9+Akkh4K60UwM26emMESw8tLCHU=

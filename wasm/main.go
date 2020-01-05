@@ -10,8 +10,8 @@ import (
 
 	"syscall/js"
 
-	"github.com/siacentral/apiclient"
-	apitypes "github.com/siacentral/apiclient/types"
+	apiclient "github.com/siacentral/apisdkgo"
+	apitypes "github.com/siacentral/apisdkgo/types"
 	"github.com/siacentral/sia-lite/wasm/wallet"
 	siatypes "gitlab.com/NebulousLabs/Sia/types"
 )
@@ -505,7 +505,7 @@ func getTransactions(this js.Value, args []js.Value) interface{} {
 				Fees:              txn.Fees,
 				StorageProofs:     txn.StorageProofs,
 				HostAnnouncements: txn.HostAnnouncements,
-				Contracts: make([]processedContract, len(txn.Contracts)),
+				Contracts:         make([]processedContract, len(txn.Contracts)),
 				ContractRevisions: make([]processedContract, len(txn.ContractRevisions)),
 			}
 
