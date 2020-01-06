@@ -3,9 +3,22 @@ importScripts('/sia/wasm_exec.js');
 
 const go = new Go();
 
-const loaded = WebAssembly.instantiateStreaming(fetch(`/sia/sia.wasm`), go.importObject).then((result) => {
+async function load() {
+	let result;
+
+	if (WebAssembly.instantiateStreaming) {
+		result = await WebAssembly.instantiateStreaming(fetch(`/sia/sia.wasm`), go.importObject);
+	} else {
+		const resp = await fetch('/sia/sia.wasm'),
+			buf = await resp.arrayBuffer();
+		
+		result = await WebAssembly.instantiate(buf, go.importObject);
+	}
+
 	go.run(result.instance);
-});
+}
+
+const loaded = load();
 
 onmessage = async(e) => {
 	try {
