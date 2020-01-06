@@ -136,11 +136,17 @@ export default {
 		minInputs() {
 			return this.fundTransaction(this.sendAmount).inputs.length;
 		},
+		minOutputs() {
+			return 3;
+		},
+		txnSize() {
+			return 100 + (this.minInputs * 313) + (this.minOutputs * 50);
+		},
 		apiFee() {
-			return new BigNumber(this.networkFees.api.fee).times((this.minInputs + 3) * 240);
+			return new BigNumber(this.networkFees.api.fee).times(this.txnSize);
 		},
 		siaFee() {
-			return new BigNumber(this.networkFees.minimum).plus(this.networkFees.maximum).div(2).times((this.minInputs + 3) * 240);
+			return new BigNumber(this.networkFees.minimum).plus(this.networkFees.maximum).div(2).times(this.txnSize);
 		},
 		fees() {
 			return this.apiFee.plus(this.siaFee);
