@@ -27,8 +27,8 @@ function defaultSpawnWorker(params, timeout) {
 	return work;
 }
 
-export function generateSeed() {
-	return defaultSpawnWorker(['generateSeed'], 15000);
+export function generateSeed(type) {
+	return defaultSpawnWorker(['generateSeed', type], 15000);
 }
 
 export function generateAddresses(seed, i, n) {

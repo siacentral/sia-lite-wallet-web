@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"math/big"
 	"sort"
+	"strings"
 	"time"
 
 	"syscall/js"
@@ -120,6 +121,14 @@ func checkArgs(args []js.Value, argTypes ...js.Type) bool {
 	return true
 }
 
+func recoverWallet(seed string) (*wallet.SeedWallet, error) {
+	if len(strings.Split(seed, " ")) < 20 {
+		return wallet.RecoverBIP39Seed(seed)
+	}
+
+	return wallet.RecoverSiaSeed(seed)
+}
+
 func encodeTransaction(this js.Value, args []js.Value) interface{} {
 	if !checkArgs(args, js.TypeString, js.TypeFunction) {
 		return false
@@ -154,8 +163,10 @@ func encodeTransaction(this js.Value, args []js.Value) interface{} {
 }
 
 func signTransaction(this js.Value, args []js.Value) interface{} {
+	var txn siatypes.Transaction
+
 	if !checkArgs(args, js.TypeString, js.TypeString, js.TypeObject, js.TypeFunction) {
-		return false
+		return nil
 	}
 
 	phrase := args[0].String()
@@ -163,46 +174,39 @@ func signTransaction(this js.Value, args []js.Value) interface{} {
 	length := args[2].Length()
 	callback := args[3]
 
-	go func() {
-		var txn siatypes.Transaction
+	w, err := recoverWallet(phrase)
 
-		w, err := wallet.RecoverSeed(phrase)
+	if err != nil {
+		callback.Invoke(err.Error(), js.Null())
+		return nil
+	}
 
-		if err != nil {
-			callback.Invoke(err.Error(), js.Null())
-			return
-		}
+	if err := json.Unmarshal([]byte(jsonTxn), &txn); err != nil {
+		callback.Invoke(err.Error(), js.Null())
+		return nil
+	}
 
-		if err := json.Unmarshal([]byte(jsonTxn), &txn); err != nil {
-			callback.Invoke(err.Error(), js.Null())
-			return
-		}
+	keys := make([]uint64, length)
 
-		keys := make([]wallet.SpendableKey, length)
+	for i := 0; i < length; i++ {
+		keys[i] = uint64(args[2].Index(i).Int())
+	}
 
-		for i := 0; i < length; i++ {
-			index := uint64(args[2].Index(i).Int())
-			keys[i] = w.GetAddress(index)
-		}
+	if err = w.SignTransaction(&txn, keys); err != nil {
+		callback.Invoke(err.Error(), js.Null())
+		return nil
+	}
 
-		signed, err := w.SignTransaction(txn, keys)
+	data, err := interfaceToJSON(txn)
 
-		if err != nil {
-			callback.Invoke(err.Error(), js.Null())
-			return
-		}
+	if err != nil {
+		callback.Invoke(err.Error(), js.Null())
+		return nil
+	}
 
-		data, err := interfaceToJSON(signed)
+	callback.Invoke(js.Null(), data)
 
-		if err != nil {
-			callback.Invoke(err.Error(), js.Null())
-			return
-		}
-
-		callback.Invoke(js.Null(), data)
-	}()
-
-	return true
+	return nil
 }
 
 func encodeUnlockHash(this js.Value, args []js.Value) interface{} {
@@ -228,30 +232,38 @@ func encodeUnlockHash(this js.Value, args []js.Value) interface{} {
 }
 
 func generateSeed(this js.Value, args []js.Value) interface{} {
-	if !checkArgs(args, js.TypeFunction) {
-		return false
+	var phrase string
+	var err error
+
+	if !checkArgs(args, js.TypeString, js.TypeFunction) {
+		return nil
 	}
 
-	callback := args[0]
+	seedType := args[0].String()
+	callback := args[1]
 
-	go func() {
-		seed := wallet.NewSeed()
-		phrase, err := seed.RecoveryPhrase()
+	switch strings.ToLower(seedType) {
+	case "bip39":
+		phrase, err = wallet.NewBIP39RecoveryPhrase()
+		break
+	default:
+		phrase, err = wallet.NewSiaRecoveryPhrase()
+		break
+	}
 
-		if err != nil {
-			callback.Invoke(err.Error(), js.Null())
-			return
-		}
+	if err != nil {
+		callback.Invoke(err.Error(), js.Null())
+		return nil
+	}
 
-		callback.Invoke(js.Null(), phrase)
-	}()
+	callback.Invoke(js.Null(), phrase)
 
-	return true
+	return nil
 }
 
 func generateAddresses(this js.Value, args []js.Value) interface{} {
 	if !checkArgs(args, js.TypeString, js.TypeNumber, js.TypeNumber, js.TypeFunction) {
-		return false
+		return nil
 	}
 
 	phrase := args[0].String()
@@ -259,30 +271,28 @@ func generateAddresses(this js.Value, args []js.Value) interface{} {
 	n := args[2].Int()
 	callback := args[3]
 
-	go func() {
-		w, err := wallet.RecoverSeed(phrase)
+	w, err := recoverWallet(phrase)
 
-		if err != nil {
-			callback.Invoke(err.Error(), js.Null())
-			return
+	if err != nil {
+		callback.Invoke(err.Error(), js.Null())
+		return nil
+	}
+
+	keys := make([]wallet.SpendableKey, n)
+	addresses := make([]interface{}, n)
+
+	w.GetAddresses(uint64(i), keys)
+
+	for a, key := range keys {
+		addresses[a] = map[string]interface{}{
+			"address": key.UnlockConditions.UnlockHash().String(),
+			"index":   a + i,
 		}
+	}
 
-		keys := make([]wallet.SpendableKey, n)
-		addresses := make([]interface{}, n)
+	callback.Invoke(js.Null(), addresses)
 
-		w.GetAddresses(uint64(i), keys)
-
-		for a, key := range keys {
-			addresses[a] = map[string]interface{}{
-				"address": key.UnlockConditions.UnlockHash().String(),
-				"index":   a + i,
-			}
-		}
-
-		callback.Invoke(js.Null(), addresses)
-	}()
-
-	return true
+	return nil
 }
 
 func mapUnlockConditions(sia siatypes.UnlockConditions) (unlockConds wallet.UnlockConditions) {
@@ -305,8 +315,12 @@ func mapUnlockConditions(sia siatypes.UnlockConditions) (unlockConds wallet.Unlo
  * larger wallets
  */
 func recoverAddresses(this js.Value, args []js.Value) interface{} {
+	const addressCount = 5e3
+	var lastUsed, maxIndex uint64
+	var lastUsedType string
+
 	if !checkArgs(args, js.TypeString, js.TypeNumber, js.TypeNumber, js.TypeFunction) {
-		return false
+		return nil
 	}
 
 	seed := args[0].String()
@@ -314,108 +328,102 @@ func recoverAddresses(this js.Value, args []js.Value) interface{} {
 	minRounds := uint64(args[2].Int())
 	callback := args[3]
 
-	go func() {
-		const addressCount = 5e3
-		var lastUsed, maxIndex uint64
-		var lastUsedType string
+	w, err := recoverWallet(seed)
 
-		w, err := wallet.RecoverSeed(seed)
+	if err != nil {
+		callback.Invoke(err.Error(), js.Null())
+		return nil
+	}
+
+	keys := make([]wallet.SpendableKey, addressCount)
+	addresses := make([]string, addressCount)
+
+	for ; i < 1e7; i += addressCount {
+		if lastUsed >= minRounds {
+			break
+		}
+
+		w.GetAddresses(i, keys)
+		indexMap := make(map[string]uint64)
+		unlockMap := make(map[string]wallet.UnlockConditions)
+
+		for j, key := range keys {
+			addresses[j] = key.UnlockConditions.UnlockHash().String()
+			unlockMap[addresses[j]] = mapUnlockConditions(key.UnlockConditions)
+			indexMap[addresses[j]] = i + uint64(j)
+		}
+
+		used, err := apiclient.FindUsedAddresses(addresses)
 
 		if err != nil {
 			callback.Invoke(err.Error(), js.Null())
-			return
+			return nil
 		}
 
-		keys := make([]wallet.SpendableKey, addressCount)
-		addresses := make([]string, addressCount)
-
-		for ; i < 1e7; i += addressCount {
-			if lastUsed >= minRounds {
-				break
-			}
-
-			w.GetAddresses(i, keys)
-			indexMap := make(map[string]uint64)
-			unlockMap := make(map[string]wallet.UnlockConditions)
-
-			for j, key := range keys {
-				addresses[j] = key.UnlockConditions.UnlockHash().String()
-				unlockMap[addresses[j]] = mapUnlockConditions(key.UnlockConditions)
-				indexMap[addresses[j]] = i + uint64(j)
-			}
-
-			used, err := apiclient.FindUsedAddresses(addresses)
-
-			if err != nil {
-				callback.Invoke(err.Error(), js.Null())
-				return
-			}
-
-			if len(used) == 0 {
-				lastUsed++
-			}
-
-			foundAddresses := []interface{}{}
-
-			for _, addr := range used {
-				if indexMap[addr.Address] > maxIndex {
-					maxIndex = indexMap[addr.Address]
-					lastUsedType = addr.UsageType
-				}
-
-				foundAddresses = append(foundAddresses, map[string]interface{}{
-					"index":             indexMap[addr.Address],
-					"unlock_conditions": unlockMap[addr.Address],
-					"address":           addr.Address,
-					"usage_type":        addr.UsageType,
-				})
-			}
-
-			data, err := interfaceToJSON(map[string]interface{}{
-				"found":     len(foundAddresses),
-				"addresses": foundAddresses,
-				"index":     maxIndex,
-				"done":      false,
-			})
-
-			if err != nil {
-				callback.Invoke(err.Error(), js.Null())
-				return
-			}
-
-			callback.Invoke(js.Null(), data)
+		if len(used) == 0 {
+			lastUsed++
 		}
 
-		additional := []map[string]interface{}{}
+		foundAddresses := []interface{}{}
 
-		if lastUsedType == "sent" {
-			maxIndex++
+		for _, addr := range used {
+			if indexMap[addr.Address] > maxIndex {
+				maxIndex = indexMap[addr.Address]
+				lastUsedType = addr.UsageType
+			}
 
-			key := w.GetAddress(maxIndex)
-
-			additional = append(additional, map[string]interface{}{
-				"index":             maxIndex,
-				"unlock_conditions": mapUnlockConditions(key.UnlockConditions),
-				"address":           key.UnlockConditions.UnlockHash().String(),
-				"usage_type":        "none",
+			foundAddresses = append(foundAddresses, map[string]interface{}{
+				"index":             indexMap[addr.Address],
+				"unlock_conditions": unlockMap[addr.Address],
+				"address":           addr.Address,
+				"usage_type":        addr.UsageType,
 			})
 		}
 
 		data, err := interfaceToJSON(map[string]interface{}{
-			"addresses": additional,
+			"found":     len(foundAddresses),
+			"addresses": foundAddresses,
 			"index":     maxIndex,
-			"done":      true,
+			"done":      false,
 		})
 
 		if err != nil {
 			callback.Invoke(err.Error(), js.Null())
-			return
+			return nil
 		}
 
 		callback.Invoke(js.Null(), data)
-	}()
+	}
 
-	return true
+	additional := []map[string]interface{}{}
+
+	if lastUsedType == "sent" {
+		maxIndex++
+
+		key := w.GetAddress(maxIndex)
+
+		additional = append(additional, map[string]interface{}{
+			"index":             maxIndex,
+			"unlock_conditions": mapUnlockConditions(key.UnlockConditions),
+			"address":           key.UnlockConditions.UnlockHash().String(),
+			"usage_type":        "none",
+		})
+	}
+
+	data, err := interfaceToJSON(map[string]interface{}{
+		"addresses": additional,
+		"index":     maxIndex,
+		"done":      true,
+	})
+
+	if err != nil {
+		callback.Invoke(err.Error(), js.Null())
+		return nil
+	}
+
+	callback.Invoke(js.Null(), data)
+
+	return nil
 }
 
 func getTransactions(this js.Value, args []js.Value) interface{} {
@@ -425,230 +433,227 @@ func getTransactions(this js.Value, args []js.Value) interface{} {
 
 	count := args[0].Length()
 	callback := args[1]
+	ownedAddresses := make(map[string]bool)
+	transactions := make(map[string]apitypes.WalletTransaction)
+	addresses := make([]string, count)
+	resp := transactionResp{}
 
-	go func() {
-		ownedAddresses := make(map[string]bool)
-		transactions := make(map[string]apitypes.WalletTransaction)
-		addresses := make([]string, count)
-		resp := transactionResp{}
+	for i := 0; i < count; i++ {
+		addresses[i] = args[0].Index(i).String()
+		ownedAddresses[addresses[i]] = true
+	}
 
-		for i := 0; i < count; i++ {
-			addresses[i] = args[0].Index(i).String()
-			ownedAddresses[addresses[i]] = true
+	for i := 0; i < count; i += 5e3 {
+		end := i + 5e3
+
+		if end > count {
+			end = count
 		}
 
-		for i := 0; i < count; i += 5e3 {
-			end := i + 5e3
-
-			if end > count {
-				end = count
-			}
-
-			callResp, err := apiclient.FindAddressBalance(500, 0, addresses[i:end])
-
-			if err != nil {
-				callback.Invoke(err.Error(), js.Null())
-				return
-			}
-
-			resp.ConfirmedBalance = resp.ConfirmedBalance.Add(callResp.Unspent)
-			resp.UnspentOutputs = append(resp.UnspentOutputs, callResp.UnspentOutputs...)
-
-			for _, txn := range callResp.Transactions {
-				if len(txn.TransactionID) == 0 {
-					if len(txn.SiacoinOutputs) == 0 {
-						continue
-					}
-
-					txn.TransactionID = fmt.Sprintf("nontxn-%s", txn.SiacoinOutputs[0].OutputID)
-				}
-
-				transactions[txn.TransactionID] = txn
-			}
-
-			unconfirmedDelta := new(big.Int)
-
-			for _, txn := range callResp.UnconfirmedTransactions {
-				for _, output := range txn.SiacoinOutputs {
-					if _, exists := ownedAddresses[output.UnlockHash]; !exists {
-						continue
-					}
-
-					unconfirmedDelta.Add(unconfirmedDelta, output.Value.Big())
-				}
-
-				for _, input := range txn.SiacoinInputs {
-					if _, exists := ownedAddresses[input.UnlockHash]; !exists {
-						continue
-					}
-
-					unconfirmedDelta.Sub(unconfirmedDelta, input.Value.Big())
-					resp.UnconfirmedSpent = append(resp.UnconfirmedSpent, input.OutputID)
-				}
-
-				transactions[txn.TransactionID] = txn
-			}
-
-			resp.UnconfirmedDelta = unconfirmedDelta.String()
-		}
-
-		for _, txn := range transactions {
-			var ownedInput, ownedOutput siatypes.Currency
-			var ownedInputsCount, ownedOutputsCount int
-
-			processed := processedTransaction{
-				TransactionID:     txn.TransactionID,
-				BlockHeight:       txn.BlockHeight,
-				Confirmations:     txn.Confirmations,
-				Timestamp:         txn.Timestamp,
-				Tags:              txn.Tags,
-				Fees:              txn.Fees,
-				StorageProofs:     txn.StorageProofs,
-				HostAnnouncements: txn.HostAnnouncements,
-				Contracts:         make([]processedContract, len(txn.Contracts)),
-				ContractRevisions: make([]processedContract, len(txn.ContractRevisions)),
-			}
-
-			for i, contract := range txn.Contracts {
-				procContract := processedContract{
-					ID:                     contract.ID,
-					BlockID:                contract.BlockID,
-					TransactionID:          contract.TransactionID,
-					MerkleRoot:             contract.MerkleRoot,
-					UnlockHash:             contract.UnlockHash,
-					Status:                 contract.Status,
-					RevisionNumber:         contract.RevisionNumber,
-					NegotiationHeight:      contract.NegotiationHeight,
-					ExpirationHeight:       contract.ExpirationHeight,
-					ProofDeadline:          contract.ProofDeadline,
-					ProofHeight:            contract.ProofHeight,
-					Payout:                 contract.Payout,
-					FileSize:               contract.FileSize,
-					ValidProofOutputs:      make([]processedOutput, len(contract.ValidProofOutputs)),
-					MissedProofOutputs:     make([]processedOutput, len(contract.MissedProofOutputs)),
-					NegotiationTimestamp:   contract.NegotiationTimestamp,
-					ExpirationTimestamp:    contract.ExpirationTimestamp,
-					ProofDeadlineTimestamp: contract.ProofDeadlineTimestamp,
-					ProofTimestamp:         contract.ProofTimestamp,
-					ProofConfirmed:         contract.ProofConfirmed,
-					Unused:                 contract.Unused,
-				}
-
-				for j, output := range contract.ValidProofOutputs {
-					_, exists := ownedAddresses[output.UnlockHash]
-					procContract.ValidProofOutputs[j].SiacoinOutput = output
-					procContract.ValidProofOutputs[j].Owned = exists
-				}
-
-				for j, output := range contract.MissedProofOutputs {
-					_, exists := ownedAddresses[output.UnlockHash]
-					procContract.MissedProofOutputs[j].SiacoinOutput = output
-					procContract.MissedProofOutputs[j].Owned = exists
-				}
-
-				processed.Contracts[i] = procContract
-			}
-
-			for i, contract := range txn.ContractRevisions {
-				procContract := processedContract{
-					ID:                     contract.ID,
-					BlockID:                contract.BlockID,
-					TransactionID:          contract.TransactionID,
-					MerkleRoot:             contract.MerkleRoot,
-					UnlockHash:             contract.UnlockHash,
-					Status:                 contract.Status,
-					RevisionNumber:         contract.RevisionNumber,
-					NegotiationHeight:      contract.NegotiationHeight,
-					ExpirationHeight:       contract.ExpirationHeight,
-					ProofDeadline:          contract.ProofDeadline,
-					ProofHeight:            contract.ProofHeight,
-					Payout:                 contract.Payout,
-					FileSize:               contract.FileSize,
-					ValidProofOutputs:      make([]processedOutput, len(contract.ValidProofOutputs)),
-					MissedProofOutputs:     make([]processedOutput, len(contract.MissedProofOutputs)),
-					NegotiationTimestamp:   contract.NegotiationTimestamp,
-					ExpirationTimestamp:    contract.ExpirationTimestamp,
-					ProofDeadlineTimestamp: contract.ProofDeadlineTimestamp,
-					ProofTimestamp:         contract.ProofTimestamp,
-					ProofConfirmed:         contract.ProofConfirmed,
-					Unused:                 contract.Unused,
-				}
-
-				for j, output := range contract.ValidProofOutputs {
-					_, exists := ownedAddresses[output.UnlockHash]
-					procContract.ValidProofOutputs[j].SiacoinOutput = output
-					procContract.ValidProofOutputs[j].Owned = exists
-				}
-
-				for j, output := range contract.MissedProofOutputs {
-					_, exists := ownedAddresses[output.UnlockHash]
-					procContract.MissedProofOutputs[j].SiacoinOutput = output
-					procContract.MissedProofOutputs[j].Owned = exists
-				}
-
-				processed.ContractRevisions[i] = procContract
-			}
-
-			for _, txnSiacoinInput := range txn.SiacoinInputs {
-				procSiacoinInput := processedInput{
-					SiacoinInput: txnSiacoinInput,
-				}
-
-				if _, exists := ownedAddresses[txnSiacoinInput.UnlockHash]; exists {
-					procSiacoinInput.Owned = true
-					ownedInput = ownedInput.Add(txnSiacoinInput.Value)
-					ownedInputsCount++
-				}
-
-				processed.SiacoinInputs = append(processed.SiacoinInputs, procSiacoinInput)
-			}
-
-			for _, txnSiacoinOutput := range txn.SiacoinOutputs {
-				procSiacoinOutput := processedOutput{
-					SiacoinOutput: txnSiacoinOutput,
-				}
-
-				if _, exists := ownedAddresses[txnSiacoinOutput.UnlockHash]; exists {
-					procSiacoinOutput.Owned = true
-					ownedOutput = ownedOutput.Add(txnSiacoinOutput.Value)
-					ownedOutputsCount++
-				}
-
-				processed.SiacoinOutputs = append(processed.SiacoinOutputs, procSiacoinOutput)
-			}
-
-			if len(txn.SiacoinInputs) == ownedInputsCount && len(txn.SiacoinOutputs) == ownedOutputsCount {
-				processed.Tags = append(processed.Tags, "defrag")
-			}
-
-			if ownedOutput.Cmp(ownedInput) == 1 {
-				processed.Direction = "received"
-				processed.Value = ownedOutput.Sub(ownedInput)
-			} else {
-				processed.Direction = "sent"
-				processed.Value = ownedInput.Sub(ownedOutput)
-			}
-
-			if processed.Value.Cmp64(0) == 0 {
-				continue
-			}
-
-			resp.Transactions = append(resp.Transactions, processed)
-		}
-
-		sort.Slice(resp.Transactions, func(i, j int) bool {
-			return resp.Transactions[i].Timestamp.After(resp.Transactions[j].Timestamp)
-		})
-
-		obj, err := interfaceToJSON(resp)
+		callResp, err := apiclient.FindAddressBalance(500, 0, addresses[i:end])
 
 		if err != nil {
 			callback.Invoke(err.Error(), js.Null())
-			return
+			return nil
 		}
 
-		callback.Invoke(js.Null(), obj)
-	}()
+		resp.ConfirmedBalance = resp.ConfirmedBalance.Add(callResp.Unspent)
+		resp.UnspentOutputs = append(resp.UnspentOutputs, callResp.UnspentOutputs...)
 
-	return true
+		for _, txn := range callResp.Transactions {
+			if len(txn.TransactionID) == 0 {
+				if len(txn.SiacoinOutputs) == 0 {
+					continue
+				}
+
+				txn.TransactionID = fmt.Sprintf("nontxn-%s", txn.SiacoinOutputs[0].OutputID)
+			}
+
+			transactions[txn.TransactionID] = txn
+		}
+
+		unconfirmedDelta := new(big.Int)
+
+		for _, txn := range callResp.UnconfirmedTransactions {
+			for _, output := range txn.SiacoinOutputs {
+				if _, exists := ownedAddresses[output.UnlockHash]; !exists {
+					continue
+				}
+
+				unconfirmedDelta.Add(unconfirmedDelta, output.Value.Big())
+			}
+
+			for _, input := range txn.SiacoinInputs {
+				if _, exists := ownedAddresses[input.UnlockHash]; !exists {
+					continue
+				}
+
+				unconfirmedDelta.Sub(unconfirmedDelta, input.Value.Big())
+				resp.UnconfirmedSpent = append(resp.UnconfirmedSpent, input.OutputID)
+			}
+
+			transactions[txn.TransactionID] = txn
+		}
+
+		resp.UnconfirmedDelta = unconfirmedDelta.String()
+	}
+
+	for _, txn := range transactions {
+		var ownedInput, ownedOutput siatypes.Currency
+		var ownedInputsCount, ownedOutputsCount int
+
+		processed := processedTransaction{
+			TransactionID:     txn.TransactionID,
+			BlockHeight:       txn.BlockHeight,
+			Confirmations:     txn.Confirmations,
+			Timestamp:         txn.Timestamp,
+			Tags:              txn.Tags,
+			Fees:              txn.Fees,
+			StorageProofs:     txn.StorageProofs,
+			HostAnnouncements: txn.HostAnnouncements,
+			Contracts:         make([]processedContract, len(txn.Contracts)),
+			ContractRevisions: make([]processedContract, len(txn.ContractRevisions)),
+		}
+
+		for i, contract := range txn.Contracts {
+			procContract := processedContract{
+				ID:                     contract.ID,
+				BlockID:                contract.BlockID,
+				TransactionID:          contract.TransactionID,
+				MerkleRoot:             contract.MerkleRoot,
+				UnlockHash:             contract.UnlockHash,
+				Status:                 contract.Status,
+				RevisionNumber:         contract.RevisionNumber,
+				NegotiationHeight:      contract.NegotiationHeight,
+				ExpirationHeight:       contract.ExpirationHeight,
+				ProofDeadline:          contract.ProofDeadline,
+				ProofHeight:            contract.ProofHeight,
+				Payout:                 contract.Payout,
+				FileSize:               contract.FileSize,
+				ValidProofOutputs:      make([]processedOutput, len(contract.ValidProofOutputs)),
+				MissedProofOutputs:     make([]processedOutput, len(contract.MissedProofOutputs)),
+				NegotiationTimestamp:   contract.NegotiationTimestamp,
+				ExpirationTimestamp:    contract.ExpirationTimestamp,
+				ProofDeadlineTimestamp: contract.ProofDeadlineTimestamp,
+				ProofTimestamp:         contract.ProofTimestamp,
+				ProofConfirmed:         contract.ProofConfirmed,
+				Unused:                 contract.Unused,
+			}
+
+			for j, output := range contract.ValidProofOutputs {
+				_, exists := ownedAddresses[output.UnlockHash]
+				procContract.ValidProofOutputs[j].SiacoinOutput = output
+				procContract.ValidProofOutputs[j].Owned = exists
+			}
+
+			for j, output := range contract.MissedProofOutputs {
+				_, exists := ownedAddresses[output.UnlockHash]
+				procContract.MissedProofOutputs[j].SiacoinOutput = output
+				procContract.MissedProofOutputs[j].Owned = exists
+			}
+
+			processed.Contracts[i] = procContract
+		}
+
+		for i, contract := range txn.ContractRevisions {
+			procContract := processedContract{
+				ID:                     contract.ID,
+				BlockID:                contract.BlockID,
+				TransactionID:          contract.TransactionID,
+				MerkleRoot:             contract.MerkleRoot,
+				UnlockHash:             contract.UnlockHash,
+				Status:                 contract.Status,
+				RevisionNumber:         contract.RevisionNumber,
+				NegotiationHeight:      contract.NegotiationHeight,
+				ExpirationHeight:       contract.ExpirationHeight,
+				ProofDeadline:          contract.ProofDeadline,
+				ProofHeight:            contract.ProofHeight,
+				Payout:                 contract.Payout,
+				FileSize:               contract.FileSize,
+				ValidProofOutputs:      make([]processedOutput, len(contract.ValidProofOutputs)),
+				MissedProofOutputs:     make([]processedOutput, len(contract.MissedProofOutputs)),
+				NegotiationTimestamp:   contract.NegotiationTimestamp,
+				ExpirationTimestamp:    contract.ExpirationTimestamp,
+				ProofDeadlineTimestamp: contract.ProofDeadlineTimestamp,
+				ProofTimestamp:         contract.ProofTimestamp,
+				ProofConfirmed:         contract.ProofConfirmed,
+				Unused:                 contract.Unused,
+			}
+
+			for j, output := range contract.ValidProofOutputs {
+				_, exists := ownedAddresses[output.UnlockHash]
+				procContract.ValidProofOutputs[j].SiacoinOutput = output
+				procContract.ValidProofOutputs[j].Owned = exists
+			}
+
+			for j, output := range contract.MissedProofOutputs {
+				_, exists := ownedAddresses[output.UnlockHash]
+				procContract.MissedProofOutputs[j].SiacoinOutput = output
+				procContract.MissedProofOutputs[j].Owned = exists
+			}
+
+			processed.ContractRevisions[i] = procContract
+		}
+
+		for _, txnSiacoinInput := range txn.SiacoinInputs {
+			procSiacoinInput := processedInput{
+				SiacoinInput: txnSiacoinInput,
+			}
+
+			if _, exists := ownedAddresses[txnSiacoinInput.UnlockHash]; exists {
+				procSiacoinInput.Owned = true
+				ownedInput = ownedInput.Add(txnSiacoinInput.Value)
+				ownedInputsCount++
+			}
+
+			processed.SiacoinInputs = append(processed.SiacoinInputs, procSiacoinInput)
+		}
+
+		for _, txnSiacoinOutput := range txn.SiacoinOutputs {
+			procSiacoinOutput := processedOutput{
+				SiacoinOutput: txnSiacoinOutput,
+			}
+
+			if _, exists := ownedAddresses[txnSiacoinOutput.UnlockHash]; exists {
+				procSiacoinOutput.Owned = true
+				ownedOutput = ownedOutput.Add(txnSiacoinOutput.Value)
+				ownedOutputsCount++
+			}
+
+			processed.SiacoinOutputs = append(processed.SiacoinOutputs, procSiacoinOutput)
+		}
+
+		if len(txn.SiacoinInputs) == ownedInputsCount && len(txn.SiacoinOutputs) == ownedOutputsCount {
+			processed.Tags = append(processed.Tags, "defrag")
+		}
+
+		if ownedOutput.Cmp(ownedInput) == 1 {
+			processed.Direction = "received"
+			processed.Value = ownedOutput.Sub(ownedInput)
+		} else {
+			processed.Direction = "sent"
+			processed.Value = ownedInput.Sub(ownedOutput)
+		}
+
+		if processed.Value.Cmp64(0) == 0 {
+			continue
+		}
+
+		resp.Transactions = append(resp.Transactions, processed)
+	}
+
+	sort.Slice(resp.Transactions, func(i, j int) bool {
+		return resp.Transactions[i].Timestamp.After(resp.Transactions[j].Timestamp)
+	})
+
+	obj, err := interfaceToJSON(resp)
+
+	if err != nil {
+		callback.Invoke(err.Error(), js.Null())
+		return nil
+	}
+
+	callback.Invoke(js.Null(), obj)
+	
+	return nil
 }

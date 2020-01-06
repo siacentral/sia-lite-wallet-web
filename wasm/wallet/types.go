@@ -1,16 +1,28 @@
 package wallet
 
 import (
+	"regexp"
+
 	"gitlab.com/NebulousLabs/Sia/crypto"
 	"gitlab.com/NebulousLabs/Sia/types"
 )
 
-type (
-	//SeedWallet creates keys and addresses for the generated seed. Wallet is stateless for ease of use
-	SeedWallet struct {
-		s [crypto.EntropySize]byte
-	}
+//Some of these funcs and consts are copied directly from the Sia code base. Unfortunately we can't
+//use some of the packages directly because of the wasm target
+const (
+	//SeedChecksumSize is the number of bytes that are used to checksum
+	//addresses to prevent accidental spending.
+	//https://gitlab.com/NebulousLabs/Sia/blob/fb65620/modules/wallet.go#L24
+	SeedChecksumSize = 6
+)
 
+var (
+	asicHardForkHeight     = types.BlockHeight(179001)
+	fullCoveredFields      = types.CoveredFields{WholeTransaction: true}
+	seedFormatEnglishRegex = regexp.MustCompile(`^([a-z]{4,12}){1}( {1}[a-z]{4,12}){27,28}$`)
+)
+
+type (
 	//SpendableKey a set of secret keys plus the corresponding unlock conditions. Siacoin and
 	//Siafund outputs with unlock hashes matching the unlock conditions can be spent by the seed
 	SpendableKey struct {
