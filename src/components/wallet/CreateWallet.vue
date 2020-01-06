@@ -11,7 +11,7 @@
 				<div class="button-title">Recover Wallet</div>
 				<p>Recovers an existing wallet from a 29 word seed. Transactions can be sent and received.</p>
 			</div>
-			<div :class="hardwareBtnClasses" @click="step='ledger'">
+			<div :class="hardwareBtnClasses" @click="onClickLedgerSupport('ledger')">
 				<div class="button-icon"><icon :icon="['fab', 'usb']" /></div>
 				<div class="button-title">Ledger Wallet</div>
 				<p v-if="ledgerSupported">Creates a new hardware backed wallet. All transactions must be signed by the Ledger device.</p>
@@ -21,6 +21,24 @@
 				<div class="button-icon"><icon icon="eye" /></div>
 				<div class="button-title">Watch-Only Wallet</div>
 				<p>Creates a new watch-only wallet. Addresses must be added manually and transactions cannot be sent.</p>
+			</div>
+		</div>
+		<div class="wallet-step" v-else-if="step === 'ledger' || step === 'create' || step === 'watch'">
+			<p v-if="step === 'ledger'">A new wallet will be created. Addresses must be manually
+				imported from a connected Ledger device. Transactions must be signed by the same
+				device. Only one hardware wallet can be created.</p>
+			<p v-else-if="step === 'watch'">A new watch-only wallet will be created. addresses
+				must be imported manually. Transactions cannot be created or broadcast.</p>
+			<p v-else>A new unique 29 word wallet seed will be generated and encrypted. This seed
+				should be saved in a secure location. You can use this seed to recover your funds from any Sia wallet.</p>
+			<div class="control">
+				<label>Wallet Name</label>
+				<input type="text" placeholder="Wallet" v-model="walletName" />
+			</div>
+			<div class="controls">
+				<button v-if="step === 'ledger'" class="btn btn-success btn-inline" @click="onCreateLedger">Import Addresses</button>
+				<button v-else-if="step === 'watch'" class="btn btn-success btn-inline" @click="onCreateWatch">Import Addresses</button>
+				<button v-else class="btn btn-success btn-inline" @click="onCreateWallet" :disabled="creating">Create</button>
 			</div>
 		</div>
 		<div class="wallet-step" v-else-if="step === 'ledger' || step === 'create' || step === 'watch'">
@@ -131,6 +149,16 @@ export default {
 			window.crypto.getRandomValues(rand);
 
 			return encode(rand);
+		},
+		onClickCreateHardware(step) {
+			try {
+				if (!ledgerSupported())
+					return;
+
+				this.step = step;
+			} catch (ex) {
+				console.error('onClickCreateHardware', ex);
+			}
 		},
 		async onCreateLedger() {
 			try {
@@ -254,6 +282,12 @@ p {
 	@media screen and (min-width: 767px) {
 		grid-template-columns: repeat(2, minmax(0, 1fr));
 	}
+}
+
+.divider {
+	height: 1px;
+	background: dark-gray;
+	grid-column: 1 / -1;
 }
 
 .create-wallet-button {
