@@ -130,5 +130,5 @@ export async function signTransaction(encodedTxn, sig, key) {
 }
 
 export function ledgerSupported() {
-	return TransportWebHID.isSupported();
+	return !!(global.navigator && global.navigator.hid);
 }
