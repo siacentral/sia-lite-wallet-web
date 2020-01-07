@@ -23,25 +23,26 @@
 				<p>Creates a new watch-only wallet. Addresses must be added manually and transactions cannot be sent.</p>
 			</div>
 		</div>
-		<div class="wallet-step" v-else-if="step === 'ledger' || step === 'create' || step === 'watch'">
-			<p v-if="step === 'ledger'">A new wallet will be created. Addresses must be manually
-				imported from a connected Ledger device. Transactions must be signed by the same
-				device. Only one hardware wallet can be created.</p>
-			<p v-else-if="step === 'watch'">A new watch-only wallet will be created. addresses
-				must be imported manually. Transactions cannot be created or broadcast.</p>
-			<p v-else>A new unique 29 word wallet seed will be generated and encrypted. This seed
-				should be saved in a secure location. You can use this seed to recover your funds from any Sia wallet.</p>
+		<div class="wallet-step" v-else-if="step === 'create'">
+			<p>A new unique wallet seed will be generated and encrypted. It is important to save this
+				seed in a secure location. You can use this seed to recover your funds
+				from any device.</p>
 			<div class="control">
 				<label>Wallet Name</label>
 				<input type="text" placeholder="Wallet" v-model="walletName" />
 			</div>
-			<div class="controls">
-				<button v-if="step === 'ledger'" class="btn btn-success btn-inline" @click="onCreateLedger">Import Addresses</button>
-				<button v-else-if="step === 'watch'" class="btn btn-success btn-inline" @click="onCreateWatch">Import Addresses</button>
-				<button v-else class="btn btn-success btn-inline" @click="onCreateWallet" :disabled="creating">Create</button>
+			<div class="control" v-if="changeSeedType">
+				<label>Seed Type</label>
+				<select v-model="seedType">
+					<option value="sia">Sia 29 word Seed</option>
+					<option value="bip39">Walrus 12 word Seed</option>
+				</select>
+			</div>
+			<div class="buttons">
+				<button class="btn btn-success btn-inline" @click="onCreateWallet" :disabled="creating">Create</button>
 			</div>
 		</div>
-		<div class="wallet-step" v-else-if="step === 'ledger' || step === 'create' || step === 'watch'">
+		<div class="wallet-step" v-else-if="step === 'ledger' || step === 'watch'">
 			<p v-if="step === 'ledger'">A new wallet will be created. Addresses must be manually
 				imported from a connected Ledger device. Transactions must be signed by the same
 				device. Only one hardware wallet can be created.</p>
@@ -105,7 +106,7 @@ export default {
 		ImportWatchAddresses
 	},
 	computed: {
-		...mapState(['password', 'wallets']),
+		...mapState(['password', 'changeSeedType']),
 		hardwareBtnClasses() {
 			return {
 				'create-wallet-button': true,
@@ -122,6 +123,7 @@ export default {
 			step: '',
 			walletName: '',
 			recoverySeed: '',
+			seedType: 'sia',
 			wallet: null
 		};
 	},
@@ -193,7 +195,7 @@ export default {
 			this.creating = true;
 
 			try {
-				const seed = await generateSeed(),
+				const seed = await generateSeed(this.seedType),
 					addresses = await generateAddresses(seed, 0, 10);
 
 				await this.saveWallet(seed, 'default');

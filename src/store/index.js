@@ -23,11 +23,12 @@ const store = new Vuex.Store({
 	state: {
 		setup: false,
 		autoLock: getLocalStorageNumeric('autoLock', 5),
+		currency: localStorage.getItem('displayCurrency') || 'usd',
+		changeSeedType: localStorage.getItem('changeSeedType') === 'true',
 		password: null,
 		wallets: [],
 		notifications: [],
 		scanQueue: [],
-		currency: localStorage.getItem('displayCurrency') || 'usd',
 		networkFees: {},
 		feeAddresses: [],
 		currencies: {}
@@ -49,6 +50,9 @@ const store = new Vuex.Store({
 		},
 		setPassword(state, password) {
 			state.password = password;
+		},
+		setChangeSeedType(state, enabled) {
+			state.changeSeedType = enabled;
 		},
 		setCurrency(state, currency) {
 			state.currency = currency;
@@ -114,6 +118,10 @@ const store = new Vuex.Store({
 		},
 		setPassword({ commit }, password) {
 			commit('setPassword', password);
+		},
+		setChangeSeedType({ commit }, enabled) {
+			localStorage.setItem('changeSeedType', enabled.toString());
+			commit('setChangeSeedType', enabled);
 		},
 		setCurrency({ commit }, currency) {
 			localStorage.setItem('displayCurrency', currency);
