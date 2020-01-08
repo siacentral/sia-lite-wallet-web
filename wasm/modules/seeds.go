@@ -14,7 +14,7 @@ func GenerateSeed(seedType string, callback js.Value) {
 	var err error
 
 	switch strings.ToLower(seedType) {
-	case "bip39":
+	case "walrus":
 		phrase, err = wallet.NewBIP39RecoveryPhrase()
 		break
 	default:
@@ -45,9 +45,17 @@ func GetAddresses(phrase string, i uint64, n uint64, callback js.Value) {
 	w.GetAddresses(uint64(i), keys)
 
 	for a, key := range keys {
+		unlockConditions, err := interfaceToJSON(key.UnlockConditions)
+
+		if err != nil {
+			callback.Invoke(err.Error(), js.Null())
+			return
+		}
+
 		addresses[a] = map[string]interface{}{
+			"unlock_conditions": unlockConditions,
 			"address": key.UnlockConditions.UnlockHash().String(),
-			"index":   uint64(a) + i,
+			"index": uint64(a) + i,
 		}
 	}
 
