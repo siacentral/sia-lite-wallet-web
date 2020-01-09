@@ -115,8 +115,8 @@ export async function signTransaction(encodedTxn, sig, key) {
 	const buf = Buffer.alloc(encodedTxn.length + 6);
 	let resp;
 
-	buf.writeInt16LE(sig, 0);
-	buf.writeInt32LE(key, 2);
+	buf.writeInt32LE(key, 0);
+	buf.writeInt16LE(sig, 4);
 	buf.set(encodedTxn, 6);
 
 	for (let i = 0; i < encodedTxn.length; i += 255) {
