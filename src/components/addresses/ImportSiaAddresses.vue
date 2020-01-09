@@ -5,13 +5,17 @@
 			<template v-if="walletType === 'ledger'">
 				<div>Status</div>
 				<div />
+				<div />
 				<div class="text-right">{{ connected ? 'Connected' : 'Not Connected' }} <template v-if="ledgerVersion">{{ ledgerVersion }}</template></div>
 			</template>
 			<div>Imported Addresses</div>
 			<div />
+			<div />
 			<div class="text-right">{{ formatNumber(this.addresses.length) }}</div>
 			<div>Current Balance</div>
+			<div />
 			<div class="text-right" v-html="balanceSC" />
+			<!--<div class="text-right" v-if="siafundBalance.gt(0)" v-html="balanceSF" />-->
 			<div class="text-right" v-html="balanceCurrency" />
 		</div>
 		<div class="buttons text-right">
@@ -29,7 +33,7 @@ import { mapState } from 'vuex';
 import BigNumber from 'bignumber.js';
 import { verifyAddress } from '@/utils';
 import { getTransactions, generateAddresses as generateSiaAddresses, encodeUnlockHash } from '@/utils/sia';
-import { formatPriceString, formatNumber } from '@/utils/format';
+import { formatPriceString, formatSiafundString, formatNumber } from '@/utils/format';
 import { getPublicKey as generateLedgerPubKey } from '@/utils/ledger';
 import { getWalletAddresses } from '@/store/db';
 
@@ -48,7 +52,8 @@ export default {
 		return {
 			ledgerVersion: '',
 			addresses: [],
-			balance: new BigNumber(0),
+			siacoinBalance: new BigNumber(0),
+			siafundBalance: new BigNumber(0),
 			ready: false,
 			connected: false,
 			refreshTimeout: null
@@ -63,7 +68,7 @@ export default {
 			return this.walletType === 'ledger' ? 'Import Public Key' : 'Add Address';
 		},
 		balanceSC() {
-			let balance = new BigNumber(this.balance);
+			let balance = new BigNumber(this.siacoinBalance);
 
 			if (balance.isNaN() || !balance.isFinite())
 				balance = new BigNumber(0);
@@ -73,12 +78,22 @@ export default {
 			return `${format.value} <span class="currency-display">${format.label}</span>`;
 		},
 		balanceCurrency() {
-			let balance = new BigNumber(this.balance);
+			let balance = new BigNumber(this.siacoinBalance);
 
 			if (balance.isNaN() || !balance.isFinite())
 				balance = new BigNumber(0);
 
 			const format = formatPriceString(balance, 2, this.currency, this.currencies[this.currency]);
+
+			return `${format.value} <span class="currency-display">${format.label}</span>`;
+		},
+		balanceSF() {
+			let balance = new BigNumber(this.siafundBalance);
+
+			if (balance.isNaN() || !balance.isFinite())
+				balance = new BigNumber(0);
+
+			const format = formatSiafundString(balance);
 
 			return `${format.value} <span class="currency-display">${format.label}</span>`;
 		},
@@ -96,8 +111,13 @@ export default {
 
 				existing.reverse();
 
-				this.addresses = existing;
+				this.addresses = existing.map(a => ({
+					...a,
+					pubkey: a.unlock_conditions.publickeys[0].substr(8)
+				}));
 			}
+
+			await this.refreshWalletBalance();
 
 			if (this.walletType !== 'ledger')
 				this.ready = true;
@@ -147,12 +167,18 @@ export default {
 
 				return addrs;
 			}, []));
-			let delta = new BigNumber(balance.unconfirmed_delta);
 
-			if (delta.isNaN())
-				delta = new BigNumber(0);
+			let deltaSC = new BigNumber(balance.unconfirmed_siacoin_delta),
+				deltaSF = new BigNumber(balance.unconfirmed_siafund_delta);
 
-			this.balance = new BigNumber(balance.confirmed_balance).minus(delta);
+			if (deltaSC.isNaN())
+				deltaSC = new BigNumber(0);
+
+			if (deltaSF.isNaN())
+				deltaSF = new BigNumber(0);
+
+			this.siacoinBalance = new BigNumber(balance.confirmed_siacoin_balance).minus(deltaSC);
+			this.siafundBalance = new BigNumber(balance.confirmed_siafund_balance).minus(deltaSF);
 		},
 		onConnected() {
 			this.ready = true;
@@ -239,7 +265,7 @@ export default {
 
 .app-status {
 	display: grid;
-	grid-template-columns: minmax(0, 1fr) repeat(2, auto);
+	grid-template-columns: minmax(0, 1fr) repeat(3, auto);
 	grid-gap: 15px;
 	padding: 15px 0;
 	border-top: 1px solid dark-gray;

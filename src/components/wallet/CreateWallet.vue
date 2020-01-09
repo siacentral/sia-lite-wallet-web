@@ -112,6 +112,21 @@ export default {
 				});
 			}
 		},
+		onClickLedger() {
+			try {
+				if (!this.ledgerSupported)
+					return;
+
+				this.step = 'create';
+				this.createType = 'ledger';
+			} catch (ex) {
+				console.error('onClickLedger', ex);
+				this.pushNotification({
+					message: ex.message,
+					severity: 'danger'
+				});
+			}
+		},
 		async onWalletCreated(wallet) {
 			try {
 				this.wallet = wallet;
@@ -183,20 +198,6 @@ export default {
 				this.step = 'review';
 			} catch (ex) {
 				console.error('onImportAddresses', ex);
-				this.pushNotification({
-					message: ex.message,
-					severity: 'danger'
-				});
-			}
-		},
-		onClickLedger() {
-			try {
-				if (!this.ledgerSupported)
-					return;
-
-				this.step = 'ledger';
-			} catch (ex) {
-				console.error('onClickLedger', ex);
 				this.pushNotification({
 					message: ex.message,
 					severity: 'danger'

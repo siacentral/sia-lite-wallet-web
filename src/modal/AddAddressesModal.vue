@@ -1,27 +1,31 @@
 <template>
 	<modal @close="$emit('close')">
-		<import-ledger-addresses v-if="wallet.type === 'ledger'" :wallet="wallet" @imported="onImportAddresses" />
-		<import-watch-addresses  v-else-if="wallet.type === 'watch'" :wallet="wallet" @imported="onImportAddresses" />
+		<import-sia-addresses :wallet="wallet" @imported="onImportAddresses" />
 	</modal>
 </template>
 
 <script>
-import ImportLedgerAddresses from '@/components/ledger/ImportLedgerAddresses';
-import ImportWatchAddresses from '@/components/watch/ImportWatchAddresses';
+import { saveAddresses } from '@/store/db';
+
+import ImportSiaAddresses from '@/components/addresses/ImportSiaAddresses';
 import Modal from './Modal';
 
 export default {
 	components: {
-		ImportLedgerAddresses,
-		ImportWatchAddresses,
+		ImportSiaAddresses,
 		Modal
 	},
 	props: {
 		wallet: Object
 	},
 	methods: {
-		onImportAddresses() {
+		async onImportAddresses(addresses) {
 			try {
+				await saveAddresses(addresses.map(a => ({
+					...a,
+					wallet_id: this.wallet.id
+				})));
+
 				this.$emit('close');
 				this.pushNotification({
 					icon: 'redo',
