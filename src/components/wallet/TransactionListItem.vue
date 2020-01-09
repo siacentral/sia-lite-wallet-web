@@ -105,10 +105,12 @@ export default {
 			return '';
 		},
 		transactionClass() {
-			if (!this.transaction || !this.transaction.confirmations === 0)
-				return { 'transaction-unconfirmed': true };
+			const classes = {};
 
-			return {};
+			if (this.transaction && this.transaction.confirmations === 0)
+				classes['transaction-unconfirmed'] = true;
+
+			return classes;
 		},
 		siacoinClass() {
 			const classes = {};
@@ -144,6 +146,7 @@ export default {
 	background: dark-gray;
 	border-radius: 4px;
 	color: rgba(255, 255, 255, 0.54);
+	font-size: 0.85rem;
 	text-align: center;
 }
 
