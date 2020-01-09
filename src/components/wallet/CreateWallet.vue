@@ -1,253 +1,207 @@
 <template>
 	<transition name="fade-top" mode="out-in">
-		<div class="wallet-step wallet-mode" v-if="step === 'pickMode'" key="pickMode">
-			<div class="create-wallet-button" @click="step = 'create'">
+		<div class="wallet-step wallet-mode" v-if="step === 'choose'" key="pickMode">
+			<div class="create-wallet-button" @click="onClickWalletType('create')">
 				<div class="button-icon"><icon icon="plus" /></div>
 				<div class="button-title">New Wallet</div>
 				<p>Generates a new wallet seed in the browser. Transactions can be sent and received.</p>
 			</div>
-			<div class="create-wallet-button" @click="step = 'recover'">
+			<div class="create-wallet-button" @click="onClickWalletType('recover')">
 				<div class="button-icon"><icon icon="redo" /></div>
 				<div class="button-title">Recover Wallet</div>
-				<p>Recovers an existing wallet from a 29 word seed. Transactions can be sent and received.</p>
+				<p>Recovers an existing wallet from a {{ seedWordPhrase }} seed. Transactions can be sent and received.</p>
 			</div>
-			<div :class="hardwareBtnClasses" @click="onClickLedgerSupport('ledger')">
+			<div :class="hardwareBtnClasses" @click="onClickLedger">
 				<div class="button-icon"><icon :icon="['fab', 'usb']" /></div>
 				<div class="button-title">Ledger Wallet</div>
 				<p v-if="ledgerSupported">Creates a new hardware backed wallet. All transactions must be signed by the Ledger device.</p>
 				<p v-else>Ledger support is only available in the Chrome browser. Enable "Experimental Web Platform Features" in Chrome to connect to the Ledger device.</p>
 			</div>
-			<div class="create-wallet-button" @click="step = 'watch'">
+			<div class="create-wallet-button" @click="onClickWalletType('watch')">
 				<div class="button-icon"><icon icon="eye" /></div>
 				<div class="button-title">Watch-Only Wallet</div>
 				<p>Creates a new watch-only wallet. Addresses must be added manually and transactions cannot be sent.</p>
 			</div>
 		</div>
-		<div class="wallet-step" v-else-if="step === 'create'">
-			<p>A new unique wallet seed will be generated and encrypted. It is important to save this
-				seed in a secure location. You can use this seed to recover your funds
-				from any device.</p>
-			<div class="control">
-				<label>Wallet Name</label>
-				<input type="text" placeholder="Wallet" v-model="walletName" />
-			</div>
-			<div class="control" v-if="changeSeedType">
-				<label>Seed Type</label>
-				<select v-model="seedType">
-					<option value="sia">Sia 29 word Seed</option>
-					<option value="bip39">Walrus 12 word Seed</option>
-				</select>
-			</div>
-			<div class="buttons">
-				<button class="btn btn-success btn-inline" @click="onCreateWallet" :disabled="creating">Create</button>
+		<build-wallet v-else-if="step === 'create'" :createType="createType" @created="onWalletCreated" />
+		<import-sia-addresses v-else-if="step === 'import'" key="import-sia" :wallet="wallet" @imported="onImportAddresses" />
+		<div class="wallet-step" v-else-if="step === 'review' && walletType === 'ledger'">
+			<p>Your Ledger wallet has been imported. Balance and transactions can now be viewed
+				without the Ledger device. To send transactions you will need to plugin and unlock
+				the device.</p>
+			<div class="controls">
+				<button class="btn btn-success btn-inline" @click="onComplete" :disabled="saving">Done</button>
 			</div>
 		</div>
-		<div class="wallet-step" v-else-if="step === 'ledger' || step === 'watch'">
-			<p v-if="step === 'ledger'">A new wallet will be created. Addresses must be manually
-				imported from a connected Ledger device. Transactions must be signed by the same
-				device. Only one hardware wallet can be created.</p>
-			<p v-else-if="step === 'watch'">A new watch-only wallet will be created. addresses
-				must be imported manually. Transactions cannot be created or broadcast.</p>
-			<p v-else>A new unique 29 word wallet seed will be generated and encrypted. This seed
-				should be saved in a secure location. You can use this seed to recover your funds from any Sia wallet.</p>
-			<div class="control">
-				<label>Wallet Name</label>
-				<input type="text" placeholder="Wallet" v-model="walletName" />
-			</div>
+		<div class="wallet-step" v-else-if="step === 'review' && walletType === 'watch'" key="review">
+			<p>A new watch-only wallet has been created. This wallet cannot send transactions.
+				Balance and transactions will be shown for all imported addresses.</p>
 			<div class="controls">
-				<button v-if="step === 'ledger'" class="btn btn-success btn-inline" @click="onCreateLedger">Import Addresses</button>
-				<button v-else-if="step === 'watch'" class="btn btn-success btn-inline" @click="onCreateWatch">Import Addresses</button>
-				<button v-else class="btn btn-success btn-inline" @click="onCreateWallet" :disabled="creating">Create</button>
-			</div>
-		</div>
-		<div class="wallet-step" v-else-if="step === 'recover'" key="recover">
-			<p>A new wallet will be created with the entered recovery seed. The blockchain will then
-				be scanned for any transactions and funds owned by addresses generated by the seed.</p>
-			<div class="control">
-				<label>Wallet Name</label>
-				<input type="text" placeholder="Wallet" v-model="walletName" />
-			</div>
-			<div class="control">
-				<label>Recovery Seed</label>
-				<textarea v-model="recoverySeed" />
-			</div>
-			<div class="controls">
-				<button class="btn btn-success btn-inline" @click="onRecoverWallet" :disabled="creating">Recover</button>
+				<button class="btn btn-success btn-inline" @click="onComplete" :disabled="saving">Done</button>
 			</div>
 		</div>
 		<div class="wallet-step" v-else-if="step === 'review'" key="review">
-			<p>A new wallet has been created. Please backup your recovery seed to a safe location</p>
+			<p>A new wallet has been created. Please backup your recovery seed to a safe location.
+				Without your seed your funds cannot be recovered.</p>
 			<div class="control">
 				<label>Recovery Seed</label>
-				<textarea v-model="recoverySeed" readonly/>
+				<textarea v-model="wallet.seed" readonly/>
 			</div>
 			<div class="controls">
-				<button class="btn btn-success btn-inline" @click="walletCreated">Done</button>
+				<button class="btn btn-success btn-inline" @click="onComplete" :disabled="saving">Done</button>
 			</div>
 		</div>
-		<import-ledger-addresses v-else-if="step === 'import-ledger'" key="ledger" :wallet="wallet" @imported="walletCreated" />
-		<import-watch-addresses v-else-if="step === 'import-watch'" key="watch" :wallet="wallet" @imported="walletCreated" />
 	</transition>
 </template>
 
 <script>
-import { encode } from '@stablelib/base64';
 import { mapState, mapActions } from 'vuex';
-import { generateSeed, generateAddresses } from '@/utils/sia';
+import { generateAddresses } from '@/utils/sia';
 import { saveAddresses } from '@/store/db';
 import { ledgerSupported } from '@/utils/ledger';
 
-import ImportLedgerAddresses from '@/components/ledger/ImportLedgerAddresses';
-import ImportWatchAddresses from '@/components/watch/ImportWatchAddresses';
+import BuildWallet from '@/components/wallet/BuildWallet';
+import ImportSiaAddresses from '@/components/addresses/ImportSiaAddresses';
 
 export default {
 	components: {
-		ImportLedgerAddresses,
-		ImportWatchAddresses
+		BuildWallet,
+		ImportSiaAddresses
 	},
 	computed: {
 		...mapState(['password', 'changeSeedType']),
+		ledgerSupported,
+		walletType() {
+			return this.wallet && typeof this.wallet.type === 'string' ? this.wallet.type : 'watch';
+		},
 		hardwareBtnClasses() {
 			return {
 				'create-wallet-button': true,
 				'create-button-disabled': !this.ledgerSupported
 			};
 		},
-		ledgerSupported() {
-			return ledgerSupported();
+		seedWordPhrase() {
+			return this.changeSeedType ? '12 or 29 word' : '29 word';
 		}
 	},
 	data() {
 		return {
-			creating: false,
 			step: '',
-			walletName: '',
-			recoverySeed: '',
-			seedType: 'sia',
-			wallet: null
+			createType: '',
+			saving: false,
+			wallet: null,
+			addresses: []
 		};
 	},
 	mounted() {
 		setTimeout(() => {
-			this.step = 'pickMode';
+			this.step = 'choose';
 		}, 300);
 	},
 	methods: {
 		...mapActions(['createWallet']),
-		async saveWallet(seed, type) {
-			this.wallet = {
-				seed,
-				type,
-				title: this.walletName || 'Wallet'
-			};
-
-			const id = await this.createWallet(this.wallet, this.password);
-
-			this.wallet.id = id;
-		},
-		randomID() {
-			const rand = new Uint8Array(64);
-
-			window.crypto.getRandomValues(rand);
-
-			return encode(rand);
-		},
-		onClickCreateHardware(step) {
+		onClickWalletType(type) {
 			try {
-				if (!ledgerSupported())
-					return;
-
-				this.step = step;
+				this.step = 'create';
+				this.createType = type;
 			} catch (ex) {
-				console.error('onClickCreateHardware', ex);
-			}
-		},
-		async onCreateLedger() {
-			try {
-				await this.saveWallet(this.randomID(), 'ledger');
-
-				this.step = 'import-ledger';
-			} catch (ex) {
-				console.error('onCreateLedger', ex);
+				console.error('onClickWalletType', ex);
 				this.pushNotification({
-					severity: 'danger',
-					message: ex.message
+					message: ex.message,
+					severity: 'danger'
 				});
 			}
 		},
-		async onCreateWatch() {
+		async onWalletCreated(wallet) {
 			try {
-				await this.saveWallet(this.randomID(), 'watch');
+				this.wallet = wallet;
 
-				this.step = 'import-watch';
+				switch (wallet.type) {
+				case 'ledger':
+				case 'watch':
+					this.step = 'import';
+					break;
+				default:
+					this.saveWallet();
+
+					this.step = 'review';
+					break;
+				}
 			} catch (ex) {
-				console.error('onCreateWatch', ex);
+				console.error('onWalletCreated', ex);
 				this.pushNotification({
-					severity: 'danger',
-					message: ex.message
+					message: ex.message,
+					severity: 'danger'
 				});
 			}
 		},
-		async onCreateWallet() {
-			if (this.creating)
+		async saveWallet() {
+			if (this.saving)
 				return;
 
-			this.creating = true;
+			this.saving = true;
 
 			try {
-				const seed = await generateSeed(this.seedType),
-					addresses = await generateAddresses(seed, 0, 10);
+				const walletID = await this.createWallet(this.wallet);
 
-				await this.saveWallet(seed, 'default');
-				await saveAddresses(addresses.map(a => ({
+				this.wallet.id = walletID;
+
+				switch (this.wallet.type) {
+				case 'ledger':
+				case 'watch':
+					break;
+				default:
+					this.addresses = await generateAddresses(this.wallet.seed, 0, 10);
+					break;
+				}
+
+				await saveAddresses(this.addresses.map(a => ({
 					...a,
-					wallet_id: this.wallet.id
-				})));
-
-				this.recoverySeed = seed;
-				this.step = 'review';
-			} catch (ex) {
-				console.error('onCreateWallet', ex);
-				this.pushNotification({
-					severity: 'danger',
-					message: ex.message
-				});
-			} finally {
-				this.creating = false;
-			}
-		},
-		async onRecoverWallet() {
-			if (this.creating)
-				return;
-
-			this.creating = true;
-
-			try {
-				const addresses = await generateAddresses(this.recoverySeed, 0, 10);
-
-				await this.saveWallet(this.recoverySeed, 'default');
-				await saveAddresses(addresses.map(a => ({
-					...a,
-					wallet_id: this.wallet.id
+					wallet_id: walletID
 				})));
 
 				this.queueWallet(this.wallet.id, true);
-				this.walletCreated();
 			} catch (ex) {
-				console.error('onRecoverWallet', ex);
+				console.error('saveWallet', ex);
 				this.pushNotification({
-					severity: 'danger',
-					message: ex.message
+					message: ex.message,
+					severity: 'danger'
 				});
 			} finally {
-				this.creating = false;
+				this.saving = false;
 			}
 		},
-		walletCreated() {
-			this.pushNotification({
-				message: 'New wallet created.'
-			});
-			this.$emit('created');
+		onComplete() {
+			this.$emit('created', this.wallet);
+		},
+		onImportAddresses(addresses) {
+			try {
+				this.addresses = addresses;
+
+				this.saveWallet();
+
+				this.step = 'review';
+			} catch (ex) {
+				console.error('onImportAddresses', ex);
+				this.pushNotification({
+					message: ex.message,
+					severity: 'danger'
+				});
+			}
+		},
+		onClickLedger() {
+			try {
+				if (!this.ledgerSupported)
+					return;
+
+				this.step = 'ledger';
+			} catch (ex) {
+				console.error('onClickLedger', ex);
+				this.pushNotification({
+					message: ex.message,
+					severity: 'danger'
+				});
+			}
 		}
 	}
 };

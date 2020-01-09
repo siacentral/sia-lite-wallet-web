@@ -47,8 +47,8 @@ export function encodeTransaction(txn) {
 	return defaultSpawnWorker(['encodeTransaction', JSON.stringify(txn)], 15000);
 }
 
-export function encodeUnlockHash(unlockhash) {
-	return defaultSpawnWorker(['encodeUnlockHash', JSON.stringify(unlockhash)], 15000);
+export function encodeUnlockHash(unlockconditions) {
+	return defaultSpawnWorker(['encodeUnlockHash', JSON.stringify(unlockconditions)], 15000);
 }
 
 export function recoverAddresses(seed, i, n, progress) {
