@@ -37,7 +37,7 @@ export default {
 			if (!this.wallet || !this.transaction)
 				return new BigNumber(0);
 
-			return this.wallet.unconfirmedBalance().minus(this.inputAmount).plus(this.receiveAmount).minus(this.fees);
+			return this.wallet.unconfirmedSiacoinBalance().minus(this.inputAmount).plus(this.receiveAmount).minus(this.fees);
 		},
 		outputs() {
 			if (!this.transaction || !Array.isArray(this.transaction.siacoin_outputs))

@@ -55,7 +55,7 @@ export default {
 	computed: {
 		...mapState(['currency', 'currencies', 'networkFees']),
 		walletBalance() {
-			return this.wallet.unconfirmedBalance();
+			return this.wallet.unconfirmedSiacoinBalance();
 		},
 		changeAddress() {
 			let addr = this.ownedAddresses.find(a => a.usage_type !== 'sent');
@@ -66,16 +66,16 @@ export default {
 			return addr;
 		},
 		unspent() {
-			const outputs = this.wallet && Array.isArray(this.wallet.outputs) ? this.wallet.outputs : [],
-				spent = this.wallet && Array.isArray(this.wallet.unconfirmed_spent) ? this.wallet.unconfirmed_spent : [],
+			const outputs = this.wallet && Array.isArray(this.wallet.unspent_siacoin_outputs) ? this.wallet.unspent_siacoin_outputs : [],
+				spent = this.wallet && Array.isArray(this.wallet.spent_siacoin_outputs) ? this.wallet.spent_siacoin_outputs : [],
 				unspent = outputs.filter(o => spent.indexOf(o.output_id) === -1);
 
 			if (!Array.isArray(unspent) || unspent.length === 0)
 				return [];
 
 			unspent.sort((a, b) => {
-				a = new BigNumber(a);
-				b = new BigNumber(b);
+				a = new BigNumber(a.value);
+				b = new BigNumber(b.value);
 
 				if (a.gt(b))
 					return 1;
@@ -396,9 +396,5 @@ export default {
 		height: 100%;
 		border-radius: 4px;
 	}
-}
-
-.buttons {
-	text-align: center;
 }
 </style>

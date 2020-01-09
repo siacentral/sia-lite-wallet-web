@@ -1,14 +1,15 @@
 <template>
 	<div :class="{ 'wallet': true, 'active-wallet': active }">
 		<div class="wallet-name">{{ wallet.title || 'Wallet' }}</div>
-		<div class="wallet-balance" v-html="walletSiacoins"></div>
+		<div class="wallet-balance" v-html="displaySiacoins"></div>
+		<!--<div class="wallet-balance" v-if="walletSiafundBalance.gt(0)" v-html="displaySiafunds"></div>-->
 	</div>
 </template>
 
 <script>
 import { mapState } from 'vuex';
 import BigNumber from 'bignumber.js';
-import { formatPriceString } from '@/utils/format';
+import { formatPriceString, formatSiafundString } from '@/utils/format';
 
 export default {
 	props: {
@@ -21,16 +22,29 @@ export default {
 			let value = new BigNumber(0);
 
 			if (this.wallet)
-				value = this.wallet.unconfirmedBalance();
+				value = this.wallet.unconfirmedSiacoinBalance();
 
 			return value;
 		},
-		walletSiacoins() {
+		walletSiafundBalance() {
+			let value = new BigNumber(0);
+
+			if (this.wallet)
+				value = this.wallet.unconfirmedSiafundBalance();
+
+			return value;
+		},
+		displaySiacoins() {
 			const siacoins = formatPriceString(new BigNumber(this.walletBalance), 2);
 
 			return `${siacoins.value} <span class="currency-display">${siacoins.label}</span>`;
 		},
-		walletCurrency() {
+		displaySiafunds() {
+			const siacoins = formatSiafundString(new BigNumber(this.walletSiafundBalance), 2);
+
+			return `${siacoins.value} <span class="currency-display">${siacoins.label}</span>`;
+		},
+		displayCurrency() {
 			const currency = formatPriceString(new BigNumber(this.walletBalance), 2, this.currency, this.currencies[this.currency]);
 
 			return `${currency.value} <span class="currency-display">${currency.label}</span>`;

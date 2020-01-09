@@ -210,8 +210,4 @@ h2 {
 		border-radius: 4px;
 	}
 }
-
-.buttons {
-	text-align: center;
-}
 </style>

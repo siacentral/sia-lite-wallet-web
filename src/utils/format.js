@@ -275,6 +275,24 @@ export function formatMonthlyPriceString(val, dec, unit, currency, rate) {
 	return formatSiacoinString(val.times(byteFactor).times(4320), dec, currency, rate);
 };
 
+export function formatSiafundString(val) {
+	if (!val || val.isEqualTo(0)) {
+		return {
+			value: '0',
+			label: 'SF'
+		};
+	}
+
+	return {
+		value: new Intl.NumberFormat([], {
+			type: 'decimal',
+			minimumFractionDigits: 0,
+			maximumFractionDigits: 0
+		}).format(val),
+		label: 'SF'
+	};
+};
+
 export function formatPriceString(val, dec, currency, rate) {
 	if (!val)
 		val = new BigNumber(0);

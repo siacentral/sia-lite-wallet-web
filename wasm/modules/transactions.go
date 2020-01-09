@@ -55,7 +55,7 @@ func SignTransaction(txn siatypes.Transaction, phrase string, requiredSignatures
 
 //GetTransactions gets all transactions belonging to the addresses
 func GetTransactions(addresses []string, callback js.Value) {
-	transactions := make(map[string]apitypes.WalletTransaction)
+	transactions := make(map[string]apitypes.Transaction)
 	ownedAddresses := make(map[string]bool)
 	count := len(addresses)
 	resp := transactionResp{}
@@ -78,22 +78,25 @@ func GetTransactions(addresses []string, callback js.Value) {
 			return
 		}
 
-		resp.ConfirmedBalance = resp.ConfirmedBalance.Add(callResp.Unspent)
-		resp.UnspentOutputs = append(resp.UnspentOutputs, callResp.UnspentOutputs...)
+		resp.ConfirmedSiacoinBalance = resp.ConfirmedSiacoinBalance.Add(callResp.UnspentSiacoins)
+		resp.ConfirmedSiafundBalance = resp.ConfirmedSiafundBalance.Add(callResp.UnspentSiafunds)
+		resp.UnspentSiacoinOutputs = append(resp.UnspentSiacoinOutputs, callResp.UnspentSiacoinOutputs...)
+		resp.UnspentSiafundOutputs = append(resp.UnspentSiafundOutputs, callResp.UnspentSiafundOutputs...)
+
+		unconfirmedSiacoinDelta := new(big.Int)
+		unconfirmedSiafundDelta := new(big.Int)
 
 		for _, txn := range callResp.Transactions {
-			if len(txn.TransactionID) == 0 {
+			if len(txn.ID) == 0 {
 				if len(txn.SiacoinOutputs) == 0 {
 					continue
 				}
 
-				txn.TransactionID = fmt.Sprintf("nontxn-%s", txn.SiacoinOutputs[0].OutputID)
+				txn.ID = fmt.Sprintf("nontxn-%s", txn.SiacoinOutputs[0].OutputID)
 			}
 
-			transactions[txn.TransactionID] = txn
+			transactions[txn.ID] = txn
 		}
-
-		unconfirmedDelta := new(big.Int)
 
 		for _, txn := range callResp.UnconfirmedTransactions {
 			for _, output := range txn.SiacoinOutputs {
@@ -101,7 +104,7 @@ func GetTransactions(addresses []string, callback js.Value) {
 					continue
 				}
 
-				unconfirmedDelta.Add(unconfirmedDelta, output.Value.Big())
+				unconfirmedSiacoinDelta.Add(unconfirmedSiacoinDelta, output.Value.Big())
 			}
 
 			for _, input := range txn.SiacoinInputs {
@@ -109,34 +112,53 @@ func GetTransactions(addresses []string, callback js.Value) {
 					continue
 				}
 
-				unconfirmedDelta.Sub(unconfirmedDelta, input.Value.Big())
-				resp.UnconfirmedSpent = append(resp.UnconfirmedSpent, input.OutputID)
+				unconfirmedSiacoinDelta.Sub(unconfirmedSiacoinDelta, input.Value.Big())
+				resp.SpentSiacoinOutputs = append(resp.SpentSiacoinOutputs, input.OutputID)
 			}
 
-			transactions[txn.TransactionID] = txn
+			for _, output := range txn.SiafundOutputs {
+				if _, exists := ownedAddresses[output.UnlockHash]; !exists {
+					continue
+				}
+
+				unconfirmedSiafundDelta.Add(unconfirmedSiafundDelta, output.Value.Big())
+			}
+
+			for _, input := range txn.SiafundInputs {
+				if _, exists := ownedAddresses[input.UnlockHash]; !exists {
+					continue
+				}
+
+				unconfirmedSiafundDelta.Sub(unconfirmedSiacoinDelta, input.Value.Big())
+				resp.SpentSiafundOutputs = append(resp.SpentSiafundOutputs, input.OutputID)
+			}
+
+			transactions[txn.ID] = txn
 		}
 
-		resp.UnconfirmedDelta = unconfirmedDelta.String()
+		resp.UnconfirmedSiacoinDelta = unconfirmedSiacoinDelta.String()
+		resp.UnconfirmedSiafundDelta = unconfirmedSiafundDelta.String()
 	}
 
 	for _, txn := range transactions {
-		var ownedInput, ownedOutput siatypes.Currency
-		var ownedInputsCount, ownedOutputsCount int
+		var ownedSiacoinInput, ownedSiacoinOutput siatypes.Currency
+		var ownedSiafundInput, ownedSiafundOutput siatypes.Currency
+		var ownedSiacoinInputsCount, ownedSiacoinOutputsCount int
+		var ownedSiafundInputsCount, ownedSiafundOutputsCount int
 
 		processed := processedTransaction{
-			TransactionID:     txn.TransactionID,
+			TransactionID:     txn.ID,
 			BlockHeight:       txn.BlockHeight,
 			Confirmations:     txn.Confirmations,
 			Timestamp:         txn.Timestamp,
-			Tags:              txn.Tags,
 			Fees:              txn.Fees,
 			StorageProofs:     txn.StorageProofs,
 			HostAnnouncements: txn.HostAnnouncements,
-			Contracts:         make([]processedContract, len(txn.Contracts)),
+			Contracts:         make([]processedContract, len(txn.StorageContracts)),
 			ContractRevisions: make([]processedContract, len(txn.ContractRevisions)),
 		}
 
-		for i, contract := range txn.Contracts {
+		for i, contract := range txn.StorageContracts {
 			procContract := processedContract{
 				ID:                     contract.ID,
 				BlockID:                contract.BlockID,
@@ -151,8 +173,8 @@ func GetTransactions(addresses []string, callback js.Value) {
 				ProofHeight:            contract.ProofHeight,
 				Payout:                 contract.Payout,
 				FileSize:               contract.FileSize,
-				ValidProofOutputs:      make([]processedOutput, len(contract.ValidProofOutputs)),
-				MissedProofOutputs:     make([]processedOutput, len(contract.MissedProofOutputs)),
+				ValidProofOutputs:      make([]processedSiacoinOutput, len(contract.ValidProofOutputs)),
+				MissedProofOutputs:     make([]processedSiacoinOutput, len(contract.MissedProofOutputs)),
 				NegotiationTimestamp:   contract.NegotiationTimestamp,
 				ExpirationTimestamp:    contract.ExpirationTimestamp,
 				ProofDeadlineTimestamp: contract.ProofDeadlineTimestamp,
@@ -191,8 +213,8 @@ func GetTransactions(addresses []string, callback js.Value) {
 				ProofHeight:            contract.ProofHeight,
 				Payout:                 contract.Payout,
 				FileSize:               contract.FileSize,
-				ValidProofOutputs:      make([]processedOutput, len(contract.ValidProofOutputs)),
-				MissedProofOutputs:     make([]processedOutput, len(contract.MissedProofOutputs)),
+				ValidProofOutputs:      make([]processedSiacoinOutput, len(contract.ValidProofOutputs)),
+				MissedProofOutputs:     make([]processedSiacoinOutput, len(contract.MissedProofOutputs)),
 				NegotiationTimestamp:   contract.NegotiationTimestamp,
 				ExpirationTimestamp:    contract.ExpirationTimestamp,
 				ProofDeadlineTimestamp: contract.ProofDeadlineTimestamp,
@@ -216,47 +238,107 @@ func GetTransactions(addresses []string, callback js.Value) {
 			processed.ContractRevisions[i] = procContract
 		}
 
+		for _, txnSiafundInput := range txn.SiafundInputs {
+			procSiafundInput := processedSiafundInput{
+				SiafundInput: txnSiafundInput,
+			}
+
+			if _, exists := ownedAddresses[txnSiafundInput.UnlockHash]; exists {
+				procSiafundInput.Owned = true
+				ownedSiafundInput = ownedSiafundInput.Add(txnSiafundInput.Value)
+				ownedSiafundInputsCount++
+			}
+
+			processed.SiafundInputs = append(processed.SiafundInputs, procSiafundInput)
+		}
+
+		for _, txnSiafundOutput := range txn.SiafundOutputs {
+			procSiafundOutput := processedSiafundOutput{
+				SiafundOutput: txnSiafundOutput,
+			}
+
+			if _, exists := ownedAddresses[txnSiafundOutput.UnlockHash]; exists {
+				procSiafundOutput.Owned = true
+				ownedSiafundOutput = ownedSiafundOutput.Add(txnSiafundOutput.Value)
+				ownedSiafundOutputsCount++
+			}
+
+			processed.SiafundOutputs = append(processed.SiafundOutputs, procSiafundOutput)
+		}
+
 		for _, txnSiacoinInput := range txn.SiacoinInputs {
-			procSiacoinInput := processedInput{
+			procSiacoinInput := processedSiacoinInput{
 				SiacoinInput: txnSiacoinInput,
 			}
 
 			if _, exists := ownedAddresses[txnSiacoinInput.UnlockHash]; exists {
 				procSiacoinInput.Owned = true
-				ownedInput = ownedInput.Add(txnSiacoinInput.Value)
-				ownedInputsCount++
+				ownedSiacoinInput = ownedSiacoinInput.Add(txnSiacoinInput.Value)
+				ownedSiacoinInputsCount++
 			}
 
 			processed.SiacoinInputs = append(processed.SiacoinInputs, procSiacoinInput)
 		}
 
 		for _, txnSiacoinOutput := range txn.SiacoinOutputs {
-			procSiacoinOutput := processedOutput{
+			procSiacoinOutput := processedSiacoinOutput{
 				SiacoinOutput: txnSiacoinOutput,
 			}
 
 			if _, exists := ownedAddresses[txnSiacoinOutput.UnlockHash]; exists {
 				procSiacoinOutput.Owned = true
-				ownedOutput = ownedOutput.Add(txnSiacoinOutput.Value)
-				ownedOutputsCount++
+				ownedSiacoinOutput = ownedSiacoinOutput.Add(txnSiacoinOutput.Value)
+				ownedSiacoinInputsCount++
 			}
 
 			processed.SiacoinOutputs = append(processed.SiacoinOutputs, procSiacoinOutput)
 		}
 
-		if len(txn.SiacoinInputs) == ownedInputsCount && len(txn.SiacoinOutputs) == ownedOutputsCount {
+		if len(txn.SiafundInputs) != 0 && len(txn.SiafundOutputs) != 0 {
+			processed.Tags = append(processed.Tags, "siafund_transaction")
+		}
+
+		if len(txn.SiacoinInputs) != 0 && len(txn.SiacoinOutputs) != 0 {
+			processed.Tags = append(processed.Tags, "siacoin_transaction")
+		}
+
+		if len(txn.SiacoinInputs) == 0 && len(txn.SiacoinOutputs) != 0 {
+			processed.Tags = append(processed.Tags, txn.SiacoinOutputs[0].Source)
+		}
+
+		if len(txn.StorageContracts) != 0 {
+			processed.Tags = append(processed.Tags, "contract_formation")
+		}
+
+		if len(txn.ContractRevisions) != 0 {
+			processed.Tags = append(processed.Tags, "contract_revision")
+		}
+
+		if len(txn.HostAnnouncements) != 0 {
+			processed.Tags = append(processed.Tags, "host_announcement")
+		}
+
+		if len(txn.SiafundOutputs) == 0 && len(txn.SiacoinOutputs) != 0 && len(txn.SiacoinInputs) == ownedSiacoinInputsCount && len(txn.SiacoinOutputs) == ownedSiacoinOutputsCount {
 			processed.Tags = append(processed.Tags, "defrag")
 		}
 
-		if ownedOutput.Cmp(ownedInput) == 1 {
-			processed.Direction = "received"
-			processed.Value = ownedOutput.Sub(ownedInput)
+		if ownedSiacoinOutput.Cmp(ownedSiacoinInput) == -1 {
+			processed.SiacoinValue.Direction = "sent"
+			processed.SiacoinValue.Value = ownedSiacoinInput.Sub(ownedSiacoinOutput)
 		} else {
-			processed.Direction = "sent"
-			processed.Value = ownedInput.Sub(ownedOutput)
+			processed.SiacoinValue.Direction = "received"
+			processed.SiacoinValue.Value = ownedSiacoinOutput.Sub(ownedSiacoinInput)
 		}
 
-		if processed.Value.Cmp64(0) == 0 {
+		if ownedSiafundOutput.Cmp(ownedSiafundInput) == 1 {
+			processed.SiafundValue.Direction = "received"
+			processed.SiafundValue.Value = ownedSiafundOutput.Sub(ownedSiafundInput)
+		} else {
+			processed.SiafundValue.Direction = "sent"
+			processed.SiafundValue.Value = ownedSiafundInput.Sub(ownedSiafundOutput)
+		}
+
+		if processed.SiacoinValue.Value.Cmp64(0) == 0 && processed.SiafundValue.Value.Cmp64(0) == 0 {
 			continue
 		}
 

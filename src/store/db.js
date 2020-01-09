@@ -44,22 +44,32 @@ export async function saveWallet(wallet, password) {
 	const walletID = encodeB64(hash(encodeUTF8(wallet.seed))),
 		key = await pbkdf2(password, wallet.salt);
 
-	let confirmed = new BigNumber(wallet.confirmed_balance),
-		unconfirmed = new BigNumber(wallet.unconfirmed_delta);
+	let confirmedSiafundBalance = new BigNumber(wallet.confirmed_siafund_balance),
+		confirmedSiacoinBalance = new BigNumber(wallet.confirmed_siacoin_balance),
+		unconfirmedSiafundDelta = new BigNumber(wallet.unconfirmed_siacoin_delta),
+		unconfirmedSiacoinDelta = new BigNumber(wallet.unconfirmed_siafund_delta);
 
-	if (confirmed.isNaN() || !confirmed.isFinite())
-		confirmed = new BigNumber(0);
+	if (confirmedSiafundBalance.isNaN() || !confirmedSiafundBalance.isFinite())
+		confirmedSiafundBalance = new BigNumber(0);
 
-	if (unconfirmed.isNaN() || !unconfirmed.isFinite())
-		unconfirmed = new BigNumber(0);
+	if (confirmedSiacoinBalance.isNaN() || !confirmedSiacoinBalance.isFinite())
+		confirmedSiacoinBalance = new BigNumber(0);
+
+	if (unconfirmedSiafundDelta.isNaN() || !unconfirmedSiafundDelta.isFinite())
+		unconfirmedSiafundDelta = new BigNumber(0);
+
+	if (unconfirmedSiacoinDelta.isNaN() || !unconfirmedSiacoinDelta.isFinite())
+		unconfirmedSiacoinDelta = new BigNumber(0);
 
 	await db.wallets.put({
 		...wallet,
 		id: walletID,
 		salt: key.salt,
 		seed: encrypt(wallet.seed, key.hash),
-		confirmed_balance: confirmed.toString(10),
-		unconfirmed_delta: unconfirmed.toString(10)
+		confirmed_siafund_balance: confirmedSiafundBalance.toString(10),
+		confirmed_siacoin_balance: confirmedSiacoinBalance.toString(10),
+		unconfirmed_siacoin_delta: unconfirmedSiafundDelta.toString(10),
+		unconfirmed_siafund_delta: unconfirmedSiacoinDelta.toString(10)
 	});
 
 	return walletID;
@@ -68,20 +78,9 @@ export async function saveWallet(wallet, password) {
 async function unlockWallet(wallet, password) {
 	const key = await pbkdf2(password, wallet.salt);
 
-	let confirmed = new BigNumber(wallet.confirmed_balance),
-		unconfirmed = new BigNumber(wallet.unconfirmed_delta);
-
-	if (confirmed.isNaN() || !confirmed.isFinite())
-		confirmed = new BigNumber(0);
-
-	if (unconfirmed.isNaN() || !unconfirmed.isFinite())
-		unconfirmed = new BigNumber(0);
-
 	return {
 		...wallet,
-		seed: decrypt(wallet.seed, key.hash),
-		confirmed_balance: confirmed,
-		unconfirmed_delta: unconfirmed
+		seed: decrypt(wallet.seed, key.hash)
 	};
 }
 

@@ -9,27 +9,47 @@ export default class Wallet {
 		this.scanning = data.scanning;
 		this.salt = data.salt;
 		this.transactions = Array.isArray(data.transactions) ? data.transactions : [];
-		this.outputs = Array.isArray(data.outputs) ? data.outputs : [];
-		this.unconfirmed_spent = Array.isArray(data.unconfirmed_spent) ? data.unconfirmed_spent : [];
-		this.confirmed_balance = new BigNumber(data.confirmed_balance);
-		this.unconfirmed_delta = new BigNumber(data.unconfirmed_delta);
-		this.unconfirmed_transactions = Array.isArray(data.unconfirmed_transactions) ? data.unconfirmed_transactions : [];
+		this.unspent_siacoin_outputs = Array.isArray(data.unspent_siacoin_outputs) ? data.unspent_siacoin_outputs : [];
+		this.unspent_siafund_outputs = Array.isArray(data.unspent_siafund_outputs) ? data.unspent_siafund_outputs : [];
+		this.spent_siacoin_outputs = Array.isArray(data.spent_siacoin_outputs) ? data.spent_siacoin_outputs : [];
+		this.spent_siafund_outputs = Array.isArray(data.spent_siafund_outputs) ? data.spent_siafund_outputs : [];
+		this.confirmed_siafund_balance = new BigNumber(data.confirmed_siafund_balance);
+		this.confirmed_siacoin_balance = new BigNumber(data.confirmed_siacoin_balance);
+		this.unconfirmed_siacoin_delta = new BigNumber(data.unconfirmed_siacoin_delta);
+		this.unconfirmed_siafund_delta = new BigNumber(data.unconfirmed_siafund_delta);
 	}
 
-	confirmedBalance() {
-		if (!this.confirmed_balance || this.confirmed_balance.isNaN())
+	confirmedSiacoinBalance() {
+		if (!this.confirmed_siacoin_balance || this.confirmed_siacoin_balance.isNaN())
 			return new BigNumber(0);
 
-		return this.confirmed_balance;
+		return this.confirmed_siacoin_balance;
 	}
 
-	unconfirmedBalance() {
-		if (!this.confirmed_balance || this.confirmed_balance.isNaN())
+	unconfirmedSiacoinBalance() {
+		if (!this.confirmed_siacoin_balance || this.confirmed_siacoin_balance.isNaN())
 			return new BigNumber(0);
 
-		if (!this.unconfirmed_delta || this.unconfirmed_delta.isNaN())
+		if (!this.unconfirmed_siacoin_delta || this.unconfirmed_siacoin_delta.isNaN())
 			return new BigNumber(0);
 
-		return this.confirmed_balance.plus(this.unconfirmed_delta);
+		return this.confirmed_siacoin_balance.plus(this.unconfirmed_siacoin_delta);
+	}
+
+	confirmedSiafundBalance() {
+		if (!this.confirmed_siafund_balance || this.confirmed_siafund_balance.isNaN())
+			return new BigNumber(0);
+
+		return this.confirmed_siafund_balance;
+	}
+
+	unconfirmedSiafundBalance() {
+		if (!this.confirmed_siafund_balance || this.confirmed_siafund_balance.isNaN())
+			return new BigNumber(0);
+
+		if (!this.unconfirmed_siafund_delta || this.unconfirmed_siafund_delta.isNaN())
+			return new BigNumber(0);
+
+		return this.confirmed_siafund_balance.plus(this.unconfirmed_siafund_delta);
 	}
 };

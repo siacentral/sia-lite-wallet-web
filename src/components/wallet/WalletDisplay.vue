@@ -11,8 +11,9 @@
 					</div>
 				</transition>
 			</div>
-			<div class="wallet-siacoin-balance" v-html="formatSiacoinString(balance)"></div>
-			<div class="wallet-display-balance" v-html="formatCurrencyString(balance)"></div>
+			<div class="wallet-siacoin-balance" v-html="formatSiacoinString(siacoinBalance)"></div>
+			<!--<div class="wallet-display-balance" v-if="siafundBalance.gt(0)" v-html="formatSiafundString(siafundBalance)"></div>-->
+			<div class="wallet-display-balance" v-html="formatCurrencyString(siacoinBalance)"></div>
 			<div class="wallet-button-wrapper">
 				<div class="wallet-buttons">
 					<button class="btn wallet-btn" @click="modal='send'" v-if="wallet.type !== 'watch'">Send</button>
@@ -43,18 +44,10 @@
 				<tbody>
 					<template v-for="group in transactions">
 						<tr class="group-date" :key="group.date"><td colspan="4">{{ group.date }}</td></tr>
-						<tr v-for="(transaction, i) in group.transactions"
+						<transaction-list-item v-for="(transaction, i) in group.transactions"
 							:key="`${group.date}-${i}`"
-							:class="getTransactionClasses(transaction)"
-							@click="onSelectTransaction(transaction.transaction_id)">
-							<td class="transaction-type fit-text">{{ friendlyType(transaction) }}</td>
-							<td class="transaction-spacer" />
-							<td class="transaction-confirms fit-text"><span>{{ friendlyConfirms(transaction.confirmations) }}</span></td>
-							<td class="transaction-amount fit-text">
-								<div v-html="transaction.siacoins"/>
-								<div class="transaction-currency" v-html="transaction.currency" />
-							</td>
-						</tr>
+							:transaction="transaction"
+							@click="onSelectTransaction(transaction.transaction_id)" />
 					</template>
 				</tbody>
 			</table>
@@ -79,13 +72,14 @@
 <script>
 import { mapState, mapActions } from 'vuex';
 import BigNumber from 'bignumber.js';
-import { formatPriceString } from '@/utils/format';
+import { formatPriceString, formatSiafundString } from '@/utils/format';
 
 import AddAddressesModal from '@/modal/AddAddressesModal';
 import ConfirmModal from '@/modal/ConfirmModal';
 import ReceiveSiacoinModal from '@/modal/ReceiveSiacoinModal';
 import SendSiacoinModal from '@/modal/SendSiacoinModal';
 import TransactionDetailModal from '@/modal/TransactionDetailModal';
+import TransactionListItem from '@/components/wallet/TransactionListItem';
 
 export default {
 	components: {
@@ -93,7 +87,8 @@ export default {
 		ConfirmModal,
 		ReceiveSiacoinModal,
 		SendSiacoinModal,
-		TransactionDetailModal
+		TransactionDetailModal,
+		TransactionListItem
 	},
 	props: {
 		wallet: Object
@@ -110,11 +105,17 @@ export default {
 		walletQueued() {
 			return this.wallet.scanning === 'full' || this.scanQueue.filter(s => s.walletID === this.wallet.id && s.full).length !== 0;
 		},
-		balance() {
+		siacoinBalance() {
 			if (!this.wallet)
 				return new BigNumber(0);
 
-			return this.wallet.unconfirmedBalance();
+			return this.wallet.unconfirmedSiacoinBalance();
+		},
+		siafundBalance() {
+			if (!this.wallet)
+				return new BigNumber(0);
+
+			return this.wallet.unconfirmedSiafundBalance();
 		},
 		name() {
 			if (!this.wallet || !this.wallet.title || this.wallet.title.length === 0)
@@ -153,8 +154,6 @@ export default {
 
 				m[d].push({
 					...t,
-					siacoins: this.getTransactionSiacoins(t),
-					currency: this.getTransactionCurrency(t),
 					timestamp: new Date(t.timestamp)
 				});
 
@@ -288,81 +287,18 @@ export default {
 				});
 			}
 		},
-		getTransactionClasses(transaction) {
-			const classes = {};
-
-			classes[`transaction-${transaction.direction}`] = true;
-
-			if (transaction.confirmations <= 0)
-				classes['transaction-unconfirmed'] = true;
-
-			return classes;
-		},
 		formatSiacoinString(val) {
 			const format = formatPriceString(val, 2);
 
 			return `${format.value} <span class="currency-display">${format.label}</span>`;
 		},
+		formatSiafundString(val) {
+			const format = formatSiafundString(val);
+
+			return `${format.value} <span class="currency-display">${format.label}</span>`;
+		},
 		formatCurrencyString(val) {
 			const format = formatPriceString(val, 2, this.currency, this.currencies[this.currency]);
-
-			return `${format.value} <span class="currency-display">${format.label}</span>`;
-		},
-		friendlyType(txn) {
-			if (!txn || !Array.isArray(txn.tags))
-				return 'Siacoin Transaction';
-
-			switch (txn.tags[0]) {
-			case 'contract_revision':
-				return 'Contract Revision';
-			case 'contract_formation':
-				return 'Contract Formation';
-			case 'storage_proof':
-				return 'Storage Proof';
-			case 'host_announcements':
-				return 'Host Announcement';
-			case 'contract_valid_output':
-			case 'contract_missed_output':
-				return 'Contract Completion';
-			case 'block_reward':
-				return 'Block Reward';
-			case 'siafund_claim':
-				return 'Siafund Claim';
-			case 'defrag':
-				return 'Defrag';
-			default:
-				return txn.tags[0];
-			}
-		},
-		friendlyConfirms(confirmations) {
-			if (isNaN(confirmations) || !isFinite(confirmations))
-				return 'Unconfirmed';
-
-			return confirmations <= 0 ? 'Unconfirmed' : '';
-		},
-		getTransactionSiacoins(txn) {
-			let value = new BigNumber(txn.value);
-
-			if (value.isNaN() || !value.isFinite())
-				value = new BigNumber(0);
-
-			const format = formatPriceString(value, 2);
-
-			if (txn.direction === 'sent')
-				return `-${format.value} <span class="currency-display">${format.label}</span>`;
-
-			return `${format.value} <span class="currency-display">${format.label}</span>`;
-		},
-		getTransactionCurrency(txn) {
-			let value = new BigNumber(txn.value);
-
-			if (value.isNaN() || !value.isFinite())
-				value = new BigNumber(0);
-
-			const format = formatPriceString(value, 2, this.currency, this.currencies[this.currency]);
-
-			if (txn.direction === 'sent')
-				return `-${format.value} <span class="currency-display">${format.label}</span>`;
 
 			return `${format.value} <span class="currency-display">${format.label}</span>`;
 		}
