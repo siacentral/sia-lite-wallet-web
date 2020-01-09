@@ -40,9 +40,6 @@ export default {
 			});
 
 			this.addresses = addresses;
-
-			console.log(this.addresses);
-
 			setTimeout(() => {
 				this.loaded = true;
 			}, 300);
