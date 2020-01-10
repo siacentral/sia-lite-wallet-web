@@ -6,7 +6,7 @@
 			<div class="control">
 				<label>{{ translate('settings.lblDisplayCurrency') }}</label>
 				<select v-model="newCurrency" @change="setCurrency(newCurrency)">
-					<optgroup label="Fiat">
+					<optgroup :label="translate('currency.fiat')">
 						<option value="usd">{{ translate('currency.usd') }}</option>
 						<option value="jpy">{{ translate('currency.jpy') }}</option>
 						<option value="eur">{{ translate('currency.eur') }}</option>
@@ -16,7 +16,7 @@
 						<option value="rub">{{ translate('currency.rub') }}</option>
 						<option value="cny">{{ translate('currency.cny') }}</option>
 					</optgroup>
-					<optgroup label="Crypto">
+					<optgroup :label="translate('currency.crypto')">
 						<option value="btc">{{ translate('currency.btc') }}</option>
 						<option value="bch">{{ translate('currency.bch') }}</option>
 						<option value="eth">{{ translate('currency.eth') }}</option>

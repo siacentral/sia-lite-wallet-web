@@ -78,6 +78,9 @@ export default {
 			pExplainFullScan: 'During the initial full scan, used addresses are scanned in batches. The wallet will scan until no consecutively used address indices are found on the blockchain for the minimum number of scan rounds.',
 			pExplainRounds: 'Decreasing the number of rounds or the number of addresses per round may increase performance, but will increase the chance addresses or balance will not be found. With the current settings, a minimum of {{0}} consecutive address indices must be unused before completion.'
 		},
+		unlockWalletModal: {
+			pWalletsLocked: 'Your wallets are currently encrypted and locked. Enter your password to unlock your wallets and access your funds.'
+		},
 		createWalletModal: {
 			newWallet: 'New Wallet',
 			recoverWallet: 'Recover Wallet',
@@ -144,6 +147,8 @@ export default {
 			sender: 'Sender'
 		},
 		currency: {
+			fiat: 'Fiat',
+			crypto: 'Crypto',
 			sc: 'SC',
 			sf: 'SF',
 			usd: 'USD',
@@ -170,7 +175,8 @@ export default {
 		},
 		language: {
 			automatic: 'Automatic',
-			en: 'English'
+			en: 'English',
+			cn: 'Chinese'
 		}
 	}
 };

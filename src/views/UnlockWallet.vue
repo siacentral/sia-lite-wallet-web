@@ -3,8 +3,7 @@
 		<div class="page-content">
 			<div class="page-icon"><icon icon="lock" /></div>
 			<h2 class="text-center">{{ translate('unlockWallet') }}</h2>
-			<p>Your wallets are currently encrypted and locked. Enter your password to unlock your
-				wallets and access your funds.</p>
+			<p>{{ translate('unlockWalletModal.pWalletsLocked') }}</p>
 			<form @submit.prevent="onUnlockWallets">
 				<div class="control">
 					<label>{{ translate('walletPassword') }}</label>
