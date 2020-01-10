@@ -1,5 +1,6 @@
 <template>
 	<div class="page page-settings">
+		<mobile-nav />
 		<div class="settings">
 			<h2>Display</h2>
 			<div class="control">
@@ -54,7 +55,12 @@
 <script>
 import { mapActions, mapState } from 'vuex';
 
+import MobileNav from '@/components/MobileNav';
+
 export default {
+	components: {
+		MobileNav
+	},
 	computed: {
 		...mapState(['currency', 'autoLock', 'changeSeedType'])
 	},

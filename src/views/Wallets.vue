@@ -1,6 +1,6 @@
 <template>
 	<div class="page wallet-page">
-		<mobile-nav></mobile-nav>
+		<mobile-nav />
 		<div class="wallets-list">
 			<div class="wallets">
 				<wallet-item
