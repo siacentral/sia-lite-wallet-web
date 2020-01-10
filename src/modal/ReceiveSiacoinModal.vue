@@ -3,7 +3,7 @@
 		<transition name="fade-top" mode="out-in" appear>
 			<div class="receive-grid" v-show="loaded" key="receive">
 				<button class="btn-prev" @click="onChangeAddress(-1)"><icon icon="chevron-left" /></button>
-				<address-qr-code class="qr-display" :address="addresses[current].address || ''" />
+				<address-qr-code class="qr-display" :address="currentAddress" />
 				<button class="btn-next" @click="onChangeAddress(1)"><icon icon="chevron-right" /></button>
 				<div class="control">
 					<input :value="currentAddress" readonly />
