@@ -101,7 +101,6 @@ export async function recoverAddresses(seed, i, n, count, progress) {
 			clearTimeout(workerDeadline);
 
 			if (data === 'ready') {
-				console.log(['recoverAddresses', seed, i, n, count]);
 				worker.postMessage(['recoverAddresses', seed, i, n, count]);
 				return;
 			}
