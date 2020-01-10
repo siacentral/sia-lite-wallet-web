@@ -14,8 +14,6 @@ function loadTranslations() {
 
 		languages.push(l.key);
 	});
-
-	console.log(languages);
 }
 
 export const languages = [];
