@@ -7,12 +7,11 @@ import (
 	"github.com/siacentral/sia-lite/wasm/wallet"
 )
 
-//RecoverAddresses scans for addresses on the blockchain 5,000 at a time up to a maximum of 100,000,000
-//addresses. Considers all addresses found if the scan goes more than minRounds * 5,000
+//RecoverAddresses scans for addresses on the blockchain addressCount at a time up to a maximum of 100,000,000
+//addresses. Considers all addresses found if the scan goes more than minRounds * addressCount
 //addresses without seeing any used. It's possible the ranges will need to be tweaked for older or
 //larger wallets
-func RecoverAddresses(seed string, i uint64, minRounds uint64, callback js.Value) {
-	const addressCount = 5e3
+func RecoverAddresses(seed string, i uint64, minRounds uint64, addressCount uint64, callback js.Value) {
 	var lastUsed, maxIndex uint64
 	var lastUsedType string
 
@@ -48,7 +47,9 @@ func RecoverAddresses(seed string, i uint64, minRounds uint64, callback js.Value
 			return
 		}
 
-		if len(used) == 0 {
+		if len(used) != 0 {
+			lastUsed = 0
+		} else {
 			lastUsed++
 		}
 

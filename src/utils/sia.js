@@ -84,7 +84,7 @@ export function encodeUnlockHash(unlockconditions) {
 	return defaultSpawnWorker(['encodeUnlockHash', JSON.stringify(unlockconditions)], 15000);
 }
 
-export async function recoverAddresses(seed, i, n, progress) {
+export async function recoverAddresses(seed, i, n, count, progress) {
 	let worker = new Worker('/sia/sia.worker.js'),
 		work;
 
@@ -101,7 +101,8 @@ export async function recoverAddresses(seed, i, n, progress) {
 			clearTimeout(workerDeadline);
 
 			if (data === 'ready') {
-				worker.postMessage(['recoverAddresses', seed, i, n]);
+				console.log(['recoverAddresses', seed, i, n, count]);
+				worker.postMessage(['recoverAddresses', seed, i, n, count]);
 				return;
 			}
 

@@ -136,16 +136,17 @@ func generateAddresses(this js.Value, args []js.Value) interface{} {
 }
 
 func recoverAddresses(this js.Value, args []js.Value) interface{} {
-	if !checkArgs(args, js.TypeString, js.TypeNumber, js.TypeNumber, js.TypeFunction) {
+	if !checkArgs(args, js.TypeString, js.TypeNumber, js.TypeNumber, js.TypeNumber, js.TypeFunction) {
 		return false
 	}
 
 	seed := args[0].String()
 	i := uint64(args[1].Int())
 	minRounds := uint64(args[2].Int())
-	callback := args[3]
+	addressCount := uint64(args[3].Int())
+	callback := args[4]
 
-	go modules.RecoverAddresses(seed, i, minRounds, callback)
+	go modules.RecoverAddresses(seed, i, minRounds, addressCount, callback)
 
 	return true
 }

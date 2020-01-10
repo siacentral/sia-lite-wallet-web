@@ -47,6 +47,24 @@
 						<label for="chk-change-seed-type">Generate 12 Word Seeds</label>
 					</div>
 				</div>
+				<div class="control-grouping">
+					<p class="text-warning">During the initial full scan for balance and outputs
+						addresses are scanned in batches. The wallet will scan until there have been
+						no addresses found on the blockchain for the minimum number of scan rounds.</p>
+					<p class="text-warning">Decreasing the number of rounds or the number of addresses per round can
+						increase performance, but will increase the chance addresses or balance
+						will not be found. With the current settings, a minimum
+						of {{ formatNumber(newMinFullScanRounds * newAddressesPerRound) }} consecutive
+						address indices must be unused before completion.</p>
+					<div class="control">
+						<label for="chk-change-seed-type">Minimum Consecutive Rounds</label>
+						<input type="number" min="10" max="1000" id="chk-change-seed-type" v-model.number="newMinFullScanRounds" @change="setMinFullScanRounds(newMinFullScanRounds)" />
+					</div>
+					<div class="control">
+						<label for="chk-change-seed-type">Addresses Per Round</label>
+						<input type="number" min="10" max="5000" id="chk-change-seed-type" v-model.number="newAddressesPerRound" @change="setAddressesPerRound(newAddressesPerRound)" />
+					</div>
+				</div>
 			</template>
 		</div>
 	</div>
@@ -54,6 +72,7 @@
 
 <script>
 import { mapActions, mapState } from 'vuex';
+import { formatNumber } from '@/utils/format';
 
 import MobileNav from '@/components/MobileNav';
 
@@ -62,23 +81,28 @@ export default {
 		MobileNav
 	},
 	computed: {
-		...mapState(['currency', 'autoLock', 'changeSeedType'])
+		...mapState(['currency', 'autoLock', 'changeSeedType', 'addressesPerRound', 'minScanRounds'])
 	},
 	data() {
 		return {
 			showAdvanced: false,
 			newCurrency: 'usd',
 			newAutoLock: 5,
-			newChangeSeedType: false
+			newChangeSeedType: false,
+			newAddressesPerRound: 1000,
+			newMinFullScanRounds: 100
 		};
 	},
 	mounted() {
 		this.newCurrency = this.currency;
 		this.newAutoLock = this.autoLock;
 		this.newChangeSeedType = this.changeSeedType;
+		this.newAddressesPerRound = this.addressesPerRound;
+		this.newMinFullScanRounds = this.minScanRounds;
 	},
 	methods: {
-		...mapActions(['setCurrency', 'setAutoLock', 'setChangeSeedType'])
+		...mapActions(['setCurrency', 'setAutoLock', 'setChangeSeedType', 'setMinFullScanRounds', 'setAddressesPerRound']),
+		formatNumber
 	}
 };
 </script>
@@ -97,12 +121,13 @@ export default {
 }
 
 .control-grouping {
-	padding: 15px;
+	padding: 15px 15px 0;
 	background: bg-dark-accent;
 	border-radius: 4px;
+	margin-bottom: 15px;
 
 	.control {
-		margin-bottom: 0;
+		margin-bottom: 15px;
 	}
 
 	p {

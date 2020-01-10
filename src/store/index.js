@@ -22,9 +22,11 @@ function getLocalStorageNumeric(key, def) {
 const store = new Vuex.Store({
 	state: {
 		setup: false,
-		autoLock: getLocalStorageNumeric('autoLock', 5),
+		autoLock: getLocalStorageNumeric('autoLock', 15),
 		currency: localStorage.getItem('displayCurrency') || 'usd',
 		changeSeedType: localStorage.getItem('changeSeedType') === 'true',
+		minScanRounds: getLocalStorageNumeric('minScanRounds', 25),
+		addressesPerRound: getLocalStorageNumeric('addressesPerRound', 1000),
 		password: null,
 		wallets: [],
 		notifications: [],
@@ -53,6 +55,12 @@ const store = new Vuex.Store({
 		},
 		setChangeSeedType(state, enabled) {
 			state.changeSeedType = enabled;
+		},
+		setMinFullScanRounds(state, rounds) {
+			state.minScanRounds = rounds;
+		},
+		setAddressesPerRound(state, addressesPerRound) {
+			state.addressesPerRound = addressesPerRound;
 		},
 		setCurrency(state, currency) {
 			state.currency = currency;
@@ -123,6 +131,17 @@ const store = new Vuex.Store({
 			localStorage.setItem('changeSeedType', enabled.toString());
 			commit('setChangeSeedType', enabled);
 		},
+		setMinFullScanRounds({ commit }, rounds) {
+			localStorage.setItem('minScanRounds', rounds);
+			commit('setMinFullScanRounds', rounds);
+		},
+		setAddressesPerRound({ commit }, addressesPerRound) {
+			if (addressesPerRound > 5e3)
+				addressesPerRound = 5e3;
+
+			localStorage.setItem('addressesPerRound', addressesPerRound);
+			commit('setAddressesPerRound', addressesPerRound);
+		},
 		setCurrency({ commit }, currency) {
 			localStorage.setItem('displayCurrency', currency);
 			commit('setCurrency', currency);
@@ -138,7 +157,7 @@ const store = new Vuex.Store({
 			commit('setPassword', password);
 
 			wallets.forEach(w => dispatch('queueWallet', { walletID: w.id, full: false }));
-			wallets.forEach(w => dispatch('queueWallet', { walletID: w.id, full: false }));
+			wallets.forEach(w => dispatch('queueWallet', { walletID: w.id, full: true }));
 		},
 		async lockWallets({ commit }) {
 			commit('lockWallets');
