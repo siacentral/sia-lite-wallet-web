@@ -1,24 +1,57 @@
-function defaultSpawnWorker(params, timeout) {
+let siaModule;
+
+async function load() {
+	if (WebAssembly.compileStreaming)
+		siaModule = await WebAssembly.compileStreaming(fetch(`/sia/sia.wasm`));
+	else {
+		const resp = await fetch('/sia/sia.wasm'),
+			buf = await resp.arrayBuffer();
+
+		siaModule = await WebAssembly.compile(buf);
+	}
+}
+
+const loaded = load();
+
+async function defaultSpawnWorker(params, timeout) {
 	let worker = new Worker('/sia/sia.worker.js'),
-		work = new Promise((resolve, reject) => {
-			let workerDeadline = setTimeout(() => {
-				reject(new Error('response timeout'));
-			}, timeout);
+		work;
 
-			worker.onmessage = (e) => {
-				const data = e.data;
+	await Promise.resolve(loaded);
 
-				clearTimeout(workerDeadline);
+	work = new Promise((resolve, reject) => {
+		let workerDeadline = setTimeout(() => {
+			reject(new Error('response timeout'));
+		}, timeout);
 
-				if (data[0])
-					return reject(new Error(data[0]));
+		worker.onmessage = (e) => {
+			const data = e.data;
 
-				resolve(data[1]);
-			};
+			clearTimeout(workerDeadline);
 
-			worker.postMessage(params);
-		});
+			if (data === 'ready') {
+				worker.postMessage(params);
+				return;
+			}
 
+			if (!Array.isArray(data)) {
+				console.error(data);
+				return reject(new Error('unexpected data'));
+			}
+
+			if (data[0] === 'log') {
+				console.debug(data[1]);
+				return;
+			}
+
+			if (data[0])
+				return reject(new Error(data[0]));
+
+			resolve(data[1]);
+		};
+	});
+
+	worker.postMessage(['module', siaModule]);
 	work.finally(() => {
 		worker.terminate();
 		worker = null;
@@ -51,34 +84,50 @@ export function encodeUnlockHash(unlockconditions) {
 	return defaultSpawnWorker(['encodeUnlockHash', JSON.stringify(unlockconditions)], 15000);
 }
 
-export function recoverAddresses(seed, i, n, progress) {
+export async function recoverAddresses(seed, i, n, progress) {
 	let worker = new Worker('/sia/sia.worker.js'),
-		work = new Promise((resolve, reject) => {
-			let timeout = setTimeout(() => {
+		work;
+
+	await Promise.resolve(loaded);
+
+	work = new Promise((resolve, reject) => {
+		let workerDeadline = setTimeout(() => {
+			reject(new Error('response timeout'));
+		}, 30000);
+
+		worker.onmessage = (e) => {
+			const data = e.data;
+
+			clearTimeout(workerDeadline);
+
+			if (data === 'ready') {
+				worker.postMessage(['recoverAddresses', seed, i, n]);
+				return;
+			}
+
+			if (!Array.isArray(data))
+				return reject(new Error('unexpected data'));
+
+			if (data[0] === 'log') {
+				console.debug(data[1]);
+				return;
+			}
+
+			if (data[0])
+				return reject(new Error(data[0]));
+
+			progress(data[1]);
+
+			if (typeof data[1].done === 'boolean' && data[1].done)
+				return resolve(data[1]);
+
+			workerDeadline = setTimeout(() => {
 				reject(new Error('response timeout'));
 			}, 30000);
+		};
+	});
 
-			worker.onmessage = (e) => {
-				const data = e.data;
-
-				clearTimeout(timeout);
-
-				if (data[0])
-					return reject(new Error(data[0]));
-
-				progress(data[1]);
-
-				if (typeof data[1].done === 'boolean' && data[1].done)
-					return resolve(data[1]);
-
-				timeout = setTimeout(() => {
-					reject(new Error('response timeout'));
-				}, 30000);
-			};
-
-			worker.postMessage(['recoverAddresses', seed, i, n]);
-		});
-
+	worker.postMessage(['module', siaModule]);
 	work.finally(() => {
 		worker.terminate();
 		worker = null;
