@@ -57,12 +57,12 @@
 						of {{ formatNumber(newMinFullScanRounds * newAddressesPerRound) }} consecutive
 						address indices must be unused before completion.</p>
 					<div class="control">
-						<label for="chk-change-seed-type">Minimum Consecutive Rounds</label>
-						<input type="number" min="10" max="1000" id="chk-change-seed-type" v-model.number="newMinFullScanRounds" @change="setMinFullScanRounds(newMinFullScanRounds)" />
+						<label>Minimum Consecutive Rounds</label>
+						<input type="number" min="10" max="1000" v-model.number="newMinFullScanRounds" @change="setMinFullScanRounds(newMinFullScanRounds)" />
 					</div>
 					<div class="control">
-						<label for="chk-change-seed-type">Addresses Per Round</label>
-						<input type="number" min="10" max="5000" id="chk-change-seed-type" v-model.number="newAddressesPerRound" @change="setAddressesPerRound(newAddressesPerRound)" />
+						<label>Addresses Per Round</label>
+						<input type="number" min="10" max="5000" v-model.number="newAddressesPerRound" @change="setAddressesPerRound(newAddressesPerRound)" />
 					</div>
 				</div>
 			</template>
