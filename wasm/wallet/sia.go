@@ -11,6 +11,14 @@ import (
 	"gitlab.com/NebulousLabs/fastrand"
 )
 
+var englishWordMap = func() map[string]bool {
+	m := make(map[string]bool, len(mnemonics.EnglishDictionary))
+	for _, v := range mnemonics.EnglishDictionary {
+		m[v] = true
+	}
+	return m
+}()
+
 //NewSiaRecoveryPhrase creates a new unique 28 or 29 word wallet seed
 func NewSiaRecoveryPhrase() (string, error) {
 	var entropy [crypto.EntropySize]byte
@@ -52,7 +60,7 @@ func RecoverSiaSeed(phrase string) (*SeedWallet, error) {
 	}
 
 	for _, word := range words {
-		if _, ok := englishMnemonicDict[word]; !ok {
+		if _, ok := englishWordMap[word]; !ok {
 			return nil, fmt.Errorf("unrecognized word %q in seed phrase", word)
 		}
 	}
