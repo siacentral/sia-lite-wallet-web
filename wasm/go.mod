@@ -9,4 +9,5 @@ require (
 	gitlab.com/NebulousLabs/entropy-mnemonics v0.0.0-20181018051301-7532f67e3500
 	gitlab.com/NebulousLabs/fastrand v0.0.0-20181126182046-603482d69e40
 	golang.org/x/crypto v0.0.0-20191105034135-c7e5f84aec59
+	golang.org/x/sys v0.0.0-20190626221950-04f50cda93cb // indirect
 )

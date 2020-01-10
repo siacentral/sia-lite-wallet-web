@@ -1,8 +1,6 @@
 package wallet
 
 import (
-	"regexp"
-
 	"gitlab.com/NebulousLabs/Sia/crypto"
 	"gitlab.com/NebulousLabs/Sia/types"
 )
@@ -17,9 +15,8 @@ const (
 )
 
 var (
-	asicHardForkHeight     = types.BlockHeight(179001)
-	fullCoveredFields      = types.CoveredFields{WholeTransaction: true}
-	seedFormatEnglishRegex = regexp.MustCompile(`^([a-z]{4,12}){1}( {1}[a-z]{4,12}){27,28}$`)
+	asicHardForkHeight = types.BlockHeight(179001)
+	fullCoveredFields  = types.CoveredFields{WholeTransaction: true}
 )
 
 type (

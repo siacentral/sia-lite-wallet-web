@@ -38,19 +38,23 @@ func RecoverSiaSeed(phrase string) (*SeedWallet, error) {
 		if unicode.IsUpper(char) {
 			return nil, errors.New("seed is not valid: all words must be lowercase")
 		}
+
 		if !unicode.IsLetter(char) && !unicode.IsSpace(char) {
 			return nil, fmt.Errorf("seed is not valid: illegal character '%v'", char)
 		}
 	}
 
+	words := strings.Fields(phrase)
+
 	// Check seed has 28 or 29 words
-	if len(strings.Fields(phrase)) != 28 && len(strings.Fields(phrase)) != 29 {
+	if len(words) != 28 && len(words) != 29 {
 		return nil, errors.New("seed is not valid: must be 28 or 29 words")
 	}
 
-	// Check for formatting errors
-	if !seedFormatEnglishRegex.MatchString(phrase) {
-		return nil, errors.New("seed is not valid: invalid formatting")
+	for _, word := range words {
+		if _, ok := englishMnemonicDict[word]; !ok {
+			return nil, fmt.Errorf("unrecognized word %q in seed phrase", word)
+		}
 	}
 
 	// Decode the string into the checksummed byte slice.
