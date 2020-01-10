@@ -9,12 +9,12 @@
 			<div class="mobile-menu" v-if="menuActive">
 				<div class="upper">
 					<router-link :to="{ name: 'wallets' }" class="menu-item">
-						<icon icon="wallet" /> Wallet
+						<icon icon="wallet" /> {{ translate('menu.wallets') }}
 					</router-link>
 				</div>
 				<div class="lower">
 					<router-link :to="{ name: 'settings' }" class="menu-item">
-						<icon icon="cogs" /> Settings
+						<icon icon="cogs" /> {{ translate('menu.settings') }}
 					</router-link>
 				</div>
 			</div>

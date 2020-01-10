@@ -2,66 +2,64 @@
 	<div class="page page-settings">
 		<mobile-nav />
 		<div class="settings">
-			<h2>Display</h2>
+			<h2>{{ translate('settings.displayHeader') }}</h2>
 			<div class="control">
-				<label>Display Currency</label>
+				<label>{{ translate('settings.lblDisplayCurrency') }}</label>
 				<select v-model="newCurrency" @change="setCurrency(newCurrency)">
 					<optgroup label="Fiat">
-						<option value="usd">USD</option>
-						<option value="jpy">JPY</option>
-						<option value="eur">EUR</option>
-						<option value="gbp">GBP</option>
-						<option value="aus">AUS</option>
-						<option value="cad">CAD</option>
-						<option value="rub">RUB</option>
-						<option value="cny">CNY</option>
+						<option value="usd">{{ translate('currency.usd') }}</option>
+						<option value="jpy">{{ translate('currency.jpy') }}</option>
+						<option value="eur">{{ translate('currency.eur') }}</option>
+						<option value="gbp">{{ translate('currency.gbp') }}</option>
+						<option value="aus">{{ translate('currency.aus') }}</option>
+						<option value="cad">{{ translate('currency.cad') }}</option>
+						<option value="rub">{{ translate('currency.rub') }}</option>
+						<option value="cny">{{ translate('currency.cny') }}</option>
 					</optgroup>
 					<optgroup label="Crypto">
-						<option value="btc">BTC</option>
-						<option value="bch">BCH</option>
-						<option value="eth">ETH</option>
-						<option value="xrp">XRP</option>
-						<option value="ltc">LTC</option>
+						<option value="btc">{{ translate('currency.btc') }}</option>
+						<option value="bch">{{ translate('currency.bch') }}</option>
+						<option value="eth">{{ translate('currency.eth') }}</option>
+						<option value="xrp">{{ translate('currency.xrp') }}</option>
+						<option value="ltc">{{ translate('currency.ltc') }}</option>
 					</optgroup>
 				</select>
 			</div>
-			<h2>Security</h2>
 			<div class="control">
-				<label>Automatic Lock Timeout (Minutes)</label>
+				<label>{{ translate('settings.lblDisplayLanguage') }}</label>
+				<select v-model="newLanguage" @change="setDisplayLanguage(newLanguage)">
+					<option value="detect">{{ translate('language.automatic') }}</option>
+					<option v-for="language in languages" :key="language" :value="language">{{ translate(`language.${language}`) }}</option>
+				</select>
+			</div>
+			<h2>{{ translate('settings.securityHeader') }}</h2>
+			<div class="control">
+				<label>{{ translate('settings.lblAutomaticLock') }}</label>
 				<input type="number" v-model.number="newAutoLock" min="1" max="30" @change="setAutoLock(newAutoLock)" />
 			</div>
 			<div class="divider" />
 			<div class="control">
 				<input type="checkbox" id="chk-show-advanced" v-model="showAdvanced" />
-				<label for="chk-show-advanced">Show Advanced</label>
+				<label for="chk-show-advanced">{{ translate('settings.chkShowAdvanced') }}</label>
 			</div>
 			<template v-if="showAdvanced">
 				<h2>Advanced</h2>
 				<div class="control-grouping">
-					<p class="text-warning">12 word seeds are not compatible with the official Sia
-						wallets. They are commonly used with Walrus wallets. Enabling this setting
-						will show a dropdown when creating a new wallet allowing you to generate
-						either a new Sia seed or a 12 word seed.</p>
+					<p class="text-warning">{{ translate('settings.pChangeSeedType') }}</p>
 					<div class="control">
 						<input type="checkbox" id="chk-change-seed-type" v-model="newChangeSeedType" @change="setChangeSeedType(newChangeSeedType)" />
-						<label for="chk-change-seed-type">Generate 12 Word Seeds</label>
+						<label for="chk-change-seed-type">{{ translate('settings.chkWalrusSeeds') }}</label>
 					</div>
 				</div>
 				<div class="control-grouping">
-					<p class="text-warning">During the initial full scan for balance and outputs
-						addresses are scanned in batches. The wallet will scan until there have been
-						no addresses found on the blockchain for the minimum number of scan rounds.</p>
-					<p class="text-warning">Decreasing the number of rounds or the number of addresses per round can
-						increase performance, but will increase the chance addresses or balance
-						will not be found. With the current settings, a minimum
-						of {{ formatNumber(newMinFullScanRounds * newAddressesPerRound) }} consecutive
-						address indices must be unused before completion.</p>
+					<p class="text-warning">{{ translate('settings.pExplainFullScan') }}</p>
+					<p class="text-warning">{{ translate('settings.pExplainRounds', formatNumber(newMinFullScanRounds * newAddressesPerRound)) }}</p>
 					<div class="control">
-						<label>Minimum Consecutive Rounds</label>
+						<label>{{ translate('settings.lblMinimumRounds') }}</label>
 						<input type="number" min="10" max="1000" v-model.number="newMinFullScanRounds" @change="setMinFullScanRounds(newMinFullScanRounds)" />
 					</div>
 					<div class="control">
-						<label>Addresses Per Round</label>
+						<label>{{ translate('settings.lblAddressesPerRound') }}</label>
 						<input type="number" min="10" max="5000" v-model.number="newAddressesPerRound" @change="setAddressesPerRound(newAddressesPerRound)" />
 					</div>
 				</div>
@@ -72,6 +70,7 @@
 
 <script>
 import { mapActions, mapState } from 'vuex';
+import { languages } from '@/translation';
 import { formatNumber } from '@/utils/format';
 
 import MobileNav from '@/components/MobileNav';
@@ -81,7 +80,11 @@ export default {
 		MobileNav
 	},
 	computed: {
-		...mapState(['currency', 'autoLock', 'changeSeedType', 'addressesPerRound', 'minScanRounds'])
+		...mapState(['currency', 'autoLock', 'changeSeedType', 'addressesPerRound',
+			'minScanRounds', 'displayLanguage']),
+		languages() {
+			return languages;
+		}
 	},
 	data() {
 		return {
@@ -90,7 +93,8 @@ export default {
 			newAutoLock: 5,
 			newChangeSeedType: false,
 			newAddressesPerRound: 1000,
-			newMinFullScanRounds: 100
+			newMinFullScanRounds: 100,
+			newLanguage: 'detect'
 		};
 	},
 	mounted() {
@@ -99,9 +103,11 @@ export default {
 		this.newChangeSeedType = this.changeSeedType;
 		this.newAddressesPerRound = this.addressesPerRound;
 		this.newMinFullScanRounds = this.minScanRounds;
+		this.newLanguage = this.displayLanguage;
 	},
 	methods: {
-		...mapActions(['setCurrency', 'setAutoLock', 'setChangeSeedType', 'setMinFullScanRounds', 'setAddressesPerRound']),
+		...mapActions(['setCurrency', 'setAutoLock', 'setChangeSeedType', 'setMinFullScanRounds',
+			'setAddressesPerRound', 'setDisplayLanguage']),
 		formatNumber
 	}
 };

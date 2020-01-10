@@ -11,8 +11,8 @@ export default {
 		if (Array.isArray(addresses) && addresses.length !== 0) {
 			lastUsed = addresses[addresses.length - 1].index;
 
-			if (lastUsed > 3e4)
-				startIndex = lastUsed - 3e4;
+			if (lastUsed > 1e4)
+				startIndex = lastUsed - 1e4;
 		}
 
 		if (typeof addressesPerRound !== 'number' || isNaN(addressesPerRound) || !isFinite(addressesPerRound))

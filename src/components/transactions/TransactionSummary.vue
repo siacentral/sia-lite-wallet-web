@@ -12,7 +12,6 @@
 <script>
 import { mapState } from 'vuex';
 import BigNumber from 'bignumber.js';
-import { formatPriceString } from '@/utils/format';
 
 import OutputList from '@/components/transactions/OutputList';
 
@@ -109,31 +108,21 @@ export default {
 	methods: {
 		getOutputTag(output) {
 			if (output.owned)
-				return 'Received';
+				return this.translate('outputTags.received');
 
 			if (this.feeAddresses.indexOf(output.unlock_hash) !== -1)
-				return 'API Fee';
+				return this.translate('outputTags.apiFee');
 
-			return 'Recipient';
+			return this.translate('outputTags.recipient');
 		},
 		getInputTag(output) {
 			if (output.owned)
-				return 'Sent';
+				return this.translate('outputTags.sent');
 
 			if (this.feeAddresses.indexOf(output.unlock_hash) !== -1)
-				return 'API Fee';
+				return this.translate('outputTags.apiFee');
 
-			return 'Sender';
-		},
-		getOutputSC(recipient) {
-			const siacoins = formatPriceString(new BigNumber(recipient.value), 2);
-
-			return `${siacoins.value} <span class="currency-display">${siacoins.label}</span>`;
-		},
-		getOutputCurrency(recipient) {
-			const currency = formatPriceString(new BigNumber(recipient.value), 2, this.currency, this.currencies[this.currency]);
-
-			return `${currency.value} <span class="currency-display">${currency.label}</span>`;
+			return this.translate('outputTags.sender');
 		}
 	}
 };

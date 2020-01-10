@@ -1,18 +1,18 @@
 <template>
 	<div>
 		<div class="control">
-			<label>Wallet Name</label>
-			<input type="text" placeholder="Wallet" v-model="walletName" />
+			<label>{{ translate('createWalletModal.lblWalletName') }}</label>
+			<input type="text" :placeholder="translate('wallet')" v-model="walletName" />
 		</div>
 		<div class="control" v-if="createType === 'create' && changeSeedType">
-			<label>Seed Type</label>
+			<label>{{ translate('createWalletModal.lblSeedType') }}</label>
 			<select v-model="seedType">
-				<option value="sia">Sia Seed</option>
-				<option value="walrus">Walrus Seed</option>
+				<option value="sia">{{ translate('createWalletModal.siaSeed') }}</option>
+				<option value="walrus">{{ translate('createWalletModal.walrusSeed') }}</option>
 			</select>
 		</div>
 		<div class="control" v-if="createType === 'recover'">
-			<label>Recovery Seed</label>
+			<label>{{ translate('createWalletModal.lblRecoverySeed') }}</label>
 			<textarea v-model="recoverySeed" />
 		</div>
 		<div class="buttons">
@@ -46,11 +46,11 @@ export default {
 			switch (this.createType) {
 			case 'ledger':
 			case 'watch':
-				return 'Import';
+				return this.translate('import');
 			case 'recover':
-				return 'Recover';
+				return this.translate('recover');
 			default:
-				return 'Generate';
+				return this.translate('generate');
 			}
 		}
 	},

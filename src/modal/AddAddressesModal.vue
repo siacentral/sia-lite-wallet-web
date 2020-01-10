@@ -29,7 +29,7 @@ export default {
 				this.$emit('close');
 				this.pushNotification({
 					icon: 'redo',
-					message: 'Addresses added. Wallet scan queued.'
+					message: this.translate('alerts.addressesAdded')
 				});
 			} catch (ex) {
 				console.error('onImportAddresses', ex);

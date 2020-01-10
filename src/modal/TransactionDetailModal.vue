@@ -12,8 +12,8 @@
 				<div class="transaction-data">{{ friendlyType(transaction) }}</div>
 			</div>
 			<div class="summary-type">
-				<button @click="mode = 'summary'" :class="summaryClasses('summary')">Summary</button>
-				<button @click="mode = 'outputs'" :class="summaryClasses('outputs')">Outputs</button>
+				<button @click="mode = 'summary'" :class="summaryClasses('summary')">{{ translate('summary') }}</button>
+				<button @click="mode = 'outputs'" :class="summaryClasses('outputs')">{{ translate('outputs') }}</button>
 			</div>
 			<div class="transaction-mode">
 				<transition name="fade-top" mode="out-in">
@@ -30,13 +30,13 @@
 			<div class="transaction-extras">
 				<div class="divider" />
 				<template v-if="fees.gt(0) && transaction.direction === 'sent'">
-					<div class="transaction-data-label">Fees</div>
+					<div class="transaction-data-label">{{ translate('transactionFee') }}</div>
 					<div class="transaction-data" v-html="siacoinDisplay(fees)" />
 					<div class="transaction-data" v-html="currencyDisplay(fees)" />
 				</template>
-				<div class="transaction-data-label">Total</div>
-				<div class="transaction-data" v-html="siacoinDisplay(transaction.value)" />
-				<div class="transaction-data" v-html="currencyDisplay(transaction.value)" />
+				<div class="transaction-data-label">{{ translate('total') }}</div>
+				<div class="transaction-data" v-html="siacoinDisplay(transaction.siacoin_value.value)" />
+				<div class="transaction-data" v-html="currencyDisplay(transaction.siacoin_value.value)" />
 			</div>
 		</div>
 	</modal>
@@ -82,12 +82,12 @@ export default {
 		siacoinDisplay(value) {
 			const siacoins = formatPriceString(new BigNumber(value), 2);
 
-			return `${siacoins.value} <span class="currency-display">${siacoins.label}</span>`;
+			return `${siacoins.value} <span class="currency-display">${this.translate('currency.sc')}</span>`;
 		},
 		currencyDisplay(value) {
 			const currency = formatPriceString(new BigNumber(value), 2, this.currency, this.currencies[this.currency]);
 
-			return `${currency.value} <span class="currency-display">${currency.label}</span>`;
+			return `${currency.value} <span class="currency-display">${this.translate(`currency.${currency.label}`)}</span>`;
 		},
 		summaryClasses(mode) {
 			return {
@@ -97,29 +97,33 @@ export default {
 			};
 		},
 		friendlyType(txn) {
-			if (!txn || !Array.isArray(txn.tags))
-				return 'Siacoin Transaction';
+			if (!this.transaction || !Array.isArray(this.transaction.tags))
+				return this.translate('transactionTypes.siacoinTransaction');
 
-			switch (txn.tags[0]) {
+			switch (this.transaction.tags[0]) {
 			case 'contract_revision':
-				return 'Contract Revision';
+				return this.translate('transactionTypes.contractRevision');
 			case 'contract_formation':
-				return 'Contract Formation';
+				return this.translate('transactionTypes.contractFormation');
 			case 'storage_proof':
-				return 'Storage Proof';
+				return this.translate('transactionTypes.storageProof');
 			case 'host_announcements':
-				return 'Host Announcement';
+				return this.translate('transactionTypes.hostAnnouncement');
 			case 'contract_valid_output':
 			case 'contract_missed_output':
-				return 'Contract Completion';
+				return this.translate('transactionTypes.contractCompleted');
 			case 'block_reward':
-				return 'Block Reward';
+				return this.translate('transactionTypes.blockReward');
+			case 'siacoin_transaction':
+				return this.translate('transactionTypes.siacoinTransaction');
+			case 'siafund_transaction':
+				return this.translate('transactionTypes.siafundTransaction');
 			case 'siafund_claim':
-				return 'Siafund Claim';
+				return this.translate('transactionTypes.siafundClaim');
 			case 'defrag':
-				return 'Defrag';
+				return this.translate('transactionTypes.defrag');
 			default:
-				return txn.tags[0];
+				return this.transaction.tags[0];
 			}
 		}
 	}

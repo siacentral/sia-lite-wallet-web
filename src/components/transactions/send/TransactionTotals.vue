@@ -1,20 +1,20 @@
 <template>
 	<div class="transaction-totals">
 		<template v-if="mode === 'outputs'">
-			<div>Miner Fee</div>
+			<div>{{ translate('minerFee') }}</div>
 			<div class="text-right" v-html="getSiacoin(minerFees)" />
 			<div class="text-right" v-html="getCurrency(minerFees)" />
 		</template>
 		<template v-else>
-			<div>Fees</div>
+			<div>{{ translate('transactionFee') }}</div>
 			<div class="text-right" v-html="getSiacoin(fees)" />
 			<div class="text-right" v-html="getCurrency(fees)" />
 		</template>
 		<div class="divider" />
-		<div>Spent</div>
+		<div>{{ translate('sendSiacoinsModal.spent') }}</div>
 		<div class="text-right" v-html="getSiacoin(spentAmount)" />
 		<div class="text-right" v-html="getCurrency(spentAmount)" />
-		<div>Remaining Balance</div>
+		<div>{{ translate('sendSiacoinsModal.remainingBalance') }}</div>
 		<div class="text-right" v-html="getSiacoin(walletBalance)" />
 		<div class="text-right" v-html="getCurrency(walletBalance)" />
 	</div>
@@ -111,12 +111,12 @@ export default {
 		getSiacoin(value) {
 			const siacoins = formatPriceString(new BigNumber(value), 2);
 
-			return `${siacoins.value} <span class="currency-display">${siacoins.label}</span>`;
+			return `${siacoins.value} <span class="currency-display">${this.translate('currency.sc')}</span>`;
 		},
 		getCurrency(value) {
 			const currency = formatPriceString(new BigNumber(value), 2, this.currency, this.currencies[this.currency]);
 
-			return `${currency.value} <span class="currency-display">${currency.label}</span>`;
+			return `${currency.value} <span class="currency-display">${this.translate(`currency.${currency.label}`)}</span>`;
 		}
 	}
 };

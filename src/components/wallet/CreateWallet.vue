@@ -3,52 +3,39 @@
 		<div class="wallet-step wallet-mode" v-if="step === 'choose'" key="pickMode">
 			<div class="create-wallet-button" @click="onClickWalletType('create')">
 				<div class="button-icon"><icon icon="plus" /></div>
-				<div class="button-title">New Wallet</div>
-				<p>Generates a new wallet seed in the browser. Transactions can be sent and received.</p>
+				<div class="button-title">{{ translate('createWalletModal.newWallet') }}</div>
+				<p>{{ translate('createWalletModal.pNewWalletExplain') }}</p>
 			</div>
 			<div class="create-wallet-button" @click="onClickWalletType('recover')">
 				<div class="button-icon"><icon icon="redo" /></div>
-				<div class="button-title">Recover Wallet</div>
-				<p>Recovers an existing wallet from a {{ seedWordPhrase }} seed. Transactions can be sent and received.</p>
+				<div class="button-title">{{ translate('createWalletModal.recoverWallet') }}</div>
+				<p>{{ translate('createWalletModal.pRecoverWalletExplain', seedWordPhrase) }}</p>
 			</div>
 			<div :class="hardwareBtnClasses" @click="onClickLedger">
 				<div class="button-icon"><icon :icon="['fab', 'usb']" /></div>
-				<div class="button-title">Ledger Wallet</div>
-				<p v-if="ledgerSupported">Creates a new hardware backed wallet. All transactions must be signed by the Ledger device.</p>
-				<p v-else>Ledger support is only available in the Chrome browser. Enable "Experimental Web Platform Features" in Chrome to connect to the Ledger device.</p>
+				<div class="button-title">{{ translate('createWalletModal.ledgerWallet') }}</div>
+				<p v-if="ledgerSupported">{{ translate('createWalletModal.pCreateLedgerExplain') }}</p>
+				<p v-else>{{ translate('createWalletModal.pLedgerUnsupportedExplain') }}</p>
 			</div>
 			<div class="create-wallet-button" @click="onClickWalletType('watch')">
 				<div class="button-icon"><icon icon="eye" /></div>
-				<div class="button-title">Watch-Only Wallet</div>
-				<p>Creates a new watch-only wallet. Addresses must be added manually and transactions cannot be sent.</p>
+				<div class="button-title">{{ translate('createWalletModal.watchWallet') }}</div>
+				<p>{{ translate('createWalletModal.pWatchWalletExplain') }}</p>
 			</div>
 		</div>
 		<build-wallet v-else-if="step === 'create'" :createType="createType" @created="onWalletCreated" />
 		<import-sia-addresses v-else-if="step === 'import'" key="import-sia" :wallet="wallet" @imported="onImportAddresses" />
-		<div class="wallet-step" v-else-if="step === 'review' && walletType === 'ledger'">
-			<p>Your Ledger wallet has been imported. Balance and transactions can now be viewed
-				without the Ledger device. To send transactions you will need to plugin and unlock
-				the device.</p>
-			<div class="controls">
-				<button class="btn btn-success btn-inline" @click="onComplete" :disabled="saving">Done</button>
-			</div>
-		</div>
-		<div class="wallet-step" v-else-if="step === 'review' && walletType === 'watch'" key="review">
-			<p>A new watch-only wallet has been created. This wallet cannot send transactions.
-				Balance and transactions will be shown for all imported addresses.</p>
-			<div class="controls">
-				<button class="btn btn-success btn-inline" @click="onComplete" :disabled="saving">Done</button>
-			</div>
-		</div>
-		<div class="wallet-step" v-else-if="step === 'review'" key="review">
-			<p>A new wallet has been created. Please backup your recovery seed to a safe location.
-				Without your seed your funds cannot be recovered.</p>
-			<div class="control">
-				<label>Recovery Seed</label>
+		<div class="wallet-step" v-else-if="step === 'review'">
+			<p v-if="walletType === 'ledger'">{{ translate('createWalletModal.pReviewLedger') }}</p>
+			<p v-else-if="walletType === 'watch'">{{ translate('createWalletModal.pReviewWatch') }}</p>
+			<p v-else-if="createType === 'recover'">{{ translate('createWalletModal.pReviewRecover') }}</p>
+			<p v-else>{{ translate('createWalletModal.pReviewNew') }}</p>
+			<div class="control" v-if="walletType === 'default'">
+				<label>{{ translate('createWalletModal.lblRecoverySeed') }}</label>
 				<textarea v-model="wallet.seed" readonly/>
 			</div>
 			<div class="controls">
-				<button class="btn btn-success btn-inline" @click="onComplete" :disabled="saving">Done</button>
+				<button class="btn btn-success btn-inline" @click="onComplete" :disabled="saving">{{ translate('done') }}</button>
 			</div>
 		</div>
 	</transition>
@@ -221,7 +208,6 @@ export default {
 	width: 100%;
 	padding: 15px;
 	align-content: safe center;
-	justify-content: center;
 
 	textarea {
 		height: 80px;

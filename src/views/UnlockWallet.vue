@@ -2,16 +2,16 @@
 	<div class="page page-unlock">
 		<div class="page-content">
 			<div class="page-icon"><icon icon="lock" /></div>
-			<h2 class="text-center">Unlock Wallet</h2>
+			<h2 class="text-center">{{ translate('unlockWallet') }}</h2>
 			<p>Your wallets are currently encrypted and locked. Enter your password to unlock your
 				wallets and access your funds.</p>
 			<form @submit.prevent="onUnlockWallets">
 				<div class="control">
-					<label>Wallet Password</label>
+					<label>{{ translate('walletPassword') }}</label>
 					<input type="password" v-model="password" />
 				</div>
 				<div class="buttons">
-					<button class="btn btn-success btn-inline" :disabled="unlocking">Unlock</button>
+					<button class="btn btn-success btn-inline" :disabled="unlocking">{{ translate('unlock') }}</button>
 				</div>
 			</form>
 		</div>

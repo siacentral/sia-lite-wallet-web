@@ -2,8 +2,8 @@
 	<div class="transaction-verify">
 		<h2 class="text-center">Verify Transaction</h2>
 		<div class="summary-type">
-			<button @click="mode = 'summary'" :class="getSummaryClasses('summary')">Summary</button>
-			<button @click="mode = 'outputs'" :class="getSummaryClasses('outputs')">Outputs</button>
+			<button @click="mode = 'summary'" :class="getSummaryClasses('summary')">{{ translate('summary') }}</button>
+			<button @click="mode = 'outputs'" :class="getSummaryClasses('outputs')">{{ translate('outputs') }}</button>
 		</div>
 		<div class="transaction-detail">
 			<transition name="fade-top" mode="out-in" appear>
@@ -27,7 +27,7 @@
 				@signed="onLedgerSigned" />
 			<div v-else-if="sending" :key="status">{{ status }}</div>
 			<div class="buttons" v-else key="send">
-				<button class="btn btn-success btn-inline" :disabled="sending" @click="onVerifyTxn">Send</button>
+				<button class="btn btn-success btn-inline" :disabled="sending" @click="onVerifyTxn">{{ translate('send') }}</button>
 			</div>
 		</transition>
 	</div>
@@ -121,7 +121,7 @@ export default {
 			this.sending = true;
 
 			try {
-				this.status = 'Signing transaction...';
+				this.status = this.translate('sendSiacoinsModal.statusSigning');
 
 				switch (this.wallet.type) {
 				case 'ledger':
@@ -136,7 +136,7 @@ export default {
 					throw new Error('unsupported wallet type');
 				}
 
-				this.status = 'Broadcasting transaction...';
+				this.status = this.translate('sendSiacoinsModal.statusBroadcasting');
 
 				await broadcastTransaction({
 					siacoininputs: this.signed.siacoininputs,
@@ -150,7 +150,7 @@ export default {
 				this.$emit('done');
 				this.pushNotification({
 					icon: 'wallet',
-					message: 'Transaction broadcast successfully'
+					message: this.translate('alerts.transactionBroadcast')
 				});
 			} catch (ex) {
 				console.error('onVerifyTxn', ex);

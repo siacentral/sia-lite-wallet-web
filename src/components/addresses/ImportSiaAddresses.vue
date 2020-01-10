@@ -3,16 +3,16 @@
 		<connect-ledger :connected="connected" @connected="onConnected" v-if="walletType === 'ledger'" />
 		<div class="app-status">
 			<template v-if="walletType === 'ledger'">
-				<div>Status</div>
+				<div>{{ translate('status') }}</div>
 				<div />
 				<div />
-				<div class="text-right">{{ connected ? 'Connected' : 'Not Connected' }} <template v-if="ledgerVersion">{{ ledgerVersion }}</template></div>
+				<div class="text-right">{{ connected ? translate('ledger.connected') : translate('ledger.disconnected') }} <template v-if="ledgerVersion">{{ ledgerVersion }}</template></div>
 			</template>
-			<div>Imported Addresses</div>
+			<div>{{ translate('importAddresses.importedHeader') }}</div>
 			<div />
 			<div />
 			<div class="text-right">{{ formatNumber(this.addresses.length) }}</div>
-			<div>Current Balance</div>
+			<div>{{ translate('importAddresses.balance') }}</div>
 			<div />
 			<div class="text-right" v-html="balanceSC" />
 			<!--<div class="text-right" v-if="siafundBalance.gt(0)" v-html="balanceSF" />-->
@@ -23,7 +23,7 @@
 		</div>
 		<import-address-list v-model="addresses" :wallet="wallet" />
 		<div class="buttons">
-			<button class="btn btn-inline btn-success" @click="onAddAddresses" :disabled="!valid || !ready">Add</button>
+			<button class="btn btn-inline btn-success" @click="onAddAddresses" :disabled="!valid || !ready">{{ translate('add') }}</button>
 		</div>
 	</div>
 </template>
@@ -65,7 +65,7 @@ export default {
 			return this.wallet && typeof this.wallet.type === 'string' ? this.wallet.type : 'watch';
 		},
 		addText() {
-			return this.walletType === 'ledger' ? 'Import Public Key' : 'Add Address';
+			return this.walletType === 'ledger' ? this.translate('importAddresses.publicKey') : this.translate('importAddresses.addAddress');
 		},
 		balanceSC() {
 			let balance = new BigNumber(this.siacoinBalance);

@@ -2,13 +2,13 @@
 	<div>
 		<connect-ledger class="connect-ledger" :connected="connected" @connected="onConnected" />
 		<div class="app-status">
-			<div>Status</div>
+			<div>{{ translate('status') }}</div>
 			<div />
 			<div class="text-right">
 				{{ connected ? 'Connected' : 'Not Connected' }}
 				<template v-if="version">{{ version }}</template>
 			</div>
-			<div>Required Signatures</div>
+			<div>{{ translate('requiredSignatures') }}</div>
 			<div />
 			<div class="text-right">
 				{{ formatNumber(signatures) }} / {{ formatNumber(requiredSignatures.length) }}
@@ -17,7 +17,7 @@
 		<div class="buttons">
 			<button class="btn btn-success btn-inline"
 				:disabled="signing || !connected"
-				@click="onSignTransaction">Sign</button>
+				@click="onSignTransaction">{{ translate('sign') }}</button>
 		</div>
 	</div>
 </template>

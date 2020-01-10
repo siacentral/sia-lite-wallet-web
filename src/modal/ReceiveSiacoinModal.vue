@@ -8,7 +8,7 @@
 				<div class="control">
 					<input :value="currentAddress" readonly />
 				</div>
-				<div class="address-counter">Address {{ currentIndex }}</div>
+				<div class="address-counter">{{ translate('address') }} {{ currentIndex }}</div>
 			</div>
 		</transition>
 	</modal>

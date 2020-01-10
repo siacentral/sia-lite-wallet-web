@@ -4,8 +4,8 @@
 			<tbody>
 				<tr v-for="(address, i) in value" :key="i">
 					<td class="text-right fit-text">{{ formatNumber(value[i].index) }}</td>
-					<td v-if="walletType === 'ledger'"><input v-model="value[i].pubkey" placeholder="Sia address to watch..." readonly /></td>
-					<td v-else><input v-model="value[i].address" placeholder="Sia address to watch..." @input="$emit('change', value)" /></td>
+					<td v-if="walletType === 'ledger'"><input v-model="value[i].pubkey" :placeholder="translate('importAddresses.addressPlaceholder')" readonly /></td>
+					<td v-else><input v-model="value[i].address" :placeholder="translate('importAddresses.addressPlaceholder')" @input="$emit('change', value)" /></td>
 					<td class="fit-text" v-if="value.length > 1 && walletType !== 'ledger'">
 						<button class="delete-btn" @click="$emit('delete', i)">
 							<icon icon="times" />

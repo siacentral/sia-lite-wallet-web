@@ -1,5 +1,5 @@
 <template>
-	<tr :class="transactionClass">
+	<tr :class="transactionClass" @click="$emit('click')">
 		<td class="transaction-type fit-text">{{ displayType }}</td>
 		<td class="transaction-spacer" />
 		<td class="transaction-confirms fit-text"><span>{{ displayConfirmations }}</span></td>
@@ -70,37 +70,37 @@ export default {
 		},
 		displayType() {
 			if (!this.transaction || !Array.isArray(this.transaction.tags))
-				return 'Siacoin Transaction';
+				return this.translate('transactionTypes.siacoinTransaction');
 
 			switch (this.transaction.tags[0]) {
 			case 'contract_revision':
-				return 'Contract Revision';
+				return this.translate('transactionTypes.contractRevision');
 			case 'contract_formation':
-				return 'Contract Formation';
+				return this.translate('transactionTypes.contractFormation');
 			case 'storage_proof':
-				return 'Storage Proof';
+				return this.translate('transactionTypes.storageProof');
 			case 'host_announcements':
-				return 'Host Announcement';
+				return this.translate('transactionTypes.hostAnnouncement');
 			case 'contract_valid_output':
 			case 'contract_missed_output':
-				return 'Contract Completion';
+				return this.translate('transactionTypes.contractCompleted');
 			case 'block_reward':
-				return 'Block Reward';
+				return this.translate('transactionTypes.blockReward');
 			case 'siacoin_transaction':
-				return 'Siacoin Transaction';
+				return this.translate('transactionTypes.siacoinTransaction');
 			case 'siafund_transaction':
-				return 'Siafund Transaction';
+				return this.translate('transactionTypes.siafundTransaction');
 			case 'siafund_claim':
-				return 'Siafund Claim';
+				return this.translate('transactionTypes.siafundClaim');
 			case 'defrag':
-				return 'Defrag';
+				return this.translate('transactionTypes.defrag');
 			default:
 				return this.transaction.tags[0];
 			}
 		},
 		displayConfirmations() {
 			if (this.transaction && this.transaction.confirmations === 0)
-				return 'Unconfirmed';
+				return this.translate('unconfirmed');
 
 			return '';
 		},
@@ -128,9 +128,6 @@ export default {
 
 			return classes;
 		}
-	},
-	methods: {
-
 	}
 };
 </script>

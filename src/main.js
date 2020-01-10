@@ -1,11 +1,11 @@
+import './registerServiceWorker';
+
 import Vue from 'vue';
 import App from './App.vue';
 import router from './router';
 import store from './store';
 import { walletCount } from './store/db';
-import './registerServiceWorker';
-/* eslint-disable import/no-webpack-loader-syntax */
-
+import { translate, languageSupported } from '@/translation';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { faFileExport, faUnlock, faLock, faEllipsisV, faChevronLeft, faChevronRight, faEye, faPencilAlt, faTrash, faPaperPlane, faWallet, faAddressBook, faCogs, faPlus, faTimes, faRedo } from '@fortawesome/free-solid-svg-icons';
 import { faUsb } from '@fortawesome/free-brands-svg-icons';
@@ -21,6 +21,18 @@ document.body.classList.add(process.platform);
 
 Vue.mixin({
 	methods: {
+		translate(id) {
+			let language = store.state.displayLanguage;
+
+			if (store.state.displayLanguage === 'detect') {
+				language = (navigator.language || '').slice(0, 2);
+
+				if (!languageSupported(language))
+					language = 'en';
+			}
+
+			return translate.apply(this, [id, language].concat(Array.from(arguments).slice(1)));
+		},
 		pushNotification(notification) {
 			store.dispatch('pushNotification', notification);
 		},

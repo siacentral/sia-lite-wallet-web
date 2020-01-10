@@ -1,9 +1,9 @@
 <template>
 	<div class="transaction-outputs">
 		<table>
-			<tr class="header" v-if="inputs && inputs.length !== 0"><td colspan="5">Inputs</td></tr>
+			<tr class="header" v-if="inputs && inputs.length !== 0"><td colspan="5">{{ translate('inputs') }}</td></tr>
 			<output-list v-if="inputs && inputs.length !== 0" :outputs="inputs" />
-			<tr class="header" v-if="outputs && outputs.length !== 0"><td colspan="5">Outputs</td></tr>
+			<tr class="header" v-if="outputs && outputs.length !== 0"><td colspan="5">{{ translate('outputs') }}</td></tr>
 			<output-list v-if="outputs && outputs.length !== 0" :outputs="outputs" />
 		</table>
 	</div>
@@ -45,21 +45,21 @@ export default {
 	methods: {
 		getOutputTag(output) {
 			if (output.owned)
-				return 'Received';
+				return this.translate('outputTags.received');
 
 			if (this.feeAddresses.indexOf(output.unlock_hash) !== -1)
-				return 'API Fee';
+				return this.translate('outputTags.apiFee');
 
-			return 'Recipient';
+			return this.translate('outputTags.recipient');
 		},
 		getInputTag(output) {
 			if (output.owned)
-				return 'Sent';
+				return this.translate('outputTags.sent');
 
 			if (this.feeAddresses.indexOf(output.unlock_hash) !== -1)
-				return 'API Fee';
+				return this.translate('outputTags.apiFee');
 
-			return 'Sender';
+			return this.translate('outputTags.sender');
 		}
 	}
 };

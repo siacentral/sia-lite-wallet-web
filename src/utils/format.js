@@ -177,7 +177,7 @@ function formatSiacoinString(val, dec) {
 	if (!val || val.isEqualTo(0)) {
 		return {
 			value: '0',
-			label: 'SC'
+			label: 'sc'
 		};
 	}
 
@@ -187,7 +187,7 @@ function formatSiacoinString(val, dec) {
 			minimumFractionDigits: dec,
 			maximumFractionDigits: 20
 		}).format(roundNumber(val.dividedBy(1e24), dec)),
-		label: 'SC'
+		label: 'sc'
 	};
 };
 
@@ -207,7 +207,7 @@ function formatCryptoString(val, dec, currency, rate) {
 			minimumFractionDigits: dec,
 			maximumFractionDigits: 20
 		}).format(roundNumber(val.dividedBy(1e24).times(rate), dec)),
-		label: currency.toUpperCase()
+		label: currency.toLowerCase()
 	};
 }
 
@@ -223,7 +223,7 @@ function formatCurrencyString(val, currency, rate) {
 
 	return {
 		value: formatter.format(roundNumber(val.dividedBy(1e24).times(rate), 2)),
-		label: currency.toUpperCase()
+		label: currency.toLowerCase()
 	};
 };
 
@@ -279,7 +279,7 @@ export function formatSiafundString(val) {
 	if (!val || val.isEqualTo(0)) {
 		return {
 			value: '0',
-			label: 'SF'
+			label: 'sf'
 		};
 	}
 
@@ -289,7 +289,7 @@ export function formatSiafundString(val) {
 			minimumFractionDigits: 0,
 			maximumFractionDigits: 0
 		}).format(val),
-		label: 'SF'
+		label: 'sf'
 	};
 };
 

@@ -1,8 +1,8 @@
 <template>
 	<div class="connect-ledger">
 		<div class="step-icon"><icon :icon="['fab', 'usb']" /></div>
-		<div class="title">Unlock your Ledger device and open the Sia App</div>
-		<button class="btn btn-inline btn-success" @click="onConnect" :disabled="connected">Connect</button>
+		<div class="title">{{ translate('ledger.instructions') }}</div>
+		<button class="btn btn-inline btn-success" @click="onConnect" :disabled="connected">{{ translate('connect') }}</button>
 	</div>
 </template>
 

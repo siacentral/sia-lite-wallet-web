@@ -4,10 +4,10 @@
 			<div class="wallet-title">{{ name }}
 				<transition name="fade" mode="out-in">
 					<div class="wallet-scanning" v-if="wallet.scanning === 'full'" key="scanning">
-						<icon icon="redo" /> Scanning...
+						<icon icon="redo" /> {{ translate('walletStatus.scanning') }}
 					</div>
 					<div class="wallet-scanning" v-else-if="walletQueued" key="queued">
-						<icon icon="redo" /> Scan Queued...
+						<icon icon="redo" /> {{ translate('walletStatus.queued') }}
 					</div>
 				</transition>
 			</div>
@@ -16,23 +16,23 @@
 			<div class="wallet-display-balance" v-html="formatCurrencyString(siacoinBalance)"></div>
 			<div class="wallet-button-wrapper">
 				<div class="wallet-buttons">
-					<button class="btn wallet-btn" @click="modal='send'" v-if="wallet.type !== 'watch'">Send</button>
-					<button class="btn wallet-btn" @click="modal='receive'">Receive</button>
+					<button class="btn wallet-btn" @click="modal='send'" v-if="wallet.type !== 'watch'">{{ translate('send') }}</button>
+					<button class="btn wallet-btn" @click="modal='receive'">{{ translate('receive') }}</button>
 					<div class="wallet-more-btn">
 						<button class="more-btn" @click="showMore = !showMore"><icon icon="ellipsis-v" /></button>
 						<transition name="fade-top" mode="out-in">
 							<div class="dropdown" v-if="showMore">
 								<button class="dropdown-item" @click="onQueueWallet"
 									:disabled="walletQueued">
-									<icon icon="redo" />Rescan Wallet</button>
+									<icon icon="redo" />{{ translate('rescanWallet') }}</button>
 								<button class="dropdown-item"
 									v-if="wallet.type === 'watch' || wallet.type === 'ledger'"
 									@click="onDropdownModal('add')">
-									<icon icon="plus" />Add Addresses</button>
+									<icon icon="plus" />{{ translate('addAddresses') }}</button>
 								<button class="dropdown-item" @click="onExportSeed" v-if="wallet.type === 'default'">
-									<icon icon="file-export" />Export Seed</button>
+									<icon icon="file-export" />{{ translate('exportSeed') }}</button>
 								<button class="dropdown-item" @click="onDropdownModal('delete')">
-									<icon icon="trash" />Delete Wallet</button>
+									<icon icon="trash" />{{ translate('deleteWallet') }}</button>
 							</div>
 						</transition>
 					</div>
@@ -58,9 +58,7 @@
 				:title="deleteTitle"
 				:buttons="deleteButtons"
 				@close="modal = null" @selected="onDeleteWallet">
-				<p>Are you sure you want to delete the wallet named "{{ name }}"? This will remove all data
-					associated with this wallet from your device. Please make sure you have the
-					recovery seed backed up.</p>
+				<p>{{ translate('deleteWalletModal.pDeleteConfirm', name) }}</p>
 			</confirm-modal>
 			<send-siacoin-modal v-else-if="modal === 'send'" :wallet="wallet" @close="modal = null" />
 			<receive-siacoin-modal v-else-if="modal === 'receive'" :wallet="wallet" @close="modal = null" />
@@ -79,7 +77,7 @@ import ConfirmModal from '@/modal/ConfirmModal';
 import ReceiveSiacoinModal from '@/modal/ReceiveSiacoinModal';
 import SendSiacoinModal from '@/modal/SendSiacoinModal';
 import TransactionDetailModal from '@/modal/TransactionDetailModal';
-import TransactionListItem from '@/components/wallet/TransactionListItem';
+import TransactionListItem from '@/components/transactions/TransactionListItem';
 
 export default {
 	components: {
@@ -185,16 +183,16 @@ export default {
 		deleteButtons() {
 			return [
 				{
-					text: 'Delete',
+					text: this.translate('delete'),
 					type: 'danger'
 				},
 				{
-					text: 'Cancel'
+					text: this.translate('cancel')
 				}
 			];
 		},
 		deleteTitle() {
-			return `Delete "${this.name}"?`;
+			return this.translate('deleteWalletModal.deleteHeader', this.name);
 		}
 	},
 	methods: {
@@ -220,7 +218,7 @@ export default {
 
 				this.pushNotification({
 					icon: 'redo',
-					message: 'Wallet has been queued for rescan'
+					message: this.translate('alerts.rescanWallet')
 				});
 			} catch (ex) {
 				this.pushNotification({

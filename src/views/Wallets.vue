@@ -10,16 +10,13 @@
 					@click.native="onSelectWallet(i)"/>
 			</div>
 			<div class="wallet-buttons">
-				<button class="btn wallet-btn" @click="walletModal = 'addWallet'"><icon icon="plus" /> Add Wallet</button>
+				<button class="btn wallet-btn" @click="walletModal = 'addWallet'"><icon icon="plus" /> {{ translate('addWallet') }}</button>
 			</div>
 		</div>
 		<div class="wallets-detail">
 			<transition name="fade-top" mode="out-in">
 				<wallet-display v-if="currentWallet" :wallet="currentWallet"
 					:key="currentWallet.id" @deleted="onDeleted" />
-				<div v-else>
-					No wallets found :(
-				</div>
 			</transition>
 		</div>
 		<transition name="fade" mode="out-in" appear>
@@ -48,6 +45,9 @@ export default {
 		currentWallet() {
 			if (!Array.isArray(this.wallets) || this.wallets.length < this.selectedWallet)
 				return null;
+
+			if (!this.wallets[this.selectedWallet])
+				return this.wallets[0];
 
 			return this.wallets[this.selectedWallet];
 		}

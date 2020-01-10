@@ -27,6 +27,7 @@ const store = new Vuex.Store({
 		changeSeedType: localStorage.getItem('changeSeedType') === 'true',
 		minScanRounds: getLocalStorageNumeric('minScanRounds', 25),
 		addressesPerRound: getLocalStorageNumeric('addressesPerRound', 1000),
+		displayLanguage: localStorage.getItem('displayLanguage') || 'detect',
 		password: null,
 		wallets: [],
 		notifications: [],
@@ -52,6 +53,9 @@ const store = new Vuex.Store({
 		},
 		setPassword(state, password) {
 			state.password = password;
+		},
+		setDisplayLanguage(state, language) {
+			state.displayLanguage = language;
 		},
 		setChangeSeedType(state, enabled) {
 			state.changeSeedType = enabled;
@@ -126,6 +130,10 @@ const store = new Vuex.Store({
 		},
 		setPassword({ commit }, password) {
 			commit('setPassword', password);
+		},
+		setDisplayLanguage({ commit }, language) {
+			localStorage.setItem('dislayLanguage', language);
+			commit('setDisplayLanguage', language);
 		},
 		setChangeSeedType({ commit }, enabled) {
 			localStorage.setItem('changeSeedType', enabled.toString());

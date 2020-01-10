@@ -4,21 +4,21 @@
 			<identicon :value="recipientAddress" />
 		</div>
 		<div class="control">
-			<label>Recipient Address</label>
-			<input type="text" v-model="recipientAddress" placeholder="Send Siacoin to..." />
+			<label>{{ translate('sendSiacoinsModal.recipientAddress') }}</label>
+			<input type="text" v-model="recipientAddress" :placeholder="translate('sendSiacoinsModal.txtRecipientPlaceholder')" />
 		</div>
-		<label>Amount</label>
+		<label>{{ translate('amount') }}</label>
 		<div class="currency-control">
 			<input ref="txtSiacoin" type="text" value="0 SC" @input="onChangeSiacoin" @blur="onFormatValues" />
-			<label>SC</label>
+			<label>{{ translate('currency.sc') }}</label>
 			<input ref="txtCurrency" type="text" value="$0.00" @input="onChangeCurrency" @blur="onFormatValues" />
-			<label>{{ currency }}</label>
+			<label>{{ translate(`currency.${currency}`) }}</label>
 		</div>
 		<div class="extras-info">
-			<div>Transaction Fee</div>
+			<div>{{ translate('transactionFee') }}</div>
 			<div class="text-right" v-html="transactionFeeSC" />
 			<div class="text-right" v-html="transactionFeeCurrency" />
-			<div>Spendable Balance</div>
+			<div>{{ translate('sendSiacoinsModal.spendableBalance') }}</div>
 			<div class="text-right" v-html="remainingBalanceSC" />
 			<div class="text-right" v-html="remainingBalanceCurrency" />
 		</div>
@@ -29,7 +29,7 @@
 			</transition>
 		</div>
 		<div class="buttons">
-			<button class="btn btn-success btn-inline" :disabled="transactionError || sending" @click="onSendTxn">Send</button>
+			<button class="btn btn-success btn-inline" :disabled="transactionError || sending" @click="onSendTxn">{{ translate('send') }}</button>
 		</div>
 	</div>
 </template>
@@ -91,12 +91,12 @@ export default {
 		transactionFeeSC() {
 			const siacoins = formatPriceString(this.fees, 2);
 
-			return `${siacoins.value} <span class="currency-display">${siacoins.label}</span>`;
+			return `${siacoins.value} <span class="currency-display">${this.translate('currency.sc')}</span>`;
 		},
 		transactionFeeCurrency() {
 			const currency = formatPriceString(this.fees, 2, this.currency, this.currencies[this.currency]);
 
-			return `${currency.value} <span class="currency-display">${currency.label}</span>`;
+			return `${currency.value} <span class="currency-display">${this.translate(`currency.${currency.label}`)}</span>`;
 		},
 		calculatedAmount() {
 			let amount = this.sendAmount;
@@ -120,16 +120,16 @@ export default {
 		},
 		transactionError() {
 			if (this.sendAmount.lte(0))
-				return 'Must send more than 0 SC';
+				return this.translate('sendSiacoinsModal.errorGreaterThan0');
 
 			if (this.sendAmount.plus(this.fees).gt(this.walletBalance))
-				return 'Send amount more than balance';
+				return this.translate('sendSiacoinsModal.errorNotEnough');
 
 			if (this.sendAmount.lt(this.fees))
-				return 'Amount sent is less than transaction fees';
+				return this.translate('sendSiacoinsModal.errorHighFee');
 
 			if (!verifyAddress(this.recipientAddress))
-				return 'Invalid recipient address';
+				return this.translate('sendSiacoinsModal.errorBadRecipient');
 
 			return null;
 		},

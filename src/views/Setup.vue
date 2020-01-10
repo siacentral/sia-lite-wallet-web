@@ -5,23 +5,14 @@
 				<div class="setup-icon">
 					<sia-central />
 				</div>
-				<h2>Welcome to Sia Lite Wallet</h2>
+				<h2>{{ translate('setup.welcomeHeader') }}</h2>
 				<div class="setup-content">
-					<p>Thank you for trying out Sia Lite Wallet by Sia Central. This wallet is
-						currently under development. If you find run into any
-						issues or would like to submit feedback please create an issue on
-						<a href="https://github.com/siacentral/sia-lite" target="_blank">GitHub</a>.
-						</p>
-					<p>This wallet is completely secure. All wallet seeds are encrypted, stored locally
-						and never leave the device. They cannot be viewed by anyone without access
-						to the device and the unlock password.</p>
-					<p>Please use caution when sending or receiving Siacoins to prevent coin loss.
-						Sia Central is not responsible for any damages incurred while using this
-						wallet.</p>
-					<p>This wallet is unofficial and is not associated with NebulousLabs or the core
-						Sia team.</p>
+					<p>{{ translate('setup.welcome1') }}</p>
+					<p>{{ translate('setup.welcome2') }}</p>
+					<p>{{ translate('setup.welcome3') }}</p>
+					<p>{{ translate('setup.welcome4') }}</p>
 					<div class="buttons">
-						<button class="btn btn-success btn-inline" @click="step = 1">Get Started</button>
+						<button class="btn btn-success btn-inline" @click="step = 1">{{ translate('btnGetStarted') }}</button>
 					</div>
 				</div>
 			</div>
@@ -29,19 +20,16 @@
 				<div class="setup-icon">
 					<sia-central />
 				</div>
-				<h2>Set a Password</h2>
+				<h2>{{ translate('setup.passwordHeader') }}</h2>
 				<div class="setup-content">
-					<p>Please set a secure password to encrypt your wallets with. This password will
-						be required to unlock and use your wallets.</p>
-					<p>All wallet seeds are encrypted, stored locally and never leave the device.
-						They cannot be viewed by anyone without access to the device and the
-						unlock password.</p>
+					<p>{{ translate('setup.password1') }}</p>
+					<p>{{ translate('setup.password2') }}</p>
 					<div class="control">
-						<label>Unlock Password</label>
+						<label>{{ translate('setup.lblPassword') }}</label>
 						<input type="password" v-model="unlockPassword" />
 					</div>
 					<div class="buttons">
-						<button class="btn btn-success btn-inline" @click="onSetPassword" :disabled="unlockPassword.length === 0">Next</button>
+						<button class="btn btn-success btn-inline" @click="onSetPassword" :disabled="unlockPassword.length === 0">{{ translate('next') }}</button>
 					</div>
 				</div>
 			</div>
