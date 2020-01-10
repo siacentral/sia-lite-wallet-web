@@ -11,9 +11,6 @@
 					<router-link :to="{ name: 'wallets' }" class="menu-item">
 						<icon icon="wallet" /> Wallet
 					</router-link>
-					<router-link :to="{ name: 'address-book' }" class="menu-item">
-						<icon icon="address-book" /> Address Book
-					</router-link>
 				</div>
 				<div class="lower">
 					<router-link :to="{ name: 'settings' }" class="menu-item">
@@ -43,7 +40,9 @@ export default {
 
 <style lang="stylus" scoped>
 .mobile-nav-wrapper {
+	position: fixed;
 	display: block;
+	z-index: 999;
 
 	@media screen and (min-width: 767px) {
 		display: none;
