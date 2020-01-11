@@ -12,7 +12,7 @@
 					<p>{{ translate('setup.welcome3') }}</p>
 					<p>{{ translate('setup.welcome4') }}</p>
 					<div class="buttons">
-						<button class="btn btn-success btn-inline" @click="step = 1">{{ translate('btnGetStarted') }}</button>
+						<button class="btn btn-success btn-inline" @click="step = 1">{{ translate('getStarted') }}</button>
 					</div>
 				</div>
 			</div>

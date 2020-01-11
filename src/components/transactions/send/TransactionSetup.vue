@@ -110,13 +110,13 @@ export default {
 			const rem = this.walletBalance.minus(this.calculatedAmount).minus(this.fees),
 				siacoins = formatPriceString(rem, 2);
 
-			return `${siacoins.value} <span class="currency-display">${siacoins.label}</span>`;
+			return `${siacoins.value} <span class="currency-display">${this.translate('currency.sc')}</span>`;
 		},
 		remainingBalanceCurrency() {
 			const rem = this.walletBalance.minus(this.calculatedAmount).minus(this.fees),
 				currency = formatPriceString(rem, 2, this.currency, this.currencies[this.currency]);
 
-			return `${currency.value} <span class="currency-display">${currency.label}</span>`;
+			return `${currency.value} <span class="currency-display">${this.translate(`currency.${currency.label}`)}</span>`;
 		},
 		transactionError() {
 			if (this.sendAmount.lte(0))
