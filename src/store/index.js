@@ -132,7 +132,7 @@ const store = new Vuex.Store({
 			commit('setPassword', password);
 		},
 		setDisplayLanguage({ commit }, language) {
-			localStorage.setItem('dislayLanguage', language);
+			localStorage.setItem('displayLanguage', language);
 			commit('setDisplayLanguage', language);
 		},
 		setChangeSeedType({ commit }, enabled) {
