@@ -159,10 +159,10 @@ export default {
 			rub: '卢布',
 			cny: '人民币',
 			btc: '比特币',
-			bch: 'BCH',
-			eth: 'ETH',
-			xrp: 'XRP',
-			ltc: 'LTC'
+			bch: '比特币现金',
+			eth: '以太币',
+			xrp: '瑞波币',
+			ltc: '莱特币'
 		},
 		alerts: {
 			welcomeBack: 'Wallets decrypted. Welcome back!',
