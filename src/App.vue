@@ -60,7 +60,7 @@ export default {
 
 				this.lockWallets();
 				this.pushNotification({
-					message: 'Wallets automatically locked due to inactivity'
+					message: this.translate('alerts.walletsLocked')
 				});
 			}, lockms);
 		}

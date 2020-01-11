@@ -170,7 +170,8 @@ export default {
 			unlockSuccess: 'Wallets decrypted. Welcome back!',
 			rescanWallet: 'Wallet has been queued for rescan',
 			transactionBroadcast: 'Transaction broadcast successfully',
-			addressesAdded: 'Addresses added. Wallet scan queued.'
+			addressesAdded: 'Addresses added. Wallet scan queued.',
+			walletsLocked: 'Wallets automatically locked due to inactivity'
 		},
 		language: {
 			automatic: 'Automatic',

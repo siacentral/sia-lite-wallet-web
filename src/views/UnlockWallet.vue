@@ -39,13 +39,13 @@ export default {
 				await this.unlockWallets(this.password);
 				this.pushNotification({
 					icon: 'unlock',
-					message: 'Wallets decrypted. Welcome back!'
+					message: this.translate('alerts.unlockSuccess')
 				});
 			} catch (ex) {
 				this.pushNotification({
 					severity: 'danger',
 					icon: 'lock',
-					message: 'Unable to decrypt wallets. Incorrect password'
+					message: this.translate('alerts.unlockError')
 				});
 				console.error('onUnlockWallets', ex);
 			} finally {
