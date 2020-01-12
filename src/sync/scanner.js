@@ -4,8 +4,7 @@ import defaultScanner from './default';
 import Store from '@/store';
 import Wallet from '@/types/wallet';
 
-const fullTimeouts = {},
-	quickTimeouts = {};
+const rescanTimeouts = {};
 
 let scanning = false;
 
@@ -71,19 +70,11 @@ export async function scanWallet(walletID, full) {
 		console.error('scanTransactions', wallet.id, ex);
 	}
 
-	clearTimeout(quickTimeouts[wallet.id]);
+	clearTimeout(rescanTimeouts[wallet.id]);
 
-	quickTimeouts[wallet.id] = setTimeout(() => {
+	rescanTimeouts[wallet.id] = setTimeout(() => {
 		Store.dispatch('queueWallet', { walletID: wallet.id, full: false });
-	}, 300000);
-
-	if (full) {
-		clearTimeout(fullTimeouts[wallet.id]);
-
-		fullTimeouts[wallet.id] = setTimeout(() => {
-			Store.dispatch('queueWallet', { walletID: wallet.id, full: true });
-		}, 1.8e+6);
-	}
+	}, 120000);
 }
 
 export async function scanTransactions(wallet) {
