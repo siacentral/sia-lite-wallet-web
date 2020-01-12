@@ -11,13 +11,21 @@
 				<option value="walrus">{{ translate('createWalletModal.walrusSeed') }}</option>
 			</select>
 		</div>
-		<div class="control" v-if="createType === 'recover'">
-			<label>{{ translate('createWalletModal.lblRecoverySeed') }}</label>
-			<textarea v-model="recoverySeed" />
-		</div>
+		<template v-if="createType === 'recover'">
+			<div class="buttons text-right">
+				<button class="btn btn-inline" @click="importSeed = true">Import</button>
+			</div>
+			<div class="control">
+				<label>{{ translate('createWalletModal.lblRecoverySeed') }}</label>
+				<textarea v-model="recoverySeed" />
+			</div>
+		</template>
 		<div class="buttons">
 			<button class="btn btn-success btn-inline" @click="onCreateWallet" :disabled="creating">{{ buttonText }}</button>
 		</div>
+		<transition name="fade" mode="out-in" appear>
+			<import-seed-modal v-if="importSeed" @close="importSeed = false" @import="onImportSeed" />
+		</transition>
 	</div>
 </template>
 
@@ -27,7 +35,12 @@ import { generateSeed, generateAddresses } from '@/utils/sia';
 import { randomBytes } from 'tweetnacl';
 import { encode } from '@stablelib/base64';
 
+import ImportSeedModal from '@/modal/ImportSeedModal';
+
 export default {
+	components: {
+		ImportSeedModal
+	},
 	props: {
 		createType: String
 	},
@@ -57,12 +70,21 @@ export default {
 	data() {
 		return {
 			creating: false,
+			importSeed: false,
 			walletName: '',
 			recoverySeed: '',
 			seedType: 'sia'
 		};
 	},
 	methods: {
+		onImportSeed(seed) {
+			try {
+				this.recoverySeed = seed;
+				this.importSeed = false;
+			} catch (ex) {
+				console.error('onImportSeed', ex);
+			}
+		},
 		async generateWalletSeed() {
 			switch (this.createType) {
 			case 'ledger':
