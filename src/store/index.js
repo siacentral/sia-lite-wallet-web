@@ -129,6 +129,8 @@ const store = new Vuex.Store({
 			commit('setSetup', setup);
 		},
 		setPassword({ commit }, password) {
+			password = hash(encodeUTF8(password));
+
 			commit('setPassword', password);
 		},
 		setDisplayLanguage({ commit }, language) {
@@ -159,13 +161,14 @@ const store = new Vuex.Store({
 			commit('setAutoLock', lockMin);
 		},
 		async unlockWallets({ commit, dispatch }, password) {
+			password = hash(encodeUTF8(password));
+
 			const wallets = await loadWallets(password);
 
 			commit('setWallets', wallets);
 			commit('setPassword', password);
 
 			wallets.forEach(w => dispatch('queueWallet', { walletID: w.id, full: false }));
-			wallets.forEach(w => dispatch('queueWallet', { walletID: w.id, full: true }));
 		},
 		async lockWallets({ commit }) {
 			commit('lockWallets');

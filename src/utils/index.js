@@ -1,21 +1,3 @@
-import { encode as encodeUTF8 } from '@stablelib/utf8';
-
-export async function pbkdf2(password, salt, iterations = 1e6) {
-	if (!salt)
-		salt = crypto.getRandomValues(new Uint8Array(16));
-
-	const buf = encodeUTF8(password),
-		key = await crypto.subtle.importKey('raw', buf, 'PBKDF2', false, ['deriveBits']),
-		keyBuf = new Uint8Array(await crypto.subtle.deriveBits({
-			name: 'PBKDF2',
-			hash: 'SHA-256',
-			salt,
-			iterations
-		}, key, 256));
-
-	return { salt, hash: keyBuf };
-}
-
 export function getLastItems(arr, n) {
 	const len = arr.length,
 		min = Math.min(len, n),

@@ -1,10 +1,10 @@
 import Dexie from 'dexie';
 
-import { hash, randomBytes, secretbox } from 'tweetnacl';
-import { encode as encodeB64, decode as decodeB64 } from '@stablelib/base64';
-import { encode as encodeUTF8, decode as decodeUTF8 } from '@stablelib/utf8';
+import { hash } from 'tweetnacl';
+import { encrypt, decrypt, pbkdf2 } from '@/utils/crypto';
+import { encode as encodeB64 } from '@stablelib/base64';
+import { encode as encodeUTF8 } from '@stablelib/utf8';
 import BigNumber from 'bignumber.js';
-import { pbkdf2 } from '@/utils';
 
 const db = new Dexie('sia-lite');
 
@@ -12,30 +12,6 @@ db.version(1).stores({
 	wallets: 'id',
 	addresses: '[address+wallet_id],wallet_id,index'
 });
-
-function encrypt(str, key) {
-	const nonce = randomBytes(secretbox.nonceLength),
-		msg = encodeUTF8(str),
-		box = secretbox(msg, nonce, key),
-		full = new Uint8Array(nonce.length + box.length);
-
-	full.set(nonce);
-	full.set(box, nonce.length);
-
-	return encodeB64(full);
-}
-
-function decrypt(encrypted, key) {
-	const buf = decodeB64(encrypted),
-		nonce = buf.slice(0, secretbox.nonceLength),
-		msg = buf.slice(secretbox.nonceLength),
-		decrypted = secretbox.open(msg, nonce, key);
-
-	if (!decrypted)
-		throw new Error('failed to decrypt');
-
-	return decodeUTF8(decrypted);
-}
 
 export async function saveWallet(wallet, password) {
 	if (!wallet || !wallet.seed || wallet.seed.length === 0)
@@ -82,6 +58,28 @@ async function unlockWallet(wallet, password) {
 		...wallet,
 		seed: decrypt(wallet.seed, key.hash)
 	};
+}
+
+// temporary function to migrate wallet seeds encrypted with p to encrypted with h(p)
+export async function migrateWallets(password) {
+	let wallets, promises = [];
+
+	try {
+		wallets = await loadWallets(encodeUTF8(password));
+	} catch (ex) {
+		// error indicates the seed is not encrypted with p
+		return;
+	}
+
+	console.debug('migrating seed encryption');
+
+	// renecrypt each wallet with h(p)
+	for (let i = 0; i < wallets.length; i++)
+		promises.push(saveWallet(wallets[i], hash(encodeUTF8(password))));
+
+	await Promise.all(promises);
+
+	console.debug(`${promises.length} seeds migrated`);
 }
 
 export async function loadWallets(password) {

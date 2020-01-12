@@ -19,6 +19,7 @@
 
 <script>
 import { mapActions } from 'vuex';
+import { migrateWallets } from '@/store/db';
 
 export default {
 	data() {
@@ -36,6 +37,8 @@ export default {
 			this.unlocking = true;
 
 			try {
+				// temporary code to migrate seeds encrypted with p to encrypted with h(p)
+				await migrateWallets(this.password);
 				await this.unlockWallets(this.password);
 				this.pushNotification({
 					icon: 'unlock',
