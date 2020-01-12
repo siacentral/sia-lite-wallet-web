@@ -1,5 +1,5 @@
-# Sia Lite
-Sia Lite is a secure lite wallet implementation for web, desktop, and mobile. This wallet lets users send and receive Siacoin without syncing the blockchain.
+# Sia Central Lite Wallet
+Sia Central Lite Wallet is a secure lite wallet implementation for web, desktop, and mobile. This wallet lets users send and receive Siacoin without syncing the blockchain.
 
 ## How it works
 This wallet makes use of the Sia Central v2 API to retrieve balance and transaction data from the Sia blockchain. All transaction generation and signing happens locally on the device the signed transaction is then broadcast to the network.
