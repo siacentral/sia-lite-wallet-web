@@ -6,8 +6,7 @@ export async function pbkdf2(password, salt, iterations = 1e6) {
 	if (!salt)
 		salt = crypto.getRandomValues(new Uint8Array(16));
 
-	const buf = password,
-		key = await crypto.subtle.importKey('raw', buf, 'PBKDF2', false, ['deriveBits']),
+	const key = await crypto.subtle.importKey('raw', password, 'PBKDF2', false, ['deriveBits']),
 		keyBuf = new Uint8Array(await crypto.subtle.deriveBits({
 			name: 'PBKDF2',
 			hash: 'SHA-256',

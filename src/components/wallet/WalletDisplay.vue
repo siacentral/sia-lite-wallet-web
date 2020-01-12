@@ -29,7 +29,7 @@
 									v-if="wallet.type === 'watch' || wallet.type === 'ledger'"
 									@click="onDropdownModal('add')">
 									<icon icon="plus" />{{ translate('addAddresses') }}</button>
-								<button class="dropdown-item" @click="onExportSeed" v-if="wallet.type === 'default'">
+								<button class="dropdown-item" @click="onDropdownModal('export')" v-if="wallet.type === 'default'">
 									<icon icon="file-export" />{{ translate('exportSeed') }}</button>
 								<button class="dropdown-item" @click="onDropdownModal('delete')">
 									<icon icon="trash" />{{ translate('deleteWallet') }}</button>
@@ -63,6 +63,7 @@
 			<send-siacoin-modal v-else-if="modal === 'send'" :wallet="wallet" @close="modal = null" />
 			<receive-siacoin-modal v-else-if="modal === 'receive'" :wallet="wallet" @close="modal = null" />
 			<transaction-detail-modal v-else-if="modal === 'transaction'" :transaction="walletTransactions[selectedTransaction]" @close="modal = null" />
+			<export-seed-modal v-else-if="modal === 'export'" :wallet="wallet" @close="modal = null" />
 		</transition>
 	</div>
 </template>
@@ -74,6 +75,7 @@ import { formatPriceString, formatSiafundString } from '@/utils/format';
 
 import AddAddressesModal from '@/modal/AddAddressesModal';
 import ConfirmModal from '@/modal/ConfirmModal';
+import ExportSeedModal from '@/modal/ExportSeedModal';
 import ReceiveSiacoinModal from '@/modal/ReceiveSiacoinModal';
 import SendSiacoinModal from '@/modal/SendSiacoinModal';
 import TransactionDetailModal from '@/modal/TransactionDetailModal';
@@ -83,6 +85,7 @@ export default {
 	components: {
 		AddAddressesModal,
 		ConfirmModal,
+		ExportSeedModal,
 		ReceiveSiacoinModal,
 		SendSiacoinModal,
 		TransactionDetailModal,
@@ -240,29 +243,6 @@ export default {
 					message: ex.message
 				});
 				console.error('onDropdownModal', ex);
-			} finally {
-				this.showMore = false;
-			}
-		},
-		onExportSeed() {
-			try {
-				const link = document.createElement('a');
-
-				link.style.display = 'none';
-
-				link.setAttribute('href',
-					`data:text/plan;charset=utf-8,${encodeURIComponent(this.wallet.seed)}`);
-				link.setAttribute('download', `${this.name.toLowerCase()}.siaseed`);
-				document.body.appendChild(link);
-				link.click();
-				document.body.removeChild(link);
-			} catch (ex) {
-				console.error('onExportSeed', ex);
-				this.pushNotification({
-					severity: 'danger',
-					icon: 'file-export',
-					message: ex.message
-				});
 			} finally {
 				this.showMore = false;
 			}
