@@ -11,16 +11,29 @@ jobs:
       - name: Checkout
         uses: actions/checkout@master
 
-      - name: Set Node.js 10.x
+      - name: Setup Node.js 10.x
         uses: actions/setup-node@master
         with:
           version: 10.x
 
-      - name: Install Deps
+      - name: Setup Go 1.13.x
+        uses: actions/setup-go@v1
+        with:
+          go-version: 1.13.x
+
+      - name: Install Node Dependencies
         run: npm install
+
+      - name: Install Go Dependencies
+        working-directory: ./wasm
+        run: GOARCH=wasm GOOS=js go get
+
+      - name: Build ./wasm
+        working-directory: ./wasm
+        run: GOARCH=wasm GOOS=js go build -o ../public/sia/sia.wasm main.go
 
       - name: Lint
         run: npm run lint
 
-      - name: Build
+      - name: Build Web
         run: npm run build
