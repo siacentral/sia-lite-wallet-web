@@ -56,7 +56,7 @@ export default {
 		transaction: Object
 	},
 	computed: {
-		...mapState(['currency', 'currencies', 'networkFees']),
+		...mapState(['currency', 'exchangeRateSC', 'networkFees']),
 		siaTransaction() {
 			return {
 				minerfees: this.transaction.miner_fees,

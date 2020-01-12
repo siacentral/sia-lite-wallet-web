@@ -61,7 +61,7 @@ export default {
 		transaction: Object
 	},
 	computed: {
-		...mapState(['currency', 'currencies', 'feeAddresses']),
+		...mapState(['currency', 'exchangeRateSC', 'feeAddresses']),
 		apiFees() {
 			if (!this.transaction || !Array.isArray(this.transaction.siacoin_outputs))
 				return new BigNumber(0);
@@ -85,7 +85,7 @@ export default {
 			return `${siacoins.value} <span class="currency-display">${this.translate('currency.sc')}</span>`;
 		},
 		currencyDisplay(value) {
-			const currency = formatPriceString(new BigNumber(value), 2, this.currency, this.currencies[this.currency]);
+			const currency = formatPriceString(new BigNumber(value), 2, this.currency, this.exchangeRateSC[this.currency]);
 
 			return `${currency.value} <span class="currency-display">${this.translate(`currency.${currency.label}`)}</span>`;
 		},

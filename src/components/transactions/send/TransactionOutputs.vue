@@ -46,7 +46,7 @@ export default {
 		wallet: Object
 	},
 	computed: {
-		...mapState(['currency', 'currencies', 'networkFees']),
+		...mapState(['currency', 'exchangeRateSC', 'networkFees']),
 		outputs() {
 			if (!this.transaction || !Array.isArray(this.transaction.siacoin_outputs))
 				return [];
@@ -67,7 +67,7 @@ export default {
 			return `${siacoins.value} <span class="currency-display">${siacoins.label}</span>`;
 		},
 		getOutputCurrency(recipient) {
-			const currency = formatPriceString(new BigNumber(recipient.value), 2, this.currency, this.currencies[this.currency]);
+			const currency = formatPriceString(new BigNumber(recipient.value), 2, this.currency, this.exchangeRateSC[this.currency]);
 
 			return `${currency.value} <span class="currency-display">${currency.label}</span>`;
 		}

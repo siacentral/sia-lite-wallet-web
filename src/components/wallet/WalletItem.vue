@@ -17,7 +17,7 @@ export default {
 		active: Boolean
 	},
 	computed: {
-		...mapState(['currency', 'currencies']),
+		...mapState(['currency', 'exchangeRateSC']),
 		walletBalance() {
 			let value = new BigNumber(0);
 
@@ -45,7 +45,7 @@ export default {
 			return `${siacoins.value} <span class="currency-display">${siacoins.label}</span>`;
 		},
 		displayCurrency() {
-			const currency = formatPriceString(new BigNumber(this.walletBalance), 2, this.currency, this.currencies[this.currency]);
+			const currency = formatPriceString(new BigNumber(this.walletBalance), 2, this.currency, this.exchangeRateSC[this.currency]);
 
 			return `${currency.value} <span class="currency-display">${currency.label}</span>`;
 		}

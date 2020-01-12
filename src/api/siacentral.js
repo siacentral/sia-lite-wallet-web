@@ -21,7 +21,7 @@ export async function getCoinPrice() {
 	if (resp.body.type !== 'success')
 		throw new Error(resp.body.message);
 
-	return resp.body.price;
+	return resp.body;
 }
 
 export async function getNetworkFees() {

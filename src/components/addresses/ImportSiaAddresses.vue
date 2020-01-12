@@ -60,7 +60,7 @@ export default {
 		};
 	},
 	computed: {
-		...mapState(['currency', 'currencies']),
+		...mapState(['currency', 'exchangeRateSC']),
 		walletType() {
 			return this.wallet && typeof this.wallet.type === 'string' ? this.wallet.type : 'watch';
 		},
@@ -83,7 +83,7 @@ export default {
 			if (balance.isNaN() || !balance.isFinite())
 				balance = new BigNumber(0);
 
-			const format = formatPriceString(balance, 2, this.currency, this.currencies[this.currency]);
+			const format = formatPriceString(balance, 2, this.currency, this.exchangeRateSC[this.currency]);
 
 			return `${format.value} <span class="currency-display">${format.label}</span>`;
 		},

@@ -34,7 +34,8 @@ const store = new Vuex.Store({
 		scanQueue: [],
 		networkFees: {},
 		feeAddresses: [],
-		currencies: {}
+		exchangeRateSC: {},
+		exchangeRateSF: {}
 	},
 	mutations: {
 		setSetup(state, setup) {
@@ -94,8 +95,9 @@ const store = new Vuex.Store({
 
 			state.wallets.splice(idx, 1);
 		},
-		setExchangeRate(state, rates) {
-			state.currencies = rates;
+		setExchangeRate(state, { siacoin, siafund }) {
+			state.exchangeRateSC = siacoin;
+			state.exchangeRateSF = siafund;
 		},
 		setNetworkFees(state, fees) {
 			state.networkFees = fees;

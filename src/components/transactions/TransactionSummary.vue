@@ -23,7 +23,7 @@ export default {
 		transaction: Object
 	},
 	computed: {
-		...mapState(['currency', 'currencies', 'feeAddresses']),
+		...mapState(['currency', 'exchangeRateSC', 'feeAddresses']),
 		direction() {
 			return this.input.gt(this.output) ? 'send' : 'receive';
 		},

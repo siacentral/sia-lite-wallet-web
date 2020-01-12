@@ -102,7 +102,7 @@ export default {
 		};
 	},
 	computed: {
-		...mapState(['currency', 'currencies', 'scanQueue']),
+		...mapState(['currency', 'exchangeRateSC', 'scanQueue']),
 		walletQueued() {
 			return this.wallet.scanning === 'full' || this.scanQueue.filter(s => s.walletID === this.wallet.id && s.full).length !== 0;
 		},
@@ -276,7 +276,7 @@ export default {
 			return `${format.value} <span class="currency-display">${format.label}</span>`;
 		},
 		formatCurrencyString(val) {
-			const format = formatPriceString(val, 2, this.currency, this.currencies[this.currency]);
+			const format = formatPriceString(val, 2, this.currency, this.exchangeRateSC[this.currency]);
 
 			return `${format.value} <span class="currency-display">${format.label}</span>`;
 		}

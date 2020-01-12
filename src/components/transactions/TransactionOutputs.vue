@@ -22,7 +22,7 @@ export default {
 		transaction: Object
 	},
 	computed: {
-		...mapState(['currency', 'currencies', 'feeAddresses']),
+		...mapState(['currency', 'exchangeRateSC', 'feeAddresses']),
 		outputs() {
 			if (!this.transaction || !Array.isArray(this.transaction.siacoin_outputs))
 				return [];

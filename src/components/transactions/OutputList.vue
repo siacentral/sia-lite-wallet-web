@@ -32,7 +32,7 @@ export default {
 		outputs: Array
 	},
 	computed: {
-		...mapState(['currency', 'currencies'])
+		...mapState(['currency', 'exchangeRateSC'])
 	},
 	methods: {
 		getOutputSC(output) {
@@ -41,7 +41,7 @@ export default {
 			return `${siacoins.value} <span class="currency-display">${siacoins.label}</span>`;
 		},
 		getOutputCurrency(output) {
-			const currency = formatPriceString(new BigNumber(output.value), 2, this.currency, this.currencies[this.currency]);
+			const currency = formatPriceString(new BigNumber(output.value), 2, this.currency, this.exchangeRateSC[this.currency]);
 
 			return `${currency.value} <span class="currency-display">${currency.label}</span>`;
 		}

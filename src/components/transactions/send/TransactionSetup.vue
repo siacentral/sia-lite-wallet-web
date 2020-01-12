@@ -53,7 +53,7 @@ export default {
 		wallet: Object
 	},
 	computed: {
-		...mapState(['currency', 'currencies', 'networkFees']),
+		...mapState(['currency', 'exchangeRateSC', 'networkFees']),
 		walletBalance() {
 			return this.wallet.unconfirmedSiacoinBalance();
 		},
@@ -94,7 +94,7 @@ export default {
 			return `${siacoins.value} <span class="currency-display">${this.translate('currency.sc')}</span>`;
 		},
 		transactionFeeCurrency() {
-			const currency = formatPriceString(this.fees, 2, this.currency, this.currencies[this.currency]);
+			const currency = formatPriceString(this.fees, 2, this.currency, this.exchangeRateSC[this.currency]);
 
 			return `${currency.value} <span class="currency-display">${this.translate(`currency.${currency.label}`)}</span>`;
 		},
@@ -114,7 +114,7 @@ export default {
 		},
 		remainingBalanceCurrency() {
 			const rem = this.walletBalance.minus(this.calculatedAmount).minus(this.fees),
-				currency = formatPriceString(rem, 2, this.currency, this.currencies[this.currency]);
+				currency = formatPriceString(rem, 2, this.currency, this.exchangeRateSC[this.currency]);
 
 			return `${currency.value} <span class="currency-display">${this.translate(`currency.${currency.label}`)}</span>`;
 		},
@@ -255,7 +255,7 @@ export default {
 			return txn;
 		},
 		formatCurrencyString(value) {
-			return formatPriceString(value, 2, this.currency, this.currencies[this.currency]).value;
+			return formatPriceString(value, 2, this.currency, this.exchangeRateSC[this.currency]).value;
 		},
 		async onSendTxn() {
 			if (this.sending)
@@ -307,7 +307,7 @@ export default {
 		onChangeCurrency() {
 			try {
 				const value = this.$refs.txtCurrency.value,
-					parsed = parseCurrencyString(value, this.currencies[this.currency]),
+					parsed = parseCurrencyString(value, this.exchangeRateSC[this.currency]),
 					siacoins = formatPriceString(parsed, 2);
 
 				this.sendAmount = parsed;
