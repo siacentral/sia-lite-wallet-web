@@ -1,5 +1,6 @@
 /**
  * UI translations in Chinese. Translations provided by Discord user ps2xu#5946
+ *
  */
 
 export default {
@@ -13,6 +14,7 @@ export default {
 		deleteWallet: '删除钱包',
 		unlockWallet: '解锁钱包',
 		walletPassword: '钱包密码',
+		unlockPassword: '解锁密码',
 		transactionFee: '交易费',
 		total: '共计',
 		minerFee: '矿工费',
@@ -29,6 +31,7 @@ export default {
 		unlock: '解锁',
 		done: '确认',
 		next: '继续',
+		export: '出口',
 		import: '输入',
 		generate: '生成',
 		recover: '恢复',
@@ -47,6 +50,16 @@ export default {
 			pDeleteConfirm: '您确定要删除名为“{{0}}”的钱包吗？ 这将从您的设备中删除与此钱包相关的所有数据。 请确保您已备份恢复种子。',
 			deleteHeader: '删除“{{0}}”？'
 		},
+		exportSeedModal: {
+			encryptionMode: 'Encryption Mode',
+			optUnencrypted: 'Unencrypted',
+			optUnlockPassword: 'Encrypted - Unlock Password',
+			optCustomPassword: 'Encrypted - Custom Password'
+		},
+		importSeedModal: {
+			importingFile: 'Importing {{0}}',
+			selectFile: 'Drag and drop a Sia seed file or click to select a file'
+		},
 		menu: {
 			wallets: '钱包',
 			settings: '设置'
@@ -59,8 +72,7 @@ export default {
 			welcome4: '此钱包是非官方钱包，与NebulousLabs或Sia核心团队无关。',
 			passwordHeader: '设置密码',
 			password1: '请设置一个安全密码来加密您的钱包。 用以解锁和使用您的钱包。',
-			password2: '所有钱包种子均已加密，存储在本地，永远不会离开设备。 无权访问设备和没有解锁的人都无法查看。',
-			lblPassword: '解锁密码'
+			password2: '所有钱包种子均已加密，存储在本地，永远不会离开设备。 无权访问设备和没有解锁的人都无法查看。'
 		},
 		settings: {
 			displayHeader: '显示',
@@ -99,7 +111,6 @@ export default {
 			lblSeedType: '种子类型',
 			siaSeed: 'Sia种子',
 			walrusSeed: 'Walrus种子'
-
 		},
 		importAddresses: {
 			importedHeader: '输入地址',

@@ -1,19 +1,19 @@
 <template>
 	<modal @close="$emit('close')">
 		<div class="control">
-			<label>Encryption Mode</label>
+			<label>{{ translate('exportSeedModal.encryptionMode') }}</label>
 			<select v-model="encryptionMode">
-				<option value="none">Unencrypted</option>
-				<option value="unlockPassword">Encrypted - Unlock password</option>
-				<option value="customPassword">Encrypted - Custom password</option>
+				<option value="none">{{ translate('exportSeedModal.optUnencrypted') }}</option>
+				<option value="unlockPassword">{{ translate('exportSeedModal.optUnlockPassword') }}</option>
+				<option value="customPassword">{{ translate('exportSeedModal.optCustomPassword') }}</option>
 			</select>
 		</div>
 		<div class="control" v-if="encryptionMode === 'customPassword'">
-			<label>Password</label>
+			<label>{{ translate('unlockPassword') }}</label>
 			<input type="password" v-model="customPassword" />
 		</div>
 		<div class="buttons">
-			<button class="btn btn-inline btn-success" @click="onExportSeed" :disabled="!valid">Export</button>
+			<button class="btn btn-inline btn-success" @click="onExportSeed" :disabled="!valid">{{ translate('export') }}</button>
 		</div>
 	</modal>
 </template>

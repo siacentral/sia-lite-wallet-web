@@ -25,7 +25,7 @@
 					<p>{{ translate('setup.password1') }}</p>
 					<p>{{ translate('setup.password2') }}</p>
 					<div class="control">
-						<label>{{ translate('setup.lblPassword') }}</label>
+						<label>{{ translate('unlockPassword') }}</label>
 						<input type="password" v-model="unlockPassword" />
 					</div>
 					<div class="buttons">

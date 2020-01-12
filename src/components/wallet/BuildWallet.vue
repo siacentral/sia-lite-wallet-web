@@ -13,7 +13,7 @@
 		</div>
 		<template v-if="createType === 'recover'">
 			<div class="buttons text-right">
-				<button class="btn btn-inline" @click="importSeed = true">Import</button>
+				<button class="btn btn-inline" @click="importSeed = true">{{ translate('import') }}</button>
 			</div>
 			<div class="control">
 				<label>{{ translate('createWalletModal.lblRecoverySeed') }}</label>

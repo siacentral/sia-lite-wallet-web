@@ -14,6 +14,7 @@ export default {
 		deleteWallet: 'Delete Wallet',
 		unlockWallet: 'Unlock Wallet',
 		walletPassword: 'Wallet Password',
+		unlockPassword: 'Unlock Password',
 		transactionFee: 'Transaction Fee',
 		total: 'Total',
 		minerFee: 'Miner Fee',
@@ -30,6 +31,7 @@ export default {
 		unlock: 'Unlock',
 		done: 'Done',
 		next: 'Next',
+		export: 'Export',
 		import: 'Import',
 		generate: 'Generate',
 		recover: 'Recover',
@@ -48,6 +50,16 @@ export default {
 			pDeleteConfirm: 'Are you sure you want to delete the wallet named "{{0}}"? This will remove all data associated with this wallet from your device. Please make sure you have the recovery seed backed up.',
 			deleteHeader: 'Delete "{{0}}"?'
 		},
+		exportSeedModal: {
+			encryptionMode: 'Encryption Mode',
+			optUnencrypted: 'Unencrypted',
+			optUnlockPassword: 'Encrypted - Unlock Password',
+			optCustomPassword: 'Encrypted - Custom Password'
+		},
+		importSeedModal: {
+			importingFile: 'Importing {{0}}',
+			selectFile: 'Drag and drop a Sia seed file or click to select a file'
+		},
 		menu: {
 			wallets: 'Wallets',
 			settings: 'Settings'
@@ -60,8 +72,7 @@ export default {
 			welcome4: 'This wallet is unofficial and is not associated with NebulousLabs or the core Sia team.',
 			passwordHeader: 'Set a Password',
 			password1: 'Please set a secure password to encrypt your wallets with. This password will be required to unlock and use your wallets.',
-			password2: 'All wallet seeds are encrypted, stored locally and never leave the device. They cannot be viewed by anyone without access to the device and the unlock password.',
-			lblPassword: 'Unlock Password'
+			password2: 'All wallet seeds are encrypted, stored locally and never leave the device. They cannot be viewed by anyone without access to the device and the unlock password.'
 		},
 		settings: {
 			displayHeader: 'Display',
@@ -100,7 +111,6 @@ export default {
 			lblSeedType: 'Seed Type',
 			siaSeed: 'Sia Seed',
 			walrusSeed: 'Walrus Seed'
-
 		},
 		importAddresses: {
 			importedHeader: 'Imported Addresses',
@@ -177,7 +187,7 @@ export default {
 		language: {
 			automatic: 'Automatic',
 			en: 'English',
-			cn: 'Chinese'
+			cn: '中文'
 		}
 	}
 };

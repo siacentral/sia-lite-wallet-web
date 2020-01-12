@@ -2,16 +2,16 @@
 	<modal @close="$emit('close')">
 		<div class="file-control" @click="onBrowseSeed" @drop.prevent="onFileDrop" @dragover.prevent>
 			<icon icon="file" />
-			<label v-if="file">Importing {{ fileName }}</label>
-			<label v-else>Drag and drop a Sia seed file or click to select a file</label>
+			<label v-if="file">{{ translate('importSeedModal.importingFile', fileName) }}</label>
+			<label v-else>{{ translate('importSeedModal.selectFile') }}</label>
 			<input type="file" id="import-file-input" ref="fileInput" @change="onFileSelect" />
 		</div>
 		<div class="control" v-if="seedEncrypted">
-			<label>Password</label>
+			<label>{{ translate('unlockPassword') }}</label>
 			<input type="password" v-model="customPassword" />
 		</div>
 		<div class="buttons">
-			<button class="btn btn-inline btn-success" @click="onImportSeed" :disabled="!valid">Import</button>
+			<button class="btn btn-inline btn-success" @click="onImportSeed" :disabled="!valid">{{ translate('import') }}</button>
 		</div>
 	</modal>
 </template>
