@@ -28,7 +28,7 @@ jobs:
         working-directory: ./wasm
         run: GOARCH=wasm GOOS=js go get
 
-      - name: Build ./wasm
+      - name: Build WASM
         working-directory: ./wasm
         run: GOARCH=wasm GOOS=js go build -o ../public/sia/sia.wasm main.go
 
