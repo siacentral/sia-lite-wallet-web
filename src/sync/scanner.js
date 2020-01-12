@@ -39,6 +39,8 @@ export async function scanner() {
 }
 
 export async function scanWallet(walletID, full) {
+	clearTimeout(rescanTimeouts[walletID]);
+
 	const wallet = Store.state.wallets.find(w => w.id === walletID);
 
 	if (!wallet)
@@ -69,8 +71,6 @@ export async function scanWallet(walletID, full) {
 	} catch (ex) {
 		console.error('scanTransactions', wallet.id, ex);
 	}
-
-	clearTimeout(rescanTimeouts[wallet.id]);
 
 	rescanTimeouts[wallet.id] = setTimeout(() => {
 		Store.dispatch('queueWallet', { walletID: wallet.id, full: false });
