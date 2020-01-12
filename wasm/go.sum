@@ -36,6 +36,8 @@ github.com/rogpeppe/go-internal v1.3.0/go.mod h1:M8bDsm7K2OlrFYOpmOWEs/qY81heoFR
 github.com/russross/blackfriday v1.5.2/go.mod h1:JO/DiYxRf+HjHt06OyowR9PTA263kcR/rfWxYHBV53g=
 github.com/siacentral/apisdkgo v0.0.0-20200109051930-e55b28ef328c h1:bnL8xqyIX71u4+oqeE43QsY0K3bL7N7YsAP4Atzxeng=
 github.com/siacentral/apisdkgo v0.0.0-20200109051930-e55b28ef328c/go.mod h1:E40Zwh4GNrYurMpjSEwAJduAl8pxSjx4jPYmU4rc3FM=
+github.com/siacentral/apisdkgo v0.0.0-20200112140952-ff017d31d5fa h1:nFdj68T7bsphMaLsK1+ezYz7Ssk2rwH4E6oskmteKvA=
+github.com/siacentral/apisdkgo v0.0.0-20200112140952-ff017d31d5fa/go.mod h1:E40Zwh4GNrYurMpjSEwAJduAl8pxSjx4jPYmU4rc3FM=
 github.com/spf13/afero v1.1.2/go.mod h1:j4pytiNVoe2o6bmDsKpLACNPDBIoEAkihy7loJ1B0CQ=
 github.com/spf13/cast v1.3.0/go.mod h1:Qx5cxh0v+4UWYiBimWS+eyWzqEqokIECu5etghLkUJE=
 github.com/spf13/cobra v0.0.4/go.mod h1:3K3wKZymM7VvHMDS9+Akkh4K60UwM26emMESw8tLCHU=

@@ -306,6 +306,10 @@ func GetTransactions(addresses []string, callback js.Value) {
 			processed.Tags = append(processed.Tags, txn.SiacoinOutputs[0].Source)
 		}
 
+		if len(txn.StorageProofs) != 0 {
+			processed.Tags = append(processed.Tags, "storage_proof")
+		}
+
 		if len(txn.StorageContracts) != 0 {
 			processed.Tags = append(processed.Tags, "contract_formation")
 		}
