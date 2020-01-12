@@ -8,18 +8,12 @@ const exportMagicBytes = new Uint8Array([95, 6, 39, 249]),
 export async function exportSeed(seed, password) {
 	const { salt, hash } = await pbkdf2(password);
 
-	console.log(seed, hash, salt);
-
 	const encrypted = decodeB64(encrypt(seed, hash)),
 		full = new Uint8Array(exportMagicBytes.length + salt.length + encrypted.length);
 
 	full.set(exportMagicBytes);
 	full.set(salt, 4);
 	full.set(encrypted, 4 + salt.length);
-
-	console.log('export');
-	console.log(salt, password, hash);
-	console.log(encrypted);
 
 	return full;
 }
@@ -45,10 +39,6 @@ async function decryptSeed(data, password) {
 	const salt = data.slice(4, 20),
 		encrypted = data.slice(4 + salt.length),
 		{ hash } = await pbkdf2(password, salt);
-
-	console.log('import');
-	console.log(new Uint8Array(salt), password, hash);
-	console.log(new Uint8Array(encrypted));
 
 	return decrypt(encodeB64(encrypted), hash);
 }

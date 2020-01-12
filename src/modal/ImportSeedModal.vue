@@ -75,7 +75,6 @@ export default {
 			} catch (ex) {
 				console.error('onFileDrop', ex);
 			}
-			console.log(e.dataTransfer.files);
 		},
 		async onFileSelect() {
 			try {
