@@ -47,16 +47,12 @@ export default {
 	},
 	methods: {
 		formatNumber,
-		async onConnected(err) {
+		async onConnected(connected) {
 			try {
-				if (err) {
-					this.connected = false;
-					this.error = err;
-					return;
-				}
+				this.connected = connected;
 
-				this.version = await getVersion();
-				this.connected = true;
+				if (this.connected)
+					this.version = await getVersion();
 			} catch (ex) {
 				console.error('onConnected', ex);
 				this.pushNotification({

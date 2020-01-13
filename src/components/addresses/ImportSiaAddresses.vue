@@ -34,7 +34,7 @@ import BigNumber from 'bignumber.js';
 import { verifyAddress } from '@/utils';
 import { getTransactions, generateAddresses as generateSiaAddresses, encodeUnlockHash } from '@/utils/sia';
 import { formatPriceString, formatSiafundString, formatNumber } from '@/utils/format';
-import { getPublicKey as generateLedgerPubKey } from '@/utils/ledger';
+import { getVersion, getPublicKey as generateLedgerPubKey } from '@/utils/ledger';
 import { getWalletAddresses } from '@/store/db';
 
 import ConnectLedger from '@/components/ledger/ConnectLedger';
@@ -180,9 +180,20 @@ export default {
 			this.siacoinBalance = new BigNumber(balance.confirmed_siacoin_balance).minus(deltaSC);
 			this.siafundBalance = new BigNumber(balance.confirmed_siafund_balance).minus(deltaSF);
 		},
-		onConnected() {
-			this.ready = true;
-			this.connected = true;
+		async onConnected(connected) {
+			try {
+				this.ready = connected;
+				this.connected = connected;
+
+				if (connected)
+					this.ledgerVersion = await getVersion();
+			} catch (ex) {
+				console.error('onConnected', ex);
+				this.pushNotification({
+					severity: 'danger',
+					message: ex.message
+				});
+			}
 		},
 		onDeleteAddress(i) {
 			if (!this.ready)

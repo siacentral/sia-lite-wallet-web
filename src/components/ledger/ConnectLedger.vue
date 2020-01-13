@@ -17,7 +17,7 @@ export default {
 		async onConnect() {
 			try {
 				await getVersion();
-				this.$emit('connected', null);
+				this.$emit('connected', true);
 			} catch (ex) {
 				console.error('onConnect', ex);
 				this.pushNotification({
@@ -25,7 +25,7 @@ export default {
 					icon: ['fab', 'usb'],
 					message: ex.message
 				});
-				this.$emit('connected', ex.message);
+				this.$emit('connected', false);
 			}
 		}
 	}
