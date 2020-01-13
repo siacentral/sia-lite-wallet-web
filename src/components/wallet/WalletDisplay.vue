@@ -1,7 +1,7 @@
 <template>
 	<div class="wallet-display">
 		<div class="wallet-balance">
-			<div class="wallet-title">{{ name }}
+			<div class="wallet-title">{{ name }} <button class="btn-select" @click="modal = 'wallet'"><icon icon="chevron-down" /></button>
 				<transition name="fade" mode="out-in">
 					<div class="wallet-scanning" v-if="wallet.scanning === 'full'" key="scanning">
 						<icon icon="redo" /> {{ translate('walletStatus.scanning') }}
@@ -64,6 +64,12 @@
 			<receive-siacoin-modal v-else-if="modal === 'receive'" :wallet="wallet" @close="modal = null" />
 			<transaction-detail-modal v-else-if="modal === 'transaction'" :transaction="walletTransactions[selectedTransaction]" @close="modal = null" />
 			<export-seed-modal v-else-if="modal === 'export'" :wallet="wallet" @close="modal = null" />
+			<select-wallet-modal
+				v-else-if="modal === 'wallet'"
+				:wallets="wallets"
+				:active="active"
+				@selected="(i) => $emit('selected', i)"
+				@close="modal = null" />
 		</transition>
 	</div>
 </template>
@@ -78,6 +84,7 @@ import ConfirmModal from '@/modal/ConfirmModal';
 import ExportSeedModal from '@/modal/ExportSeedModal';
 import ReceiveSiacoinModal from '@/modal/ReceiveSiacoinModal';
 import SendSiacoinModal from '@/modal/SendSiacoinModal';
+import SelectWalletModal from '@/modal/SelectWalletModal';
 import TransactionDetailModal from '@/modal/TransactionDetailModal';
 import TransactionListItem from '@/components/transactions/TransactionListItem';
 
@@ -88,11 +95,14 @@ export default {
 		ExportSeedModal,
 		ReceiveSiacoinModal,
 		SendSiacoinModal,
+		SelectWalletModal,
 		TransactionDetailModal,
 		TransactionListItem
 	},
 	props: {
-		wallet: Object
+		wallet: Object,
+		wallets: Array,
+		active: Number
 	},
 	data() {
 		return {
@@ -186,11 +196,11 @@ export default {
 		deleteButtons() {
 			return [
 				{
-					text: this.translate('delete'),
+					key: 'delete',
 					type: 'danger'
 				},
 				{
-					text: this.translate('cancel')
+					key: 'cancel'
 				}
 			];
 		},
@@ -251,7 +261,7 @@ export default {
 			try {
 				this.modal = null;
 
-				if (button !== 'Delete')
+				if (button !== 'delete')
 					return;
 
 				await this.deleteWallet(this.wallet.id);
@@ -268,17 +278,17 @@ export default {
 		formatSiacoinString(val) {
 			const format = formatPriceString(val, 2);
 
-			return `${format.value} <span class="currency-display">${format.label}</span>`;
+			return `${format.value} <span class="currency-display">${this.translate(`currency.${format.label}`)}</span>`;
 		},
 		formatSiafundString(val) {
 			const format = formatSiafundString(val);
 
-			return `${format.value} <span class="currency-display">${format.label}</span>`;
+			return `${format.value} <span class="currency-display">${this.translate(`currency.${format.label}`)}</span>`;
 		},
 		formatCurrencyString(val) {
 			const format = formatPriceString(val, 2, this.currency, this.exchangeRateSC[this.currency]);
 
-			return `${format.value} <span class="currency-display">${format.label}</span>`;
+			return `${format.value} <span class="currency-display">${this.translate(`currency.${format.label}`)}</span>`;
 		}
 	}
 };
@@ -313,6 +323,14 @@ export default {
 	width: 100%;
 	height: 100%;
 	overflow: hidden;
+}
+
+.btn-select {
+	display: inline-block;
+
+	@media screen and (min-width: 767px) {
+		display: none;
+	}
 }
 
 .wallet-balance {

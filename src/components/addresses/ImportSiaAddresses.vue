@@ -75,7 +75,7 @@ export default {
 
 			const format = formatPriceString(balance, 2);
 
-			return `${format.value} <span class="currency-display">${format.label}</span>`;
+			return `${format.value} <span class="currency-display">${this.translate(`currency.${format.label}`)}</span>`;
 		},
 		balanceCurrency() {
 			let balance = new BigNumber(this.siacoinBalance);
@@ -85,7 +85,7 @@ export default {
 
 			const format = formatPriceString(balance, 2, this.currency, this.exchangeRateSC[this.currency]);
 
-			return `${format.value} <span class="currency-display">${format.label}</span>`;
+			return `${format.value} <span class="currency-display">${this.translate(`currency.${format.label}`)}</span>`;
 		},
 		balanceSF() {
 			let balance = new BigNumber(this.siafundBalance);
@@ -95,7 +95,7 @@ export default {
 
 			const format = formatSiafundString(balance);
 
-			return `${format.value} <span class="currency-display">${format.label}</span>`;
+			return `${format.value} <span class="currency-display">${this.translate(`currency.${format.label}`)}</span>`;
 		},
 		valid() {
 			if (this.walletType === 'ledger')

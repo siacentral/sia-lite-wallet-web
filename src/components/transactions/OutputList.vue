@@ -38,12 +38,12 @@ export default {
 		getOutputSC(output) {
 			const siacoins = formatPriceString(new BigNumber(output.value), 2);
 
-			return `${siacoins.value} <span class="currency-display">${siacoins.label}</span>`;
+			return `${siacoins.value} <span class="currency-display">${this.translate(`currency.${siacoins.label}`)}</span>`;
 		},
 		getOutputCurrency(output) {
 			const currency = formatPriceString(new BigNumber(output.value), 2, this.currency, this.exchangeRateSC[this.currency]);
 
-			return `${currency.value} <span class="currency-display">${currency.label}</span>`;
+			return `${currency.value} <span class="currency-display">${this.translate(`currency.${currency.label}`)}</span>`;
 		}
 	}
 };

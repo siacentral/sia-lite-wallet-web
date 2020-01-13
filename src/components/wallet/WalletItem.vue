@@ -37,17 +37,17 @@ export default {
 		displaySiacoins() {
 			const siacoins = formatPriceString(new BigNumber(this.walletBalance), 2);
 
-			return `${siacoins.value} <span class="currency-display">${siacoins.label}</span>`;
+			return `${siacoins.value} <span class="currency-display">${this.translate(`currency.${siacoins.label}`)}</span>`;
 		},
 		displaySiafunds() {
 			const siacoins = formatSiafundString(new BigNumber(this.walletSiafundBalance), 2);
 
-			return `${siacoins.value} <span class="currency-display">${siacoins.label}</span>`;
+			return `${siacoins.value} <span class="currency-display">${this.translate(`currency.${siacoins.label}`)}</span>`;
 		},
 		displayCurrency() {
 			const currency = formatPriceString(new BigNumber(this.walletBalance), 2, this.currency, this.exchangeRateSC[this.currency]);
 
-			return `${currency.value} <span class="currency-display">${currency.label}</span>`;
+			return `${currency.value} <span class="currency-display">${this.translate(`currency.${currency.label}`)}</span>`;
 		}
 	}
 };

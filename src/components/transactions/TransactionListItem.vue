@@ -48,25 +48,25 @@ export default {
 			const format = formatPriceString(this.siacoinAmount, 2);
 
 			if (this.transaction.siacoin_value.direction === 'sent')
-				return `-${format.value} <span class="currency-display">${format.label}</span>`;
+				return `-${format.value} <span class="currency-display">${this.translate(`currency.${format.label}`)}</span>`;
 
-			return `${format.value} <span class="currency-display">${format.label}</span>`;
+			return `${format.value} <span class="currency-display">${this.translate(`currency.${format.label}`)}</span>`;
 		},
 		displaySiafunds() {
 			const format = formatSiafundString(this.siafundAmount);
 
 			if (this.transaction.siafund_value.direction === 'sent')
-				return `-${format.value} <span class="currency-display">${format.label}</span>`;
+				return `-${format.value} <span class="currency-display">${this.translate(`currency.${format.label}`)}</span>`;
 
-			return `${format.value} <span class="currency-display">${format.label}</span>`;
+			return `${format.value} <span class="currency-display">${this.translate(`currency.${format.label}`)}</span>`;
 		},
 		displayCurrency() {
 			const format = formatPriceString(this.siacoinAmount, 2, this.currency, this.exchangeRateSC[this.currency]);
 
 			if (this.transaction.siacoin_value.direction === 'sent')
-				return `-${format.value} <span class="currency-display">${format.label}</span>`;
+				return `-${format.value} <span class="currency-display">${this.translate(`currency.${format.label}`)}</span>`;
 
-			return `${format.value} <span class="currency-display">${format.label}</span>`;
+			return `${format.value} <span class="currency-display">${this.translate(`currency.${format.label}`)}</span>`;
 		},
 		displayType() {
 			if (!this.transaction || !Array.isArray(this.transaction.tags))

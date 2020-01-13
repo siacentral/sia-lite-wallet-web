@@ -7,7 +7,7 @@
 				<button
 					v-for="(button, i) in buttons" :key="i"
 					:class="buttonClasses(button)"
-					@click="$emit('selected', button.key || button.text)">{{ button.text }}</button>
+					@click="$emit('selected', button.key)">{{ translate(button.key) }}</button>
 			</div>
 		</div>
 	</modal>
