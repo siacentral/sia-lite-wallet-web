@@ -57,7 +57,6 @@ export default {
 	},
 	computed: {
 		...mapState(['password', 'changeSeedType']),
-		ledgerSupported,
 		walletType() {
 			return this.wallet && typeof this.wallet.type === 'string' ? this.wallet.type : 'watch';
 		},
@@ -76,11 +75,13 @@ export default {
 			step: '',
 			createType: '',
 			saving: false,
+			ledgerSupported: false,
 			wallet: null,
 			addresses: []
 		};
 	},
-	mounted() {
+	async mounted() {
+		this.ledgerSupported = await ledgerSupported();
 		setTimeout(() => {
 			this.step = 'choose';
 		}, 300);

@@ -44,7 +44,13 @@ function typedArrayToUint16(val) {
 async function connect() {
 	listen((log) => console.log(log));
 
-	transport = await TransportWebHID.create();
+	const transports = await supportedTransports();
+
+	if (transports.indexOf('hid') !== -1)
+		transport = await TransportWebHID.create();
+	else
+		throw new Error('no supported transports');
+
 	transport.setScrambleKey('');
 }
 
@@ -129,6 +135,14 @@ export async function signTransaction(encodedTxn, sig, key) {
 	return encode(resp);
 }
 
-export function ledgerSupported() {
-	return !!(global.navigator && global.navigator.hid);
+async function supportedTransports() {
+	const support = await Promise.all([
+		TransportWebHID.isSupported().then(supported => supported ? 'hid' : null)
+	]);
+
+	return support.filter(t => t);
+}
+
+export async function ledgerSupported() {
+	return (await supportedTransports()).length !== 0;
 }

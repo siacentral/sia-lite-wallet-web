@@ -7,16 +7,11 @@
 </template>
 
 <script>
-import { ledgerSupported, getVersion } from '@/utils/ledger';
+import { getVersion } from '@/utils/ledger';
 
 export default {
 	props: {
 		connected: Boolean
-	},
-	computed: {
-		ledgerSupported() {
-			return ledgerSupported();
-		}
 	},
 	methods: {
 		async onConnect() {
