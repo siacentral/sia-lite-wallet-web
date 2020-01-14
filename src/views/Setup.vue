@@ -41,6 +41,11 @@
 			</div>
 			<create-wallet class="setup-step" v-else-if="step === 2" key="create" @created="onWalletCreated" />
 		</transition>
+		<div class="extra-links">
+			<a href="https://github.com/siacentral/sia-lite-wallet"><icon :icon="['fab', 'github']" /></a>
+			<a href="https://siacentral.com"><sia-central /></a>
+			<a href="https://sia.tech"><built-with-sia /></a>
+		</div>
 	</div>
 </template>
 
@@ -50,10 +55,12 @@ import { mapActions } from 'vuex';
 
 import CreateWallet from '@/components/wallet/CreateWallet';
 import SiaCentral from '@/assets/siacentral.svg';
+import BuiltWithSia from '@/assets/built-with-sia.svg';
 
 export default {
 	components: {
 		CreateWallet,
+		BuiltWithSia,
 		SiaCentral
 	},
 	computed: {
@@ -137,7 +144,7 @@ p {
 	height: 100%;
 	max-width: 700px;
 	margin: auto;
-	padding: 15px;
+	padding: 50px 15px;
 	grid-gap: 15px;
 	align-content: safe center;
 }
@@ -151,5 +158,24 @@ p {
 .setup-content {
 	overflow-x: hidden;
 	overflow-y: auto;
+}
+
+.extra-links {
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	padding: 15px;
+	text-align: center;
+
+	a {
+		color: rgba(255, 255, 255, 0.54);
+		margin: 0 15px;
+
+		svg {
+			width: 28px;
+			height: auto;
+		}
+	}
 }
 </style>
