@@ -175,6 +175,10 @@ p {
 		svg {
 			width: 28px;
 			height: auto;
+
+			g path {
+				stroke: rgba(255, 255, 255, 0.54) !important;
+			}
 		}
 	}
 }
