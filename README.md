@@ -1,6 +1,6 @@
 The Sia Central Lite Wallet is a secure Siacoin lite wallet implementation for web. This wallet has been tested and works with Chromium based browsers on Desktop, iOS Safari or Chrome, and Chrome on Android. Desktop and mobile apps will be coming soon. Sensitive data, such as wallet seeds, is stored encrypted using a user-set passphrase and never leaves the device.
 
-**[Sia Central Lite Wallet](https://wallet.siacentral.com)** | **[GitHub](https://github.com/siacentral/sia-lite-wallet)**
+**[Sia Central Lite Wallet](https://wallet.siacentral.com)** | **[GitHub](https://github.com/siacentral/sia-lite-wallet)** | **[Docker](https://hub.docker.com/r/siacentral/sia-central-lite-wallet)**
 
 ### Main Features
 
@@ -29,6 +29,11 @@ Watch-Only wallets cannot send transactions on the Sia network. They are read-on
 ### How It Works
 
 This wallet uses a Sia wrapper that allows parts of Sia to be run directly in the browser. This lets the wallet generate, recover seeds, addresses, and sign transactions without using an external server or daemon. The wallet uses the Sia Central Explorer API to retrieve balance and transaction data without downloading the full blockchain.  All transaction generation and signing happens locally, the signed transaction is then broadcast to the network.
+
+## Docker
+```
+docker run -p 80:80 -d siacentral/sia-central-lite-wallet
+```
 
 ## Project setup
 ```
