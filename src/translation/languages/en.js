@@ -66,7 +66,7 @@ export default {
 		},
 		setup: {
 			welcomeHeader: 'Welcome to the Sia Central Lite Wallet',
-			welcome1: 'Thank you for trying out Sia Central Lite Wallet. This wallet is currently under development. If you find run into any issues or would like to submit feedback please create an issue on GitHub.',
+			welcome1: 'Thank you for trying out Sia Central Lite Wallet. This wallet is currently in open Beta testing. Please report any bugs or submit feedback on GitHub.',
 			welcome2: 'This wallet is completely secure. All wallet seeds are encrypted, stored locally and never leave the device. They cannot be viewed by anyone without access to the device and the unlock password.',
 			welcome3: 'Please use caution when sending or receiving Siacoins to prevent coin loss. Sia Central is not responsible for any damages incurred while using this wallet.',
 			welcome4: 'This wallet is unofficial and is not associated with NebulousLabs or the core Sia team.',
