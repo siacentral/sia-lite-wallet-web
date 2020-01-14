@@ -122,7 +122,7 @@ export default {
 		ledger: {
 			connected: 'Connected',
 			disconnected: 'Disconnected',
-			instructions: 'Current Balance'
+			instructions: 'Unlock your Ledger Nano S and open the Sia App.'
 		},
 		sendSiacoinsModal: {
 			spendableBalance: 'Spendable Balance',
