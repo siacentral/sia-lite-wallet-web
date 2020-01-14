@@ -3,7 +3,7 @@
 		<div class="wallets">
 			<wallet-list class="wallets-list"
 				:wallets="wallets"
-				:active="selectedWallet"
+				:active="active"
 				@selected="(i) => $emit('selected', i)" />
 		</div>
 	</modal>

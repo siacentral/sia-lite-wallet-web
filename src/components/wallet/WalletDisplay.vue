@@ -300,6 +300,7 @@ export default {
 	font-size: 1.3rem;
 	text-align: center;
 	margin-bottom: 30px;
+	padding: 0 25px;
 
 	.wallet-scanning {
 		position: absolute;
@@ -326,7 +327,11 @@ export default {
 }
 
 .btn-select {
+	position: absolute;
 	display: inline-block;
+	right: 0;
+	top: 3px;
+	color: rgba(255, 255, 255, 0.54);
 
 	@media screen and (min-width: 767px) {
 		display: none;
@@ -418,12 +423,11 @@ export default {
 
 .wallet-button-wrapper {
 	margin: auto;
-	max-width: 700px;
+	max-width: 500px;
 }
 
 .wallet-buttons {
 	display: flex;
-    padding: 15px;
     align-items: center;
     justify-items: center;
 

@@ -81,6 +81,8 @@ export default {
 <style lang="stylus" scoped>
 .wallets-list {
 	display: none;
+	border-right: 2px solid primary;
+	padding-bottom: 15px;
 
 	@media screen and (min-width: 767px) {
 		display: grid;

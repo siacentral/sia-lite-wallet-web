@@ -16,7 +16,7 @@
 	left: 0;
 	right: 0;
 	grid-gap: 15px;
-	padding: 30px 15px;
+	padding: 40px 15px;
 	align-content: safe center;
 	background: bg-dark-accent;
 	overflow: hidden;

@@ -42,7 +42,6 @@ export default {
 	display: grid;
 	grid-template-rows: minmax(0, 1fr) auto;
 	grid-gap: 15px;
-	border-right: 2px solid primary;
 	overflow: hidden;
 }
 
@@ -52,7 +51,7 @@ export default {
 }
 
 .wallet-buttons {
-	padding: 0 15px 15px;
+	padding: 0 15px;
 }
 
 .btn.wallet-btn {
