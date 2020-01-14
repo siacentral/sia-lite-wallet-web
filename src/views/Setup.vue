@@ -11,6 +11,12 @@
 					<p>{{ translate('setup.welcome2') }}</p>
 					<p>{{ translate('setup.welcome3') }}</p>
 					<p>{{ translate('setup.welcome4') }}</p>
+					<div class="control">
+						<label>{{ translate('settings.lblDisplayLanguage') }}</label>
+						<select v-model="newLanguage" @change="setDisplayLanguage(newLanguage)">
+							<option v-for="language in languages" :key="language" :value="language">{{ translate(`language.${language}`) }}</option>
+						</select>
+					</div>
 					<div class="buttons">
 						<button class="btn btn-success btn-inline" @click="step = 1">{{ translate('getStarted') }}</button>
 					</div>
@@ -39,6 +45,7 @@
 </template>
 
 <script>
+import { languages, languageSupported } from '@/translation';
 import { mapActions } from 'vuex';
 
 import CreateWallet from '@/components/wallet/CreateWallet';
@@ -49,11 +56,23 @@ export default {
 		CreateWallet,
 		SiaCentral
 	},
+	computed: {
+		languages() {
+			return languages;
+		}
+	},
 	data() {
 		return {
 			step: null,
-			unlockPassword: ''
+			unlockPassword: '',
+			newLanguage: null
 		};
+	},
+	beforeMount() {
+		this.newLanguage = (navigator.language || '').slice(0, 2);
+
+		if (!languageSupported(this.newLanguage))
+			this.newLanguage = 'en';
 	},
 	mounted() {
 		setTimeout(() => {
@@ -61,7 +80,7 @@ export default {
 		}, 500);
 	},
 	methods: {
-		...mapActions(['setPassword', 'setSetup']),
+		...mapActions(['setPassword', 'setSetup', 'setDisplayLanguage']),
 		onSetPassword() {
 			try {
 				if (this.unlockPassword.length === 0)
