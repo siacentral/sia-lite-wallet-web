@@ -197,7 +197,7 @@ function formatCryptoString(val, dec, currency, rate) {
 	if (val.isEqualTo(0) || !rate) {
 		return {
 			value: '0',
-			label: currency.toUpperCase()
+			label: currency.toLowerCase()
 		};
 	}
 
@@ -217,7 +217,7 @@ function formatCurrencyString(val, currency, rate) {
 	if (val.isEqualTo(0) || !rate) {
 		return {
 			value: formatter.format(0),
-			label: currency.toUpperCase()
+			label: currency.toLowerCase()
 		};
 	}
 
