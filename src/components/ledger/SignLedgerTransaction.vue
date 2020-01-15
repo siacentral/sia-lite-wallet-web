@@ -24,7 +24,7 @@
 
 <script>
 import { encodeTransaction } from '@/utils/sia';
-import { getVersion, signTransaction } from '@/utils/ledger';
+import { getVersion, signTransaction } from '@/ledger';
 import { formatNumber } from '@/utils/format';
 
 import ConnectLedger from './ConnectLedger';

@@ -42,7 +42,7 @@
 			<create-wallet class="setup-step" v-else-if="step === 2" key="create" @created="onWalletCreated" />
 		</transition>
 		<div class="extra-links">
-			<a href="https://github.com/siacentral/sia-lite-wallet"><icon :icon="['fab', 'github']" /></a>
+			<a href="https://github.com/siacentral/sia-lite-wallet-web"><icon :icon="['fab', 'github']" /></a>
 			<a href="https://siacentral.com"><sia-central /></a>
 			<a href="https://sia.tech"><built-with-sia /></a>
 		</div>

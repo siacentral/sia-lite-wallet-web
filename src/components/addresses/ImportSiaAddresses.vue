@@ -34,7 +34,7 @@ import BigNumber from 'bignumber.js';
 import { verifyAddress } from '@/utils';
 import { getTransactions, generateAddresses as generateSiaAddresses, encodeUnlockHash } from '@/utils/sia';
 import { formatPriceString, formatSiafundString, formatNumber } from '@/utils/format';
-import { getVersion, getPublicKey as generateLedgerPubKey } from '@/utils/ledger';
+import { getVersion, getPublicKey as generateLedgerPubKey } from '@/ledger';
 import { getWalletAddresses } from '@/store/db';
 
 import ConnectLedger from '@/components/ledger/ConnectLedger';

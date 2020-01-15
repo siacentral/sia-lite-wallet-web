@@ -5,7 +5,7 @@ import (
 
 	"syscall/js"
 
-	"github.com/siacentral/sia-lite/wasm/wallet"
+	"github.com/siacentral/sia-lite-wallet-web/wasm/wallet"
 )
 
 //GenerateSeed generates a new 12 or 29 word seed phrase
@@ -54,8 +54,8 @@ func GetAddresses(phrase string, i uint64, n uint64, callback js.Value) {
 
 		addresses[a] = map[string]interface{}{
 			"unlock_conditions": unlockConditions,
-			"address": key.UnlockConditions.UnlockHash().String(),
-			"index": uint64(a) + i,
+			"address":           key.UnlockConditions.UnlockHash().String(),
+			"index":             uint64(a) + i,
 		}
 	}
 

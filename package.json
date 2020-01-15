@@ -1,5 +1,5 @@
 {
-  "name": "sia-lite-ui",
+  "name": "sia-central-lite-wallet",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -7,7 +7,6 @@
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint"
   },
-  "main": "background.js",
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^1.2.25",
     "@fortawesome/free-brands-svg-icons": "^5.12.0",

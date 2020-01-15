@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"syscall/js"
 
-	"github.com/siacentral/sia-lite/wasm/modules"
+	"github.com/siacentral/sia-lite-wallet-web/wasm/modules"
 	siatypes "gitlab.com/NebulousLabs/Sia/types"
 )
 

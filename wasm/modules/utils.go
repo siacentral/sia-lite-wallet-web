@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"strings"
 
-	"github.com/siacentral/sia-lite/wasm/wallet"
+	"github.com/siacentral/sia-lite-wallet-web/wasm/wallet"
 	siatypes "gitlab.com/NebulousLabs/Sia/types"
 )
 

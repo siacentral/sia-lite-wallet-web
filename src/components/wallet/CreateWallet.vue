@@ -45,7 +45,7 @@
 import { mapState, mapActions } from 'vuex';
 import { generateAddresses } from '@/utils/sia';
 import { saveAddresses } from '@/store/db';
-import { ledgerSupported } from '@/utils/ledger';
+import { ledgerSupported } from '@/ledger';
 
 import BuildWallet from '@/components/wallet/BuildWallet';
 import ImportSiaAddresses from '@/components/addresses/ImportSiaAddresses';

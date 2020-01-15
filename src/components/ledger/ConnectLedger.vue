@@ -7,7 +7,7 @@
 </template>
 
 <script>
-import { getVersion } from '@/utils/ledger';
+import { getVersion } from '@/ledger';
 
 export default {
 	props: {

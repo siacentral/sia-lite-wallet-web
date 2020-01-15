@@ -4,7 +4,7 @@ import (
 	"syscall/js"
 
 	apiclient "github.com/siacentral/apisdkgo"
-	"github.com/siacentral/sia-lite/wasm/wallet"
+	"github.com/siacentral/sia-lite-wallet-web/wasm/wallet"
 )
 
 //RecoverAddresses scans for addresses on the blockchain addressCount at a time up to a maximum of 100,000,000
