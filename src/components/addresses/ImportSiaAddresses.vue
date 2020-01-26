@@ -98,10 +98,13 @@ export default {
 			return `${format.value} <span class="currency-display">${this.translate(`currency.${format.label}`)}</span>`;
 		},
 		valid() {
+			if (!Array.isArray(this.addresses) || this.addresses.length === 0)
+				return false;
+
 			if (this.walletType === 'ledger')
 				return true;
 
-			return !Array.isArray(this.addresses) || this.addresses.length === 0 || this.addresses.filter(a => !verifyAddress(a.address)).length === 0;
+			return this.addresses.filter(a => !verifyAddress(a.address)).length === 0;
 		}
 	},
 	async mounted() {
