@@ -117,7 +117,9 @@ export default {
 			balance: 'Current Balance',
 			addressPlaceholder: 'Sia address to watch...',
 			publicKey: 'Import Public Key',
-			addAddress: 'Add Address'
+			addAddress: 'Add Address',
+			displayPublicKey: 'Show Public Key',
+			displayAddress: 'Show Address'
 		},
 		ledger: {
 			connected: 'Connected',

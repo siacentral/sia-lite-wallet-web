@@ -4,12 +4,15 @@
 			<tbody>
 				<tr v-for="(address, i) in value" :key="i">
 					<td class="text-right fit-text">{{ formatNumber(value[i].index) }}</td>
-					<td v-if="walletType === 'ledger'"><input v-model="value[i].pubkey" :placeholder="translate('importAddresses.addressPlaceholder')" readonly /></td>
+					<td v-if="publickey"><input v-model="value[i].pubkey" :placeholder="translate('importAddresses.addressPlaceholder')" readonly /></td>
 					<td v-else><input v-model="value[i].address" :placeholder="translate('importAddresses.addressPlaceholder')" @input="$emit('change', value)" /></td>
 					<td class="fit-text" v-if="value.length > 1 && walletType !== 'ledger'">
 						<button class="delete-btn" @click="$emit('delete', i)">
 							<icon icon="times" />
 						</button>
+					</td>
+					<td class="fit-text" v-else-if="walletType === 'ledger'">
+						<button class="btn btn-inline" @click="onVerifyLedger(value[i].index)">{{ translate('verify') }}</button>
 					</td>
 				</tr>
 			</tbody>
@@ -19,11 +22,13 @@
 
 <script>
 import { formatNumber } from '@/utils/format';
+import { getPublicKey, getAddress } from '@/ledger';
 
 export default {
 	props: {
 		wallet: Object,
-		value: Array
+		value: Array,
+		publickey: Boolean
 	},
 	computed: {
 		walletType() {
@@ -31,7 +36,17 @@ export default {
 		}
 	},
 	methods: {
-		formatNumber
+		formatNumber,
+		async onVerifyLedger(i) {
+			try {
+				if (this.publickey)
+					await getPublicKey(i);
+				else
+					await getAddress(i);
+			} catch (ex) {
+				console.error('ImportAddressList.onVerifyLedger', ex);
+			}
+		}
 	}
 };
 </script>
@@ -66,6 +81,12 @@ export default {
 		outline: none;
 		line-height: 36px;
 		text-overflow: ellipsis;
+	}
+}
+
+.fit-text {
+	.btn {
+		margin-right: 0;
 	}
 }
 </style>

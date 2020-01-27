@@ -19,9 +19,12 @@
 			<div class="text-right" v-html="balanceCurrency" />
 		</div>
 		<div class="buttons text-right">
+			<button class="btn btn-inline"
+				v-if="walletType === 'ledger'"
+				@click="displayPublicKey = !displayPublicKey">{{ displayText }}</button>
 			<button class="btn btn-inline btn-success" @click="onAddAddress" :disabled="!ready">{{ addText }}</button>
 		</div>
-		<import-address-list v-model="addresses" :wallet="wallet" />
+		<import-address-list v-model="addresses" :wallet="wallet" :publickey="displayPublicKey" />
 		<div class="buttons">
 			<button class="btn btn-inline btn-success" @click="onAddAddresses" :disabled="!valid || !ready">{{ translate('add') }}</button>
 		</div>
@@ -54,6 +57,7 @@ export default {
 			addresses: [],
 			siacoinBalance: new BigNumber(0),
 			siafundBalance: new BigNumber(0),
+			displayPublicKey: false,
 			ready: false,
 			connected: false,
 			refreshTimeout: null
@@ -66,6 +70,9 @@ export default {
 		},
 		addText() {
 			return this.walletType === 'ledger' ? this.translate('importAddresses.publicKey') : this.translate('importAddresses.addAddress');
+		},
+		displayText() {
+			return this.displayPublicKey ? this.translate('importAddresses.displayAddress') : this.translate('importAddresses.displayPublicKey');
 		},
 		balanceSC() {
 			let balance = new BigNumber(this.siacoinBalance);
@@ -124,6 +131,8 @@ export default {
 
 			if (this.walletType !== 'ledger')
 				this.ready = true;
+			else
+				this.displayPublicKey = true;
 		} catch (ex) {
 			console.error('ImportSiaAddressesMounted', ex);
 		}
@@ -150,6 +159,7 @@ export default {
 					},
 					address = await encodeUnlockHash(unlockConditions);
 
+				this.displayPublicKey = true;
 				addr = {
 					address: address,
 					pubkey: key.substr(8),
