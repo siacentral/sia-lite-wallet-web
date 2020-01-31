@@ -10,7 +10,7 @@ export default {
 		addWallet: '增加钱包',
 		rescanWallet: '重新扫描钱包',
 		addAddresses: '增加地址',
-		exportSeed: '输入种子',
+		exportSeed: '导出种子',
 		deleteWallet: '删除钱包',
 		unlockWallet: '解锁钱包',
 		walletPassword: '钱包密码',
@@ -31,8 +31,8 @@ export default {
 		unlock: '解锁',
 		done: '确认',
 		next: '继续',
-		export: '出口',
-		import: '输入',
+		export: '导出',
+		import: '导入',
 		generate: '生成',
 		recover: '恢复',
 		delete: '删除',
@@ -51,14 +51,14 @@ export default {
 			deleteHeader: '删除“{{0}}”？'
 		},
 		exportSeedModal: {
-			encryptionMode: 'Encryption Mode',
-			optUnencrypted: 'Unencrypted',
-			optUnlockPassword: 'Encrypted - Unlock Password',
-			optCustomPassword: 'Encrypted - Custom Password'
+			encryptionMode: '加密方式',
+			optUnencrypted: '不加密',
+			optUnlockPassword: '使用解锁密码加密',
+			optCustomPassword: '使用自定义密码加密'
 		},
 		importSeedModal: {
-			importingFile: 'Importing {{0}}',
-			selectFile: 'Drag and drop a Sia seed file or click to select a file'
+			importingFile: '导入中 {{0}}',
+			selectFile: '拖入或点击选择Sia种子文件'
 		},
 		menu: {
 			wallets: '钱包',
