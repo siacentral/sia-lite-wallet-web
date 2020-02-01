@@ -117,7 +117,9 @@ export default {
 			balance: '当前余额',
 			addressPlaceholder: '查看的Sia地址...',
 			publicKey: '导入公钥',
-			addAddress: '增加地址'
+			addAddress: '增加地址',
+			displayPublicKey: 'Show Public Key',
+			displayAddress: 'Show Address'
 		},
 		ledger: {
 			connected: '已连接',
