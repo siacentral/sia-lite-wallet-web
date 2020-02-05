@@ -24,3 +24,6 @@ deploy.sh
 
 #Electron-builder output
 /dist_electron
+
+#Ignore Sia WASM
+sia.wasm
