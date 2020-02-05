@@ -1,3 +1,13 @@
+/**
+ * calculates the fees to send the transaction
+ * @param {Number} inputs the number of inputs
+ * @param {Number} outputs the number of outputs
+ * @param {BigNumber} fee the fee that will be charged
+ */
+export function calculateFee(inputs, outputs, fee) {
+	return fee.times(100 + (inputs * 313) + (outputs * 50));
+}
+
 export function getLastItems(arr, n) {
 	const len = arr.length,
 		min = Math.min(len, n),

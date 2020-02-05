@@ -42,6 +42,8 @@ export default {
 		status: 'Status',
 		wallet: 'Wallet',
 		unconfirmed: 'Unconfirmed',
+		half: 'Half',
+		full: 'Full',
 		walletStatus: {
 			scanning: 'Scanning...',
 			queued: 'Scan Queued...'

@@ -13,6 +13,10 @@
 			<label>{{ translate('currency.sc') }}</label>
 			<input ref="txtCurrency" type="text" value="$0.00" @input="onChangeCurrency" @blur="onFormatValues" />
 			<label>{{ translate(`currency.${currency}`) }}</label>
+			<div class="transaction-buttons">
+				<button class="btn btn-small btn-inline" @click="onSendHalf">{{ translate('half') }}</button>
+				<button class="btn btn-small btn-inline" @click="onSendFull">{{ translate('full') }}</button>
+			</div>
 		</div>
 		<div class="extras-info">
 			<div>{{ translate('transactionFee') }}</div>
@@ -37,7 +41,7 @@
 <script>
 import BigNumber from 'bignumber.js';
 import { mapState } from 'vuex';
-import { verifyAddress } from '@/utils';
+import { calculateFee, verifyAddress } from '@/utils';
 import { parseCurrencyString, parseSiacoinString } from '@/utils/parse';
 import { formatPriceString } from '@/utils/format';
 import { getWalletAddresses } from '@/store/db';
@@ -136,17 +140,13 @@ export default {
 		minInputs() {
 			return this.fundTransaction(this.sendAmount).inputs.length;
 		},
-		minOutputs() {
-			return 3;
-		},
-		txnSize() {
-			return 100 + (this.minInputs * 313) + (this.minOutputs * 50);
-		},
 		apiFee() {
-			return new BigNumber(this.networkFees.api.fee).times(this.txnSize);
+			return calculateFee(this.minInputs, 3,
+				new BigNumber(this.networkFees.api.fee));
 		},
 		siaFee() {
-			return new BigNumber(this.networkFees.minimum).plus(this.networkFees.maximum).div(2).times(this.txnSize);
+			return calculateFee(this.minInputs, 3,
+				new BigNumber(this.networkFees.minimum).plus(this.networkFees.maximum).div(2));
 		},
 		fees() {
 			return this.apiFee.plus(this.siaFee);
@@ -256,6 +256,40 @@ export default {
 		},
 		formatCurrencyString(value) {
 			return formatPriceString(value, 2, this.currency, this.exchangeRateSC[this.currency]).value;
+		},
+		onSendHalf() {
+			try {
+				const unspentTotal = this.unspent.reduce((v, u) => v.plus(u.value), new BigNumber(0));
+
+				this.sendAmount = unspentTotal.div(2);
+				this.onFormatValues();
+			} catch (ex) {
+				console.error('onSendHalf', ex);
+				this.pushNotification({
+					severity: 'danger',
+					message: ex.message
+				});
+			}
+		},
+		onSendFull() {
+			try {
+				const inputs = this.unspent.length,
+					networkFees = calculateFee(inputs, 3,
+						new BigNumber(this.networkFees.minimum).plus(this.networkFees.maximum).div(2)),
+					siaFees = calculateFee(inputs, 3,
+						new BigNumber(this.networkFees.api.fee)),
+					totalFee = networkFees.plus(siaFees),
+					unspentTotal = this.unspent.reduce((v, u) => v.plus(u.value), new BigNumber(0));
+
+				this.sendAmount = unspentTotal.minus(totalFee);
+				this.onFormatValues();
+			} catch (ex) {
+				console.error('onSendFull', ex);
+				this.pushNotification({
+					severity: 'danger',
+					message: ex.message
+				});
+			}
 		},
 		async onSendTxn() {
 			if (this.sending)
@@ -368,6 +402,19 @@ export default {
 			border-bottom-left-radius: 4px;
 			border-bottom-right-radius: 4px;
 			border-top: none;
+		}
+	}
+}
+
+.transaction-buttons {
+	margin-top: 5px;
+	text-align: right;
+
+	.btn.btn-small {
+		font-size: 0.8rem;
+
+		&:last-child {
+			margin-right: 0;
 		}
 	}
 }

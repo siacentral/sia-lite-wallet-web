@@ -42,6 +42,8 @@ export default {
 		status: '状态',
 		wallet: '钱包',
 		unconfirmed: '未确认',
+		half: 'Half',
+		full: 'Full',
 		walletStatus: {
 			scanning: '扫描中...',
 			queued: '列队扫描...'
@@ -185,11 +187,6 @@ export default {
 			transactionBroadcast: '广播交易成功。',
 			addressesAdded: '已增加地址，钱包扫描已排队。',
 			walletsLocked: '因不活动钱包已自动锁定。'
-		},
-		language: {
-			automatic: '自动',
-			en: 'English',
-			cn: '中文'
 		}
 	}
 };
