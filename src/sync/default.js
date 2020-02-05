@@ -11,14 +11,14 @@ export default {
 		if (Array.isArray(addresses) && addresses.length !== 0) {
 			lastUsed = addresses[addresses.length - 1].index;
 
-			if (lastUsed > 1e4)
-				startIndex = lastUsed - 1e4;
+			if (lastUsed > 5e4)
+				startIndex = lastUsed - 5e4;
 		}
 
 		if (typeof addressesPerRound !== 'number' || isNaN(addressesPerRound) || !isFinite(addressesPerRound))
-			addressesPerRound = 1000;
+			addressesPerRound = 2500;
 
-		await recoverAddresses(wallet.seed, startIndex, 2, addressesPerRound, async(progress) => {
+		await recoverAddresses(wallet.seed, startIndex, 1, addressesPerRound, lastUsed, async(progress) => {
 			if (!progress || !Array.isArray(progress.addresses))
 				return;
 
@@ -38,9 +38,9 @@ export default {
 			minScanRounds = 100;
 
 		if (typeof addressesPerRound !== 'number' || isNaN(addressesPerRound) || !isFinite(addressesPerRound))
-			addressesPerRound = 1000;
+			addressesPerRound = 2000;
 
-		await recoverAddresses(wallet.seed, 0, minScanRounds, addressesPerRound, async(progress) => {
+		await recoverAddresses(wallet.seed, 0, minScanRounds, addressesPerRound, 0, async(progress) => {
 			if (!progress || !Array.isArray(progress.addresses))
 				return;
 

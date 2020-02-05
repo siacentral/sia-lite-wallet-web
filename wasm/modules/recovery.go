@@ -11,7 +11,7 @@ import (
 //addresses. Considers all addresses found if the scan goes more than minRounds * addressCount
 //addresses without seeing any used. It's possible the ranges will need to be tweaked for older or
 //larger wallets
-func RecoverAddresses(seed string, i uint64, minRounds uint64, addressCount uint64, callback js.Value) {
+func RecoverAddresses(seed string, i uint64, minRounds uint64, addressCount uint64, min uint64, callback js.Value) {
 	var lastUsed, maxIndex uint64
 	var lastUsedType string
 
@@ -49,7 +49,7 @@ func RecoverAddresses(seed string, i uint64, minRounds uint64, addressCount uint
 
 		if len(used) != 0 {
 			lastUsed = 0
-		} else {
+		} else if maxIndex >= min {
 			lastUsed++
 		}
 

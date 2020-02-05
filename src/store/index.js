@@ -26,7 +26,7 @@ const store = new Vuex.Store({
 		currency: localStorage.getItem('displayCurrency') || 'usd',
 		changeSeedType: localStorage.getItem('changeSeedType') === 'true',
 		minScanRounds: getLocalStorageNumeric('minScanRounds', 50),
-		addressesPerRound: getLocalStorageNumeric('addressesPerRound', 1000),
+		addressesPerRound: getLocalStorageNumeric('addressesPerRound', 2500),
 		displayLanguage: localStorage.getItem('displayLanguage') || 'detect',
 		password: null,
 		wallets: [],
