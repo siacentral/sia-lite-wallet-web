@@ -4,21 +4,20 @@ import Store from '@/store';
 
 export default {
 	quickScan: async function(wallet) {
+		let startIndex = 0, lastKnownIndex, addressesPerRound = Store.state.addressesPerRound;
 		const addresses = await getWalletAddresses(wallet.id);
-		let lastUsed = 0, startIndex = 0,
-			addressesPerRound = Store.state.addressesPerRound;
 
 		if (Array.isArray(addresses) && addresses.length !== 0) {
-			lastUsed = addresses[addresses.length - 1].index;
+			lastKnownIndex = addresses[addresses.length - 1].index;
 
-			if (lastUsed > 5e4)
-				startIndex = lastUsed - 5e4;
+			if (lastKnownIndex > 5e4)
+				startIndex = lastKnownIndex - 5e4;
 		}
 
-		if (typeof addressesPerRound !== 'number' || isNaN(addressesPerRound) || !isFinite(addressesPerRound))
+		if (typeof addressesPerRound !== 'number' || addressesPerRound <= 0 || addressesPerRound > 5000)
 			addressesPerRound = 2500;
 
-		await recoverAddresses(wallet.seed, startIndex, 1, addressesPerRound, lastUsed, async(progress) => {
+		await recoverAddresses(wallet.seed, startIndex, 2, addressesPerRound, lastKnownIndex, async(progress) => {
 			if (!progress || !Array.isArray(progress.addresses))
 				return;
 
@@ -34,13 +33,13 @@ export default {
 		let minScanRounds = Store.state.minScanRounds,
 			addressesPerRound = Store.state.addressesPerRound;
 
-		if (typeof minScanRounds !== 'number' || isNaN(minScanRounds) || !isFinite(minScanRounds))
-			minScanRounds = 100;
+		if (typeof minScanRounds !== 'number' || minScanRounds < 0 || minScanRounds > 500)
+			minScanRounds = 50;
 
-		if (typeof addressesPerRound !== 'number' || isNaN(addressesPerRound) || !isFinite(addressesPerRound))
-			addressesPerRound = 2000;
+		if (typeof addressesPerRound !== 'number' || addressesPerRound <= 0 || addressesPerRound > 5000)
+			addressesPerRound = 2500;
 
-		await recoverAddresses(wallet.seed, 0, minScanRounds, addressesPerRound, 0, async(progress) => {
+		await recoverAddresses(wallet.seed, 0, minScanRounds, addressesPerRound, [], async(progress) => {
 			if (!progress || !Array.isArray(progress.addresses))
 				return;
 
