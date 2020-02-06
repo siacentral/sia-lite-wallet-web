@@ -12,7 +12,7 @@ import (
 //addresses without seeing any used. It's possible the ranges will need to be tweaked for older or
 //larger wallets
 func RecoverAddresses(seed string, i uint64, minRounds uint64, addressCount uint64, min uint64, callback js.Value) {
-	var lastUsed, maxIndex uint64
+	var lastUsed, maxIndex, lastGenIdx uint64
 	var lastUsedType string
 
 	w, err := recoverWallet(seed)
@@ -29,6 +29,8 @@ func RecoverAddresses(seed string, i uint64, minRounds uint64, addressCount uint
 		if lastUsed >= minRounds {
 			break
 		}
+
+		lastGenIdx = i + uint64(len(keys))
 
 		w.GetAddresses(i, keys)
 		indexMap := make(map[string]uint64)
@@ -49,7 +51,7 @@ func RecoverAddresses(seed string, i uint64, minRounds uint64, addressCount uint
 
 		if len(used) != 0 {
 			lastUsed = 0
-		} else if addressCount >= min {
+		} else if lastGenIdx >= min {
 			lastUsed++
 		}
 
