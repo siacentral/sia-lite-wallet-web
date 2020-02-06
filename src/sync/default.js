@@ -39,7 +39,7 @@ export default {
 		if (typeof addressesPerRound !== 'number' || addressesPerRound <= 0 || addressesPerRound > 5000)
 			addressesPerRound = 2500;
 
-		await recoverAddresses(wallet.seed, 0, minScanRounds, addressesPerRound, [], async(progress) => {
+		await recoverAddresses(wallet.seed, 0, minScanRounds, addressesPerRound, 0, async(progress) => {
 			if (!progress || !Array.isArray(progress.addresses))
 				return;
 
