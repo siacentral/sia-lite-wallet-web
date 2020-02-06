@@ -142,12 +142,12 @@ func recoverAddresses(this js.Value, args []js.Value) interface{} {
 
 	seed := args[0].String()
 	i := uint64(args[1].Int())
-	minRounds := uint64(args[2].Int())
+	maxEmptyRounds := uint64(args[2].Int())
 	addressCount := uint64(args[3].Int())
-	minIndex := uint64(args[4].Int())
+	lastKnownIdx := uint64(args[4].Int())
 	callback := args[5]
 
-	go modules.RecoverAddresses(seed, i, minRounds, addressCount, minIndex, callback)
+	go modules.RecoverAddresses(seed, i, maxEmptyRounds, addressCount, lastKnownIdx, callback)
 
 	return true
 }

@@ -11,9 +11,8 @@ import (
 //addresses. Considers all addresses found if the scan goes more than minRounds * addressCount
 //addresses without seeing any used. It's possible the ranges will need to be tweaked for older or
 //larger wallets
-func RecoverAddresses(seed string, i uint64, minRounds uint64, addressCount uint64, min uint64, callback js.Value) {
-	var lastUsed, maxIndex, lastGenIdx uint64
-	var lastUsedType string
+func RecoverAddresses(seed string, i uint64, maxEmptyRounds uint64, addressCount uint64, lastKnownIndex uint64, callback js.Value) {
+	var emptyRounds, lastUsedIndex uint64
 
 	w, err := recoverWallet(seed)
 
@@ -22,24 +21,20 @@ func RecoverAddresses(seed string, i uint64, minRounds uint64, addressCount uint
 		return
 	}
 
-	keys := make([]wallet.SpendableKey, addressCount)
-	addresses := make([]string, addressCount)
+	//hard limit of 1e7 addresses after the starting index
+	limit := i + 1e7
 
-	for ; i < 1e7; i += addressCount {
-		if lastUsed >= minRounds {
-			break
-		}
-
-		lastGenIdx = i + uint64(len(keys))
-
-		w.GetAddresses(i, keys)
+	for i < limit && emptyRounds < maxEmptyRounds {
+		addresses := make([]string, 0, addressCount)
 		indexMap := make(map[string]uint64)
 		unlockMap := make(map[string]wallet.UnlockConditions)
 
-		for j, key := range keys {
-			addresses[j] = key.UnlockConditions.UnlockHash().String()
-			unlockMap[addresses[j]] = mapUnlockConditions(key.UnlockConditions)
-			indexMap[addresses[j]] = i + uint64(j)
+		for ; uint64(len(addresses)) < addressCount; i++ {
+			key := w.GetAddress(i)
+			address := key.UnlockConditions.UnlockHash().String()
+			addresses = append(addresses, address)
+			unlockMap[address] = mapUnlockConditions(key.UnlockConditions)
+			indexMap[address] = i
 		}
 
 		used, err := apiclient.FindUsedAddresses(addresses)
@@ -50,17 +45,16 @@ func RecoverAddresses(seed string, i uint64, minRounds uint64, addressCount uint
 		}
 
 		if len(used) != 0 {
-			lastUsed = 0
-		} else if lastGenIdx >= min {
-			lastUsed++
+			emptyRounds = 0
+		} else if i >= lastKnownIndex {
+			emptyRounds++
 		}
 
 		foundAddresses := []interface{}{}
 
 		for _, addr := range used {
-			if indexMap[addr.Address] > maxIndex {
-				maxIndex = indexMap[addr.Address]
-				lastUsedType = addr.UsageType
+			if indexMap[addr.Address] > lastUsedIndex {
+				lastUsedIndex = indexMap[addr.Address]
 			}
 
 			foundAddresses = append(foundAddresses, map[string]interface{}{
@@ -74,7 +68,7 @@ func RecoverAddresses(seed string, i uint64, minRounds uint64, addressCount uint
 		data, err := interfaceToJSON(map[string]interface{}{
 			"found":     len(foundAddresses),
 			"addresses": foundAddresses,
-			"index":     maxIndex,
+			"index":     lastUsedIndex,
 			"done":      false,
 		})
 
@@ -87,23 +81,18 @@ func RecoverAddresses(seed string, i uint64, minRounds uint64, addressCount uint
 	}
 
 	additional := []map[string]interface{}{}
+	key := w.GetAddress(lastUsedIndex + 1)
 
-	if lastUsedType == "sent" {
-		maxIndex++
-
-		key := w.GetAddress(maxIndex)
-
-		additional = append(additional, map[string]interface{}{
-			"index":             maxIndex,
-			"unlock_conditions": mapUnlockConditions(key.UnlockConditions),
-			"address":           key.UnlockConditions.UnlockHash().String(),
-			"usage_type":        "none",
-		})
-	}
+	additional = append(additional, map[string]interface{}{
+		"index":             lastUsedIndex + 1,
+		"unlock_conditions": mapUnlockConditions(key.UnlockConditions),
+		"address":           key.UnlockConditions.UnlockHash().String(),
+		"usage_type":        "none",
+	})
 
 	data, err := interfaceToJSON(map[string]interface{}{
 		"addresses": additional,
-		"index":     maxIndex,
+		"index":     lastUsedIndex + 1,
 		"done":      true,
 	})
 
