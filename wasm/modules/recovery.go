@@ -49,7 +49,7 @@ func RecoverAddresses(seed string, i uint64, minRounds uint64, addressCount uint
 
 		if len(used) != 0 {
 			lastUsed = 0
-		} else if maxIndex >= min {
+		} else if addressCount >= min {
 			lastUsed++
 		}
 
