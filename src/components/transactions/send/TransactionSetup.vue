@@ -261,6 +261,11 @@ export default {
 			try {
 				const unspentTotal = this.unspent.reduce((v, u) => v.plus(u.value), new BigNumber(0));
 
+				if (unspentTotal.eq(0)) {
+					this.sendAmount = new BigNumber(0);
+					return;
+				}
+
 				this.sendAmount = unspentTotal.div(2);
 				this.onFormatValues();
 			} catch (ex) {
@@ -280,6 +285,11 @@ export default {
 						new BigNumber(this.networkFees.api.fee)),
 					totalFee = networkFees.plus(siaFees),
 					unspentTotal = this.unspent.reduce((v, u) => v.plus(u.value), new BigNumber(0));
+
+				if (unspentTotal.eq(0) || unspentTotal.lt(totalFee)) {
+					this.sendAmount = new BigNumber(0);
+					return;
+				}
 
 				this.sendAmount = unspentTotal.minus(totalFee);
 				this.onFormatValues();
