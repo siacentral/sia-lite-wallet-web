@@ -4,6 +4,9 @@
 			<div class="nav-logo">
 				<sia-central />
 			</div>
+			<transition name="fade" mode="out-in" appear>
+				<div v-if="offline" class="connect-status">Offline</div>
+			</transition>
 			<router-link :to="{ name: 'wallets' }" class="menu-item">
 				<icon icon="wallet" />
 			</router-link>
@@ -17,11 +20,15 @@
 </template>
 
 <script>
+import { mapState } from 'vuex';
 import SiaCentral from '@/assets/siacentral.svg';
 
 export default {
 	components: {
 		SiaCentral
+	},
+	computed: {
+		...mapState(['offline'])
 	}
 };
 </script>
@@ -44,6 +51,14 @@ export default {
 		.primary-nav {
 			padding-top: 30px;
 		}
+	}
+
+	.connect-status {
+		paddding: 5px;
+		background: negative-accent;
+		font-size: 0.9rem;
+		text-align: center;
+		border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 	}
 
 	.nav-logo {

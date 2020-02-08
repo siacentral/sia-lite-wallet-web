@@ -62,14 +62,19 @@ export async function scanWallet(walletID, full) {
 		default:
 			throw new Error('unknown wallet type');
 		}
+
+		Store.dispatch('setOffline', false);
 	} catch (ex) {
 		console.error('scanWallet', wallet.id, ex);
+		Store.dispatch('setOffline', true);
 	}
 
 	try {
 		await scanTransactions(wallet);
+		Store.dispatch('setOffline', false);
 	} catch (ex) {
 		console.error('scanTransactions', wallet.id, ex);
+		Store.dispatch('setOffline', true);
 	}
 
 	rescanTimeouts[wallet.id] = setTimeout(() => {

@@ -22,6 +22,7 @@ function getLocalStorageNumeric(key, def) {
 const store = new Vuex.Store({
 	state: {
 		setup: false,
+		offline: false,
 		autoLock: getLocalStorageNumeric('autoLock', 15),
 		currency: localStorage.getItem('displayCurrency') || 'usd',
 		changeSeedType: localStorage.getItem('changeSeedType') === 'true',
@@ -40,6 +41,9 @@ const store = new Vuex.Store({
 	mutations: {
 		setSetup(state, setup) {
 			state.setup = setup;
+		},
+		setOffline(state, offline) {
+			state.offline = offline;
 		},
 		setWallets(state, wallets) {
 			state.wallets = wallets.map(w => new Wallet(w));
@@ -129,6 +133,9 @@ const store = new Vuex.Store({
 	actions: {
 		setSetup({ commit }, setup) {
 			commit('setSetup', setup);
+		},
+		setOffline({ commit }, offline) {
+			commit('setOffline', offline);
 		},
 		setPassword({ commit }, password) {
 			password = hash(encodeUTF8(password));

@@ -4,6 +4,9 @@
 			<div class="nav-section"><button :class="{ 'hamburger-btn': true, 'menu-active': menuActive }" @click="menuActive = !menuActive"><span /><span /><span /><span /><span /></button></div>
 			<div class="nav-section"><sia-central /></div>
 			<div class="nav-section"><slot /></div>
+			<transition name="fade" mode="out-in" appear>
+				<div v-if="offline" class="connect-status">Offline</div>
+			</transition>
 		</nav>
 		<transition name="slide-left" appear>
 			<div class="mobile-menu" v-if="menuActive">
@@ -24,11 +27,15 @@
 </template>
 
 <script>
+import { mapState } from 'vuex';
 import SiaCentral from '@/assets/siacentral.svg';
 
 export default {
 	components: {
 		SiaCentral
+	},
+	computed: {
+		...mapState(['offline'])
 	},
 	data() {
 		return {
@@ -42,6 +49,23 @@ export default {
 .mobile-nav-wrapper {
 	position: fixed;
 	display: block;
+	z-index: 999;
+
+	@media screen and (min-width: 767px) {
+		display: none;
+	}
+}
+
+.connect-status {
+	position: fixed;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	paddding: 10px;
+	background: negative-accent;
+	font-size: 1rem;
+	text-align: center;
+	border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 	z-index: 999;
 
 	@media screen and (min-width: 767px) {
