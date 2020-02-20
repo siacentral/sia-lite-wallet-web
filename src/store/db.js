@@ -41,6 +41,8 @@ export async function saveWallet(wallet, password) {
 		...wallet,
 		id: walletID,
 		salt: key.salt,
+		server_type: wallet.server_type || 'siacentral',
+		server_url: wallet.server_url,
 		seed: encrypt(wallet.seed, key.hash),
 		confirmed_siafund_balance: confirmedSiafundBalance.toString(10),
 		confirmed_siacoin_balance: confirmedSiacoinBalance.toString(10),
