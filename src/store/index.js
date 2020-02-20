@@ -26,6 +26,7 @@ const store = new Vuex.Store({
 		autoLock: getLocalStorageNumeric('autoLock', 15),
 		currency: localStorage.getItem('displayCurrency') || 'usd',
 		changeSeedType: localStorage.getItem('changeSeedType') === 'true',
+		changeServerType: localStorage.getItem('changeServerType') === 'true',
 		minScanRounds: getLocalStorageNumeric('minScanRounds', 50),
 		addressesPerRound: getLocalStorageNumeric('addressesPerRound', 2500),
 		displayLanguage: localStorage.getItem('displayLanguage') || 'detect',
@@ -64,6 +65,9 @@ const store = new Vuex.Store({
 		},
 		setChangeSeedType(state, enabled) {
 			state.changeSeedType = enabled;
+		},
+		setChangeServerType(state, enabled) {
+			state.changeServerType = enabled;
 		},
 		setMinFullScanRounds(state, rounds) {
 			state.minScanRounds = rounds;
@@ -149,6 +153,10 @@ const store = new Vuex.Store({
 		setChangeSeedType({ commit }, enabled) {
 			localStorage.setItem('changeSeedType', enabled.toString());
 			commit('setChangeSeedType', enabled);
+		},
+		setChangeServerType({ commit }, enabled) {
+			localStorage.setItem('changeServerType', enabled.toString());
+			commit('setChangeServerType', enabled);
 		},
 		setMinFullScanRounds({ commit }, rounds) {
 			localStorage.setItem('minScanRounds', rounds);

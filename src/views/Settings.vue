@@ -52,6 +52,13 @@
 					</div>
 				</div>
 				<div class="control-grouping">
+					<p class="text-warning">{{ translate('settings.pChangeServerType') }}</p>
+					<div class="control">
+						<input type="checkbox" id="chk-change-server-type" v-model="newChangeServerType" @change="setChangeServerType(newChangeServerType)" />
+						<label for="chk-change-server-type">{{ translate('settings.chkChangeWalletServer') }}</label>
+					</div>
+				</div>
+				<div class="control-grouping">
 					<p class="text-warning">{{ translate('settings.pExplainFullScan') }}</p>
 					<p class="text-warning">{{ translate('settings.pExplainRounds', formatNumber(newMinFullScanRounds * newAddressesPerRound)) }}</p>
 					<div class="control">
@@ -80,7 +87,7 @@ export default {
 		MobileNav
 	},
 	computed: {
-		...mapState(['currency', 'autoLock', 'changeSeedType', 'addressesPerRound',
+		...mapState(['currency', 'autoLock', 'changeSeedType', 'changeServerType', 'addressesPerRound',
 			'minScanRounds', 'displayLanguage']),
 		languages() {
 			return languages;
@@ -92,6 +99,7 @@ export default {
 			newCurrency: 'usd',
 			newAutoLock: 5,
 			newChangeSeedType: false,
+			newChangeServerType: false,
 			newAddressesPerRound: 1000,
 			newMinFullScanRounds: 100,
 			newLanguage: 'detect'
@@ -101,12 +109,13 @@ export default {
 		this.newCurrency = this.currency;
 		this.newAutoLock = this.autoLock;
 		this.newChangeSeedType = this.changeSeedType;
+		this.newChangeServerType = this.changeServerType;
 		this.newAddressesPerRound = this.addressesPerRound;
 		this.newMinFullScanRounds = this.minScanRounds;
 		this.newLanguage = this.displayLanguage;
 	},
 	methods: {
-		...mapActions(['setCurrency', 'setAutoLock', 'setChangeSeedType', 'setMinFullScanRounds',
+		...mapActions(['setCurrency', 'setAutoLock', 'setChangeSeedType', 'setChangeServerType', 'setMinFullScanRounds',
 			'setAddressesPerRound', 'setDisplayLanguage']),
 		formatNumber
 	}
