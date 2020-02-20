@@ -87,7 +87,9 @@ export default {
 			lblAddressesPerRound: 'Addresses Per Round',
 			chkShowAdvanced: 'Show Advanced',
 			chkWalrusSeeds: 'Enable 12 word seeds',
+			chkChangeWalletServer: 'Enable 3rd-party wallet servers',
 			pChangeSeedType: '12 word seeds are not compatible with the official Sia wallets. They are commonly used with Walrus wallets. Enabling this setting will show a dropdown when creating a new wallet allowing you to generate either a new Sia seed or a 12 word seed.',
+			pChangeServerType: 'Allows the usage of 3rd-party wallet servers, like Walrus. 3rd-party servers help reduce centralization and allow for choice between trusting Sia Central or another party. However, all wallet features may not be supported.',
 			pExplainFullScan: 'During the initial full scan, used addresses are scanned in batches. The wallet will scan until no consecutively used address indices are found on the blockchain for the minimum number of scan rounds.',
 			pExplainRounds: 'Decreasing the number of rounds or the number of addresses per round may increase performance, but will increase the chance addresses or balance will not be found. With the current settings, a minimum of {{0}} consecutive address indices must be unused before completion.'
 		},
