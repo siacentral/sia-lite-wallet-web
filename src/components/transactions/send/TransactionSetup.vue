@@ -266,7 +266,7 @@ export default {
 					return;
 				}
 
-				this.sendAmount = unspentTotal.div(2);
+				this.sendAmount = unspentTotal.div(2).precision(0, BigNumber.ROUND_DOWN);
 				this.onFormatValues();
 			} catch (ex) {
 				console.error('onSendHalf', ex);
