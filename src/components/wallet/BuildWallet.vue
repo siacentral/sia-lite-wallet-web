@@ -11,6 +11,16 @@
 				<option value="walrus">{{ translate('createWalletModal.walrusSeed') }}</option>
 			</select>
 		</div>
+		<template v-if="changeServerType">
+			<div class="control">
+				<label>{{ translate('createWalletModal.lblServerType') }}</label>
+				<select v-model="serverType">
+					<option value="siacentral">{{ translate('siacentral') }}</option>
+					<option value="narwal">{{ translate('narwal') }}</option>
+					<option value="walrus">{{ translate('walrus') }}</option>
+				</select>
+			</div>
+		</template>
 		<template v-if="createType === 'recover'">
 			<div class="buttons text-right">
 				<button class="btn btn-inline" @click="importSeed = true">{{ translate('import') }}</button>
@@ -45,7 +55,7 @@ export default {
 		createType: String
 	},
 	computed: {
-		...mapState(['changeSeedType']),
+		...mapState(['changeSeedType', 'changeServerType']),
 		walletType() {
 			switch (this.createType) {
 			case 'ledger':
@@ -73,7 +83,8 @@ export default {
 			importSeed: false,
 			walletName: '',
 			recoverySeed: '',
-			seedType: 'sia'
+			seedType: 'sia',
+			serverType: 'siacentral'
 		};
 	},
 	methods: {

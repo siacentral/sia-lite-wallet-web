@@ -1,8 +1,7 @@
-import { getWalletAddresses } from '@/store/db';
-import { getTransactions } from '@/utils/sia';
+
 import defaultScanner from './default';
+import walrusScanner from './walrus';
 import Store from '@/store';
-import Wallet from '@/types/wallet';
 
 const rescanTimeouts = {};
 
@@ -42,9 +41,20 @@ export async function scanWallet(walletID, full) {
 	clearTimeout(rescanTimeouts[walletID]);
 
 	const wallet = Store.state.wallets.find(w => w.id === walletID);
+	let scanner;
 
 	if (!wallet)
 		return;
+
+	switch (wallet.server_type) {
+	case 'walrus':
+	case 'narwal':
+		scanner = walrusScanner;
+		break;
+	default:
+		scanner = defaultScanner;
+		break;
+	}
 
 	try {
 		switch (wallet.type) {
@@ -54,9 +64,9 @@ export async function scanWallet(walletID, full) {
 			break;
 		case 'default':
 			if (full)
-				await defaultScanner.fullScan(wallet);
+				await scanner.fullScan(wallet);
 			else
-				await defaultScanner.quickScan(wallet);
+				await scanner.quickScan(wallet);
 
 			break;
 		default:
@@ -83,17 +93,11 @@ export async function scanWallet(walletID, full) {
 }
 
 export async function scanTransactions(wallet) {
-	const addresses = await getWalletAddresses(wallet.id);
-
-	if (!Array.isArray(addresses) || addresses.length === 0)
-		throw new Error('wallet has no addresses');
-
-	const balance = await getTransactions(addresses.map(a => a.address));
-
-	wallet = new Wallet({
-		...wallet,
-		...balance
-	});
-
-	await Store.dispatch('saveWallet', wallet);
+	switch (wallet.server_type) {
+	case 'walrus':
+	case 'narwal':
+		return walrusScanner.scanTransactions(wallet);
+	default:
+		return defaultScanner.scanTransactions(wallet);
+	}
 }

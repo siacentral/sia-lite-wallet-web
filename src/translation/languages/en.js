@@ -44,6 +44,9 @@ export default {
 		unconfirmed: 'Unconfirmed',
 		half: 'Half',
 		full: 'Full',
+		siacentral: 'Sia Central',
+		walrus: 'Walrus',
+		narwal: 'Narwal',
 		walletStatus: {
 			scanning: 'Scanning...',
 			queued: 'Scan Queued...'
@@ -113,6 +116,7 @@ export default {
 			lblWalletName: 'Wallet Name',
 			lblRecoverySeed: 'Recovery Seed',
 			lblSeedType: 'Seed Type',
+			lblServerType: 'Server Type',
 			siaSeed: 'Sia Seed',
 			walrusSeed: 'Walrus Seed'
 		},

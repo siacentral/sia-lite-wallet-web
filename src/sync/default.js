@@ -1,6 +1,7 @@
-import { recoverAddresses } from '@/utils/sia';
+import { recoverAddresses, getTransactions } from '@/utils/sia';
 import { saveAddresses, getWalletAddresses } from '@/store/db';
 import Store from '@/store';
+import Wallet from '@/types/wallet';
 
 export default {
 	quickScan: async function(wallet) {
@@ -48,5 +49,20 @@ export default {
 				wallet_id: wallet.id
 			})));
 		});
+	},
+	scanTransactions: async function(wallet) {
+		const addresses = await getWalletAddresses(wallet.id);
+
+		if (!Array.isArray(addresses) || addresses.length === 0)
+			throw new Error('wallet has no addresses');
+
+		const balance = await getTransactions(addresses.map(a => a.address));
+
+		wallet = new Wallet({
+			...wallet,
+			...balance
+		});
+
+		await Store.dispatch('saveWallet', wallet);
 	}
 };

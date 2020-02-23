@@ -1,4 +1,4 @@
-module github.com/siacentral/sia-lite-wallet-web/wasm
+module github.com/siacentral/sia-lite-wallet-web
 
 go 1.13
 
