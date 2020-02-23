@@ -138,12 +138,12 @@ export default {
 
 				this.status = this.translate('sendSiacoinsModal.statusBroadcasting');
 
-				await broadcastTransaction({
+				await broadcastTransaction([{
 					siacoininputs: this.signed.siacoininputs,
 					siacoinoutputs: this.signed.siacoinoutputs,
 					minerfees: this.signed.minerfees,
 					transactionsignatures: this.signed.transactionsignatures
-				});
+				}]);
 				await scanTransactions(this.wallet);
 
 				this.status = 'Transaction sent...';

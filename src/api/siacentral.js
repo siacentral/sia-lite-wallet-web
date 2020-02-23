@@ -50,12 +50,11 @@ export async function getFeeAddresses() {
 	return resp.body.collected.map(a => a.address);
 }
 
-export async function broadcastTransaction(transaction, parents) {
+export async function broadcastTransaction(transactions) {
 	const resp = await sendJSONRequest(`https://api.siacentral.com/v2/wallet/broadcast`, {
 		method: 'POST',
 		body: {
-			transaction,
-			parents
+			transactions
 		}
 	});
 
