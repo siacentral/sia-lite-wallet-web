@@ -38,12 +38,10 @@ export default {
 		wallet.unspent_siacoin_outputs = values[2] || [];
 		wallet.confirmed_siacoin_balance = values[3] || '0';
 
-		console.log(values[1]);
-
 		wallet.transactions.unshift(...values[1].map(txn => {
 			let sent = new BigNumber(0);
 
-			txn.miner_fees.forEach(m => {
+			txn.fees.forEach(m => {
 				sent = sent.plus(m);
 			});
 
