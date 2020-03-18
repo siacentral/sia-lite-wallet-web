@@ -152,16 +152,18 @@ export default {
 
 				// check the server connection
 				if (wallet.server_type === 'walrus') {
+					let addresses = [];
 					try {
 						const client = new WalrusClient(wallet.server_url);
 
-						await client.getAddresses();
-
-						console.log('check passed?');
+						addresses = await client.getAddresses();
 					} catch (ex) {
 						console.warn('BuildWallet.onCreateWallet', ex.message);
 						throw new Error('Unable to connect to Walrus server. Check your URL.');
 					}
+
+					if (this.createType === 'create' && addresses.length !== 0)
+						throw new Error('That walrus server is already in use. Choose "Recover Wallet" to import an existing seed');
 				}
 
 				this.$emit('created', wallet);
