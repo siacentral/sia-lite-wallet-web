@@ -24,6 +24,7 @@
 			</div>
 		</div>
 		<build-wallet v-else-if="step === 'create'" :createType="createType" @created="onWalletCreated" />
+		<import-walrus-addresses v-else-if="step === 'import' && wallet.server_type === 'walrus'" key="import-walrus" :wallet="wallet" @imported="onImportAddresses" />
 		<import-sia-addresses v-else-if="step === 'import'" key="import-sia" :wallet="wallet" @imported="onImportAddresses" />
 		<div class="wallet-step" v-else-if="step === 'review'">
 			<p v-if="walletType === 'ledger'">{{ translate('createWalletModal.pReviewLedger') }}</p>
@@ -49,11 +50,13 @@ import { ledgerSupported } from '@/ledger';
 
 import BuildWallet from '@/components/wallet/BuildWallet';
 import ImportSiaAddresses from '@/components/addresses/ImportSiaAddresses';
+import ImportWalrusAddresses from '@/components/addresses/ImportWalrusAddresses';
 
 export default {
 	components: {
 		BuildWallet,
-		ImportSiaAddresses
+		ImportSiaAddresses,
+		ImportWalrusAddresses
 	},
 	computed: {
 		...mapState(['password', 'changeSeedType']),
@@ -118,6 +121,11 @@ export default {
 		async onWalletCreated(wallet) {
 			try {
 				this.wallet = wallet;
+
+				if (wallet.server_type === 'walrus' || wallet.server_type === 'narwal') {
+					this.step = 'import';
+					return;
+				}
 
 				switch (wallet.type) {
 				case 'ledger':
