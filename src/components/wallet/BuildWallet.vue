@@ -20,6 +20,10 @@
 					<option value="walrus">{{ translate('walrus') }}</option>
 				</select>
 			</div>
+			<div class="control" v-if="showServerURL">
+				<label>{{ translate('createWalletModal.lblServerURL') }}</label>
+				<input v-model="serverURL" />
+			</div>
 		</template>
 		<template v-if="createType === 'recover'">
 			<div class="buttons text-right">
@@ -42,8 +46,10 @@
 <script>
 import { mapState } from 'vuex';
 import { generateSeed, generateAddresses } from '@/utils/sia';
+import { hexID } from '@/utils/crypto';
 import { randomBytes } from 'tweetnacl';
 import { encode } from '@stablelib/base64';
+import WalrusClient from '@/api/walrus';
 
 import ImportSeedModal from '@/modal/ImportSeedModal';
 
@@ -75,6 +81,14 @@ export default {
 			default:
 				return this.translate('generate');
 			}
+		},
+		showServerURL() {
+			if ((this.createType === 'recover' && this.serverType !== 'siacentral') ||
+				(this.createType === 'watch' && this.serverType !== 'siacentral') ||
+				this.serverType === 'walrus')
+				return true;
+
+			return false;
 		}
 	},
 	data() {
@@ -84,7 +98,8 @@ export default {
 			walletName: '',
 			recoverySeed: '',
 			seedType: 'sia',
-			serverType: 'siacentral'
+			serverType: 'siacentral',
+			serverURL: null
 		};
 	},
 	methods: {
@@ -117,13 +132,39 @@ export default {
 			this.creating = true;
 
 			try {
-				const seed = await this.generateWalletSeed();
+				const seed = await this.generateWalletSeed(),
+					wallet = {
+						seed,
+						title: this.walletName,
+						type: this.walletType,
+						server_type: this.serverType,
+						server_url: this.serverURL
+					};
 
-				this.$emit('created', {
-					seed,
-					title: this.walletName,
-					type: this.walletType
-				});
+				// narwal wallets are walrus
+				if (this.serverType === 'narwal') {
+					wallet.server_type = 'walrus';
+
+					// automatically generate a new narwal url
+					if (this.createType === 'create')
+						wallet.server_url = `https://narwal.lukechampine.com/wallet/${hexID(8)}`;
+				}
+
+				// check the server connection
+				if (wallet.server_type === 'walrus') {
+					try {
+						const client = new WalrusClient(wallet.server_url);
+
+						await client.getAddresses();
+
+						console.log('check passed?');
+					} catch (ex) {
+						console.warn('BuildWallet.onCreateWallet', ex.message);
+						throw new Error('Unable to connect to Walrus server. Check your URL.');
+					}
+				}
+
+				this.$emit('created', wallet);
 			} catch (ex) {
 				console.error('onCreateWallet', ex);
 				this.pushNotification({

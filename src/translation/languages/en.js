@@ -117,6 +117,7 @@ export default {
 			lblRecoverySeed: 'Recovery Seed',
 			lblSeedType: 'Seed Type',
 			lblServerType: 'Server Type',
+			lblServerURL: 'Server URL',
 			siaSeed: 'Sia Seed',
 			walrusSeed: 'Walrus Seed'
 		},
