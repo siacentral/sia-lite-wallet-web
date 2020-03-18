@@ -35,7 +35,6 @@ type (
 
 	processedTransaction struct {
 		TransactionID     string                   `json:"transaction_id"`
-		Direction         string                   `json:"direction"`
 		BlockHeight       uint64                   `json:"block_height"`
 		Confirmations     uint64                   `json:"confirmations"`
 		Fees              siatypes.Currency        `json:"fees"`
@@ -54,8 +53,8 @@ type (
 	}
 
 	processedTxnValue struct {
-		Value siatypes.Currency `json:"value"`
-		Direction string `json:"direction"`
+		Value     siatypes.Currency `json:"value"`
+		Direction string            `json:"direction"`
 	}
 
 	processedSiacoinOutput struct {
