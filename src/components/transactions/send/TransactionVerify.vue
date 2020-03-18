@@ -36,7 +36,7 @@
 
 <script>
 import BigNumber from 'bignumber.js';
-import { formatSiacoinString } from '@/utils/format';
+import { formatPriceString } from '@/utils/format';
 import { mapState } from 'vuex';
 import { signTransaction } from '@/utils/sia';
 import { scanTransactions } from '@/sync/scanner';
@@ -79,7 +79,7 @@ export default {
 			};
 		},
 		remStr() {
-			const format = formatSiacoinString(this.remainder);
+			const format = formatPriceString(this.remainder, 2);
 
 			return `${format.value} <span class="currency-display">${format.label}</div>`;
 		},
@@ -88,8 +88,6 @@ export default {
 				output = this.transaction.siacoin_outputs.reduce((v, o) => v.plus(o.value), new BigNumber(0));
 
 			output = output.plus(this.transaction.miner_fees.reduce((v, f) => v.plus(f), new BigNumber(0)));
-
-			console.log(input.toString(10), output.toString(10));
 
 			return output.minus(input).abs();
 		},
