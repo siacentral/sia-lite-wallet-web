@@ -26,6 +26,7 @@
 				:requiredSignatures="requiredSignatures"
 				@signed="onLedgerSigned" />
 			<div v-else-if="sending" :key="status">{{ status }}</div>
+			<div v-else-if="!valid" :key="valid" class="text-danger">Transaction is not valid, would burn <template v-html="remStr" /></div>
 			<div class="buttons" v-else key="send">
 				<button class="btn btn-success btn-inline" :disabled="sending" @click="onVerifyTxn">{{ translate('send') }}</button>
 			</div>
@@ -34,6 +35,8 @@
 </template>
 
 <script>
+import BigNumber from 'bignumber.js';
+import { formatSiacoinString } from '@/utils/format';
 import { mapState } from 'vuex';
 import { signTransaction } from '@/utils/sia';
 import { scanTransactions } from '@/sync/scanner';
@@ -74,6 +77,24 @@ export default {
 					coveredfields: { wholetransaction: true }
 				}))
 			};
+		},
+		remStr() {
+			const format = formatSiacoinString(this.remainder);
+
+			return `${format.value} <span class="currency-display">${format.label}</div>`;
+		},
+		remainder() {
+			let input = this.transaction.siacoin_inputs.reduce((v, i) => v.plus(i.value), new BigNumber(0)),
+				output = this.transaction.siacoin_outputs.reduce((v, o) => v.plus(o.value), new BigNumber(0));
+
+			output = output.plus(this.transaction.miner_fees.reduce((v, f) => v.plus(f), new BigNumber(0)));
+
+			console.log(input.toString(10), output.toString(10));
+
+			return output.minus(input).abs();
+		},
+		valid() {
+			return this.remainder.eq(0);
 		},
 		requiredSignatures() {
 			return this.transaction.siacoin_inputs.map(i => i.index);

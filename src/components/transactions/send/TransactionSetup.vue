@@ -141,6 +141,9 @@ export default {
 			return this.fundTransaction(this.sendAmount).inputs.length;
 		},
 		apiFee() {
+			if (this.wallet.server_type && this.wallet.server_type !== 'siacentral')
+				return new BigNumber(0);
+
 			return calculateFee(this.minInputs, 3,
 				new BigNumber(this.networkFees.api.fee));
 		},
@@ -224,25 +227,24 @@ export default {
 				feeAddress = this.networkFees.api.address,
 				change = added.minus(this.fees).minus(this.sendAmount);
 
-			console.log(inputs, added);
-
 			if (added.lt(this.sendAmount.plus(this.fees)))
 				throw new Error('not enough funds to create transaction');
 
-			txn.siacoin_outputs.push(
-				{
-					unlock_hash: this.recipientAddress,
-					value: this.sendAmount.toString(10),
-					tag: 'Recipient',
-					owned: this.ownsAddress(this.recipientAddress)
-				},
-				{
+			txn.siacoin_outputs.push({
+				unlock_hash: this.recipientAddress,
+				value: this.sendAmount.toString(10),
+				tag: 'Recipient',
+				owned: this.ownsAddress(this.recipientAddress)
+			});
+
+			if (this.apiFee.gt(0)) {
+				txn.siacoin_outputs.push({
 					unlock_hash: feeAddress,
 					value: this.apiFee.toString(10),
 					tag: 'API Fee',
 					owned: false
-				}
-			);
+				});
+			}
 
 			if (change.gt(0)) {
 				if (!this.changeAddress || !this.changeAddress.address || !verifyAddress(this.changeAddress.address))
