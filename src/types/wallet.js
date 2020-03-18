@@ -29,13 +29,16 @@ export default class Wallet {
 	}
 
 	unconfirmedSiacoinBalance() {
-		if (!this.confirmed_siacoin_balance || this.confirmed_siacoin_balance.isNaN())
-			return new BigNumber(0);
+		let balance = this.confirmed_siacoin_balance,
+			delta = this.unconfirmed_siacoin_delta;
 
-		if (!this.unconfirmed_siacoin_delta || this.unconfirmed_siacoin_delta.isNaN())
-			return new BigNumber(0);
+		if (!balance || balance.isNaN())
+			balance = new BigNumber(0);
 
-		return this.confirmed_siacoin_balance.plus(this.unconfirmed_siacoin_delta);
+		if (!delta || delta.isNaN())
+			delta = new BigNumber(0);
+
+		return balance.plus(delta);
 	}
 
 	confirmedSiafundBalance() {
@@ -46,12 +49,15 @@ export default class Wallet {
 	}
 
 	unconfirmedSiafundBalance() {
-		if (!this.confirmed_siafund_balance || this.confirmed_siafund_balance.isNaN())
-			return new BigNumber(0);
+		let balance = this.confirmed_siafund_balance,
+			delta = this.unconfirmed_siafund_delta;
 
-		if (!this.unconfirmed_siafund_delta || this.unconfirmed_siafund_delta.isNaN())
-			return new BigNumber(0);
+		if (!balance || balance.isNaN())
+			balance = new BigNumber(0);
 
-		return this.confirmed_siafund_balance.plus(this.unconfirmed_siafund_delta);
+		if (!delta || delta.isNaN())
+			delta = new BigNumber(0);
+
+		return balance.plus(delta);
 	}
 };
