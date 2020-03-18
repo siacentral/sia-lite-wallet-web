@@ -2,15 +2,20 @@ import { sendJSONRequest } from './common';
 
 const baseURL = 'https://api.siacentral.com';
 
-export function getBlock(height) {
-	let url = `${baseURL}/v2/explorer/block`;
+export async function getBlock(height) {
+	let url = `${baseURL}/v2/explorer/blocks`;
 
 	if (height)
 		url += `?height=${height}`;
 
-	return sendJSONRequest(url, {
+	const resp = await sendJSONRequest(url, {
 		method: 'GET'
 	});
+
+	if (resp.body.type !== 'success')
+		throw new Error(resp.body.message);
+
+	return resp.body.block;
 }
 
 export async function getCoinPrice() {
