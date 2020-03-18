@@ -85,7 +85,7 @@ export default class {
 
 		return resp.body.map(u => ({
 			output_id: u.ID,
-			unlock_hash: u.unlockHash,
+			unlock_hash: u.unlockhash,
 			source: 'siacoin_transaction',
 			maturity_height: 0,
 			block_height: 0,
@@ -93,12 +93,10 @@ export default class {
 		}));
 	}
 
-	async broadcastTransaction(txn) {
+	async broadcastTransaction(txnset) {
 		const resp = await sendJSONRequest(singleJoiningSlash(this._baseURL, '/broadcast'), {
 			method: 'POST',
-			body: [
-				txn
-			]
+			body: txnset
 		});
 
 		if (resp.statusCode < 200 || resp.statusCode >= 300)
