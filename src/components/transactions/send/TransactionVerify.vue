@@ -38,6 +38,7 @@ import { mapState } from 'vuex';
 import { signTransaction } from '@/utils/sia';
 import { scanTransactions } from '@/sync/scanner';
 import { broadcastTransaction } from '@/api/siacentral';
+import WalrusClient from '@/api/walrus';
 
 import SignLedgerTransaction from '@/components/ledger/SignLedgerTransaction';
 import TransactionSummary from '@/components/transactions/TransactionSummary';
@@ -114,6 +115,21 @@ export default {
 				});
 			}
 		},
+		broadcastTxnset(txnset) {
+			switch (this.wallet.server_type) {
+			case 'walrus':
+				const client = new WalrusClient(this.wallet.server_url);
+
+				return client.broadcastTransaction(txnset.map(txn => ({
+					siacoinInputs: txn.siacoininputs,
+					siacoinOutputs: txn.siacoinoutputs,
+					minerFees: txn.minerfees,
+					transactionSignatures: txn.transactionsignatures
+				})));
+			default:
+				return broadcastTransaction(txnset);
+			}
+		},
 		async onVerifyTxn() {
 			if (this.sending)
 				return;
@@ -138,7 +154,7 @@ export default {
 
 				this.status = this.translate('sendSiacoinsModal.statusBroadcasting');
 
-				await broadcastTransaction([{
+				await this.broadcastTxnset([{
 					siacoininputs: this.signed.siacoininputs,
 					siacoinoutputs: this.signed.siacoinoutputs,
 					minerfees: this.signed.minerfees,

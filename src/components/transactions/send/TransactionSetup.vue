@@ -189,6 +189,8 @@ export default {
 			const inputs = [];
 			let added = new BigNumber(0);
 
+			console.log(this.unspent);
+
 			for (let i = 0; i < this.unspent.length; i++) {
 				const output = this.unspent[i],
 					addr = this.ownedAddresses.find(a => output.unlock_hash === a.address && a.unlock_conditions);
@@ -221,6 +223,8 @@ export default {
 				},
 				feeAddress = this.networkFees.api.address,
 				change = added.minus(this.fees).minus(this.sendAmount);
+
+			console.log(inputs, added);
 
 			if (added.lt(this.sendAmount.plus(this.fees)))
 				throw new Error('not enough funds to create transaction');

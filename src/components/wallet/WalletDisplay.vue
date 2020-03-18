@@ -212,7 +212,7 @@ export default {
 		...mapActions(['deleteWallet']),
 		onSelectTransaction(id) {
 			try {
-				if (!this.walletTransactions[id])
+				if (!this.walletTransactions[id] || this.wallet.server_type === 'walrus')
 					return;
 
 				this.selectedTransaction = id;
