@@ -151,7 +151,7 @@ export default class {
 			const processed = {
 					transaction_id: id,
 					block_height: parseInt(txn.blockHeight, 10),
-					fees: txn.minerFees,
+					fees: txn.transaction.minerFees,
 					siafund_inputs: [],
 					siafund_outputs: [],
 					timestamp: new Date(txn.timestamp)
@@ -159,7 +159,7 @@ export default class {
 				inflow = new BigNumber(txn.inflow),
 				outflow = new BigNumber(txn.outflow);
 
-			if (inflow.gt(outflow)) {
+			if (outflow.eq(0)) {
 				processed.siacoin_value = {
 					direction: 'received',
 					value: inflow.toString(10)
@@ -167,19 +167,19 @@ export default class {
 			} else {
 				processed.siacoin_value = {
 					direction: 'sent',
-					value: outflow.minus(inflow).toString(10)
+					value: outflow.toString(10)
 				};
 			}
 
-			if (Array.isArray(txn.siacoinOutputs)) {
-				processed.siacoin_outputs = txn.siacoinOutputs.map(o => ({
+			if (Array.isArray(txn.transaction.siacoinOutputs)) {
+				processed.siacoin_outputs = txn.transaction.siacoinOutputs.map(o => ({
 					value: o.value,
 					unlock_hash: o.unlockHash
 				}));
 			}
 
-			if (Array.isArray(txn.siacoinInputs)) {
-				processed.siacoin_inputs = txn.siacoinInputs.map(i => ({
+			if (Array.isArray(txn.transaction.siacoinInputs)) {
+				processed.siacoin_inputs = txn.transaction.siacoinInputs.map(i => ({
 					parent_id: i.parentID,
 					unlock_conditions: {
 						publickeys: i.unlockConditions.publicKeys,
@@ -192,6 +192,34 @@ export default class {
 
 			return transactions;
 		}, []);
+	}
+
+	async getLimboTransactions() {
+		const transactions = await sendJSONRequest(singleJoiningSlash(this._baseURL, '/limbo'), {
+			method: 'GET'
+		});
+
+		if (transactions.statusCode < 200 || transactions.statusCode >= 300)
+			throw new Error(transactions.body);
+
+		if (!Array.isArray(transactions.body))
+			return [];
+
+		return transactions.body.map(txn => ({
+			siacoin_inputs: txn.siacoinInputs.map(i => ({
+				parent_id: i.parentID,
+				unlock_conditions: {
+					publickeys: i.unlockConditions.publicKeys,
+					signaturesrequired: i.signaturesRequired
+				}
+			})),
+			siacoin_outputs: txn.siacoinOutputs.map(o => ({
+				value: o.value,
+				unlock_hash: o.unlockHash
+			})),
+			fees: txn.minerFees,
+			confirmations: 0
+		}));
 	}
 
 	async addUnlockConditions(unlockConditions, keyIndex) {

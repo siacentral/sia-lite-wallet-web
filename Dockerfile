@@ -1,12 +1,13 @@
 # build wasm
 FROM golang:1.13-alpine AS buildgo
 
+RUN echo "Install Build Tools" && apk update && apk upgrade && apk add --no-cache gcc musl-dev openssl git
+
 WORKDIR /app
 
-COPY ./wasm .
+COPY . .
 
-RUN GOARCH=wasm GOOS=js go get
-RUN GOARCH=wasm GOOS=js go build -o sia.wasm main.go
+RUN GOARCH=wasm GOOS=js go build -o sia.wasm wasm/main.go
 RUN cp "$(go env GOROOT)/misc/wasm/wasm_exec.js" /app
 
 # build web app
