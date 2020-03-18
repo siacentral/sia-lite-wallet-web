@@ -26,7 +26,7 @@
 									:disabled="walletQueued">
 									<icon icon="redo" />{{ translate('rescanWallet') }}</button>
 								<button class="dropdown-item"
-									v-if="wallet.type === 'watch' || wallet.type === 'ledger'"
+									v-if="wallet.server_type === 'walrus' || wallet.type === 'watch' || wallet.type === 'ledger'"
 									@click="onDropdownModal('add')">
 									<icon icon="plus" />{{ translate('addAddresses') }}</button>
 								<button class="dropdown-item" @click="onDropdownModal('export')" v-if="wallet.type === 'default'">
