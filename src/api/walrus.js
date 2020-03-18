@@ -1,30 +1,28 @@
 import { sendJSONRequest } from './common';
 
+function singleJoiningSlash(a, b) {
+	const aslash = a[a.length - 1] === '/',
+		bslash = b[0] === '/';
+
+	if (aslash && bslash)
+		return a + b.substring(1);
+	else if (!aslash && !bslash)
+		return a + '/' + b;
+
+	return a + b;
+}
+
 export default class {
 	constructor(addr) {
+		if (typeof addr !== 'string' || addr.length === 0)
+			throw new Error('server address is required');
+
 		this._baseURL = addr;
 	}
 
-	async getAddressUnlockConditions(address) {
-		const resp = await sendJSONRequest(`${this._baseURL}/addresses/${address}`, {
-			method: 'GET'
-		});
-
-		if (resp.statusCode < 200 || resp.statusCode >= 300)
-			throw new Error(resp.body);
-
-		return {
-			unlock_conditions: {
-				public_keys: resp.body.unlockConditions.publicKeys,
-				signatures_required: resp.body.unlockConditions.signaturesRequired
-			},
-			index: resp.body.keyIndex,
-			address
-		};
-	}
-
 	async getAddresses() {
-		const addresses = await sendJSONRequest(`${this._baseURL}/addresses`, {
+		console.log(this._baseURL, '/addresses', singleJoiningSlash(this._baseURL, '/addresses'));
+		const addresses = await sendJSONRequest(singleJoiningSlash(this._baseURL, '/addresses'), {
 			method: 'GET'
 		});
 
@@ -34,16 +32,41 @@ export default class {
 		if (!Array.isArray(addresses.body))
 			return [];
 
-		const promises = [];
+		return addresses.body;
+	}
 
-		for (let i = 0; i < addresses.body.length; i++)
-			promises.push(this.getAddressUnlockConditions(addresses.body[i]));
+	async getUnlockConditions() {
+		const addresses = await this.getAddresses(),
+			unlockConds = await sendJSONRequest(singleJoiningSlash(this._baseURL, '/batchquery/addresses'), {
+				method: 'POST',
+				body: addresses
+			});
 
-		return Promise.all(promises);
+		if (unlockConds.statusCode < 200 || unlockConds.statusCode >= 300)
+			throw new Error(unlockConds.body);
+
+		if (!Array.isArray(unlockConds.body))
+			return [];
+
+		return addresses.reduce((uc, a) => {
+			// only supports unlock conditons with 1 signature required for now
+			if (unlockConds[a] && unlockConds[a].unlockConditions.signaturesRequired === 1) {
+				uc.push({
+					address: a,
+					unlock_conditions: {
+						publickeys: unlockConds[a].unlockConditions.publicKeys,
+						signaturesrequired: unlockConds[a].unlockConditions.signaturesRequired
+					},
+					index: unlockConds[a].keyIndex
+				});
+			}
+
+			return uc;
+		}, []);
 	}
 
 	async getUnspentOutputs() {
-		const resp = await sendJSONRequest(`${this._baseURL}/utxos`, {
+		const resp = await sendJSONRequest(singleJoiningSlash(this._baseURL, '/utxos'), {
 			method: 'GET'
 		});
 
@@ -54,7 +77,7 @@ export default class {
 	}
 
 	async broadcastTransaction(txn) {
-		const resp = await sendJSONRequest(`${this._baseURL}/broadcast`, {
+		const resp = await sendJSONRequest(singleJoiningSlash(this._baseURL, '/broadcast'), {
 			method: 'POST',
 			body: [
 				txn
@@ -70,7 +93,7 @@ export default class {
 	async getBalance(limbo) {
 		limbo = typeof limbo === 'boolean' ? limbo : true;
 
-		const resp = await sendJSONRequest(`${this._baseURL}/balance?limbo=${limbo}`, {
+		const resp = await sendJSONRequest(singleJoiningSlash(this._baseURL, `/balance?limbo=${limbo}`), {
 			method: 'GET'
 		});
 
@@ -80,30 +103,20 @@ export default class {
 		return resp.body;
 	}
 
-	async getTransactions(limit, page) {
-		const start = limit * page,
-			end = start + limit,
-			transactions = await sendJSONRequest(`${this._baseURL}/transactions`, {
-				method: 'GET'
-			}),
-			promises = [];
+	async getTransactions() {
+		const transactions = await sendJSONRequest(singleJoiningSlash(this._baseURL, '/batchquery/transactions'), {
+			method: 'POST'
+		});
 
 		if (transactions.statusCode < 200 || transactions.statusCode >= 300)
 			throw new Error(transactions.body);
 
 		if (!Array.isArray(transactions.body))
 			return [];
-
-		for (let i = start; i < end; i++) {
-			if (transactions.body.length >= i)
-				break;
-
-			promises.push();
-		}
 	}
 
 	async addUnlockConditions(unlockConditions, keyIndex) {
-		const resp = await sendJSONRequest(`${this._baseURL}/addresses`, {
+		const resp = await sendJSONRequest(singleJoiningSlash(this._baseURL, '/addresses'), {
 			method: 'POST',
 			body: {
 				unlockConditions,
@@ -118,7 +131,7 @@ export default class {
 	}
 
 	async removeAddress(address) {
-		const resp = await sendJSONRequest(`${this._baseURL}/addresses/${address}`, {
+		const resp = await sendJSONRequest(singleJoiningSlash(this._baseURL, `/addresses/${address}`), {
 			method: 'DELETE'
 		});
 
