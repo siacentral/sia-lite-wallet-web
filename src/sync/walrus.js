@@ -1,5 +1,4 @@
 import WalrusClient from '@/api/walrus';
-import { getBlock } from '@/api/siacentral';
 import { saveAddresses, getWalletAddresses } from '@/store/db';
 import Store from '@/store';
 import BigNumber from 'bignumber.js';
@@ -19,7 +18,6 @@ export default {
 	fullScan: scan,
 	scanTransactions: async function(wallet) {
 		const walrus = new WalrusClient(wallet.server_url),
-			blockHeight = (await getBlock()).height,
 			addresses = await getWalletAddresses(wallet.id),
 			addressMap = addresses.reduce((v, a) => {
 				v[a] = true;
@@ -35,7 +33,7 @@ export default {
 
 		wallet.transactions = values[0].map(txn => ({
 			...txn,
-			confirmations: 1 + blockHeight - txn.blockHeight
+			confirmations: 1
 		}));
 		wallet.unspent_siacoin_outputs = values[2] || [];
 		wallet.confirmed_siacoin_balance = values[3] || '0';
@@ -58,6 +56,7 @@ export default {
 				return o;
 			});
 
+			txn.confirmations = 0;
 			txn.siacoin_value = {
 				direction: 'sent',
 				value: sent
