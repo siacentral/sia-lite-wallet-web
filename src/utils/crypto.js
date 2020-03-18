@@ -17,6 +17,10 @@ export async function pbkdf2(password, salt, iterations = 1e6) {
 	return { salt, hash: keyBuf };
 }
 
+export function hexID(n) {
+	return Array.prototype.map.call(randomBytes(n), b => b.toString(16).padStart(2, '0')).join('');
+}
+
 export function encrypt(str, key) {
 	const nonce = randomBytes(secretbox.nonceLength),
 		msg = encodeUTF8(str),
