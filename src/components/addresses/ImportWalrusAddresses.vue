@@ -15,7 +15,6 @@
 			<div>{{ translate('importAddresses.balance') }}</div>
 			<div />
 			<div class="text-right" v-html="balanceSC" />
-			<!--<div class="text-right" v-if="siafundBalance.gt(0)" v-html="balanceSF" />-->
 			<div class="text-right" v-html="balanceCurrency" />
 		</div>
 		<div class="buttons text-right">
@@ -35,10 +34,10 @@
 import { mapState } from 'vuex';
 import BigNumber from 'bignumber.js';
 import { verifyAddress } from '@/utils';
-import { getTransactions, generateAddresses as generateSiaAddresses, encodeUnlockHash } from '@/utils/sia';
-import { formatPriceString, formatSiafundString, formatNumber } from '@/utils/format';
+import { generateAddresses as generateSiaAddresses, encodeUnlockHash } from '@/utils/sia';
+import { formatPriceString, formatNumber } from '@/utils/format';
 import { getVersion, getPublicKey as generateLedgerPubKey } from '@/ledger';
-import { getWalletAddresses } from '@/store/db';
+import WalrusClient from '@/api/walrus';
 
 import ConnectLedger from '@/components/ledger/ConnectLedger';
 import ImportAddressList from './ImportAddressList';
@@ -53,10 +52,10 @@ export default {
 	},
 	data() {
 		return {
+			apiClient: null,
 			ledgerVersion: '',
 			addresses: [],
 			siacoinBalance: new BigNumber(0),
-			siafundBalance: new BigNumber(0),
 			displayPublicKey: false,
 			ready: false,
 			connected: false,
@@ -94,38 +93,20 @@ export default {
 
 			return `${format.value} <span class="currency-display">${this.translate(`currency.${format.label}`)}</span>`;
 		},
-		balanceSF() {
-			let balance = new BigNumber(this.siafundBalance);
-
-			if (balance.isNaN() || !balance.isFinite())
-				balance = new BigNumber(0);
-
-			const format = formatSiafundString(balance);
-
-			return `${format.value} <span class="currency-display">${this.translate(`currency.${format.label}`)}</span>`;
-		},
 		valid() {
 			if (!Array.isArray(this.addresses) || this.addresses.length === 0)
 				return false;
 
-			if (this.walletType === 'ledger')
-				return true;
-
-			return this.addresses.filter(a => !verifyAddress(a.address)).length === 0;
+			return this.addresses.filter(a => {
+				console.log(a);
+				return !verifyAddress(a.address);
+			}).length === 0;
 		}
 	},
 	async mounted() {
 		try {
-			if (this.wallet.id) {
-				const existing = await getWalletAddresses(this.wallet.id);
-
-				existing.reverse();
-
-				this.addresses = existing.map(a => ({
-					...a,
-					pubkey: a.unlock_conditions.publickeys[0].substr(8)
-				}));
-			}
+			this.apiClient = new WalrusClient(this.wallet.server_url);
+			this.addresses = await this.apiClient.getUnlockConditions();
 
 			await this.refreshWalletBalance();
 
@@ -135,6 +116,10 @@ export default {
 				this.displayPublicKey = true;
 		} catch (ex) {
 			console.error('ImportSiaAddressesMounted', ex);
+			this.pushNotification({
+				message: ex.message,
+				severity: 'danger'
+			});
 		}
 	},
 	methods: {
@@ -168,30 +153,15 @@ export default {
 				};
 				break;
 			default:
-				addr = await generateSiaAddresses(this.wallet.seed, nextIndex, 1);
+				addr = (await generateSiaAddresses(this.wallet.seed, nextIndex, 1))[0];
 			}
 
 			return addr;
 		},
 		async refreshWalletBalance() {
-			const balance = await getTransactions(this.addresses.reduce((addrs, a) => {
-				if (verifyAddress(a.address))
-					addrs.push(a.address);
+			const balance = await this.apiClient.getBalance(true);
 
-				return addrs;
-			}, []));
-
-			let deltaSC = new BigNumber(balance.unconfirmed_siacoin_delta),
-				deltaSF = new BigNumber(balance.unconfirmed_siafund_delta);
-
-			if (deltaSC.isNaN())
-				deltaSC = new BigNumber(0);
-
-			if (deltaSF.isNaN())
-				deltaSF = new BigNumber(0);
-
-			this.siacoinBalance = new BigNumber(balance.confirmed_siacoin_balance).minus(deltaSC);
-			this.siafundBalance = new BigNumber(balance.confirmed_siafund_balance).minus(deltaSF);
+			this.siacoinBalance = new BigNumber(balance);
 		},
 		async onConnected(connected) {
 			try {
@@ -208,13 +178,14 @@ export default {
 				});
 			}
 		},
-		onDeleteAddress(i) {
+		async onDeleteAddress(i) {
 			if (!this.ready)
 				return;
 
 			this.ready = false;
 
 			try {
+				await this.apiClient.removeAddress(this.addresses[i]);
 				this.addresses.splice(i, 1);
 			} catch (ex) {
 				console.error('onDeleteAddress', ex);
@@ -237,6 +208,11 @@ export default {
 				const address = await this.generateAddress();
 
 				this.addresses.unshift(address);
+
+				await this.apiClient.addUnlockConditions({
+					publicKeys: address.unlock_conditions.publickeys,
+					signaturesRequired: address.unlock_conditions.signaturesrequired
+				}, address.index);
 				await this.refreshWalletBalance();
 			} catch (ex) {
 				console.error('onAddPublicKey', ex);
@@ -252,6 +228,9 @@ export default {
 			const address = await encodeUnlockHash(this.addresses[i].unlock_conditions);
 
 			this.addresses[i].address = address;
+		},
+		async addWalrusAddress(i) {
+
 		},
 		async onAddAddresses() {
 			if (!this.ready)

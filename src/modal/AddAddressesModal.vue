@@ -1,6 +1,7 @@
 <template>
 	<modal @close="$emit('close')">
-		<import-sia-addresses :wallet="wallet" @imported="onImportAddresses" />
+		<import-walrus-addresses v-if="walletType === 'walrus'" :wallet="wallet" @imported="onImportAddresses" />
+		<import-sia-addresses v-else :wallet="wallet" @imported="onImportAddresses" />
 	</modal>
 </template>
 
@@ -8,15 +9,22 @@
 import { saveAddresses } from '@/store/db';
 
 import ImportSiaAddresses from '@/components/addresses/ImportSiaAddresses';
+import ImportWalrusAddresses from '@/components/addresses/ImportWalrusAddresses';
 import Modal from './Modal';
 
 export default {
 	components: {
 		ImportSiaAddresses,
+		ImportWalrusAddresses,
 		Modal
 	},
 	props: {
 		wallet: Object
+	},
+	computed: {
+		walletType() {
+			return this.wallet && this.wallet.server_type ? this.wallet.server_type : 'siacentral';
+		}
 	},
 	methods: {
 		async onImportAddresses(addresses) {
