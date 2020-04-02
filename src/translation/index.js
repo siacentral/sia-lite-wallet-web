@@ -1,8 +1,9 @@
 import en from './languages/en.js';
 import cn from './languages/cn.js';
+import fr from './languages/fr.js';
 
 const supportedLanguages = [
-		en, cn
+		en, cn, fr
 	],
 	translations = {};
 

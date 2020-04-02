@@ -198,7 +198,8 @@ export default {
 		language: {
 			automatic: 'Automatic',
 			en: 'English',
-			cn: '中文'
+			cn: '中文',
+			fr: 'Français'
 		}
 	}
 };
