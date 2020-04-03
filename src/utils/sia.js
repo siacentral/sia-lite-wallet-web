@@ -84,6 +84,10 @@ export function encodeUnlockHash(unlockconditions) {
 	return defaultSpawnWorker(['encodeUnlockHash', JSON.stringify(unlockconditions)], 15000);
 }
 
+export function encodeUnlockHashes(unencoded) {
+	return defaultSpawnWorker(['encodeUnlockHashes', unencoded.map(u => JSON.stringify(u))], 15000);
+}
+
 export async function recoverAddresses(seed, i, n, count, last, progress) {
 	let worker = new Worker('/sia/sia.worker.js'),
 		work;

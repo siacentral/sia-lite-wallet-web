@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"log"
 	"syscall/js"
 
 	"github.com/siacentral/sia-lite-wallet-web/wasm/modules"
@@ -10,13 +11,14 @@ import (
 
 func main() {
 	js.Global().Set("sia", map[string]interface{}{
-		"generateSeed":      js.FuncOf(generateSeed),
-		"generateAddresses": js.FuncOf(generateAddresses),
-		"recoverAddresses":  js.FuncOf(recoverAddresses),
-		"getTransactions":   js.FuncOf(getTransactions),
-		"encodeTransaction": js.FuncOf(encodeTransaction),
-		"signTransaction":   js.FuncOf(signTransaction),
-		"encodeUnlockHash":  js.FuncOf(encodeUnlockHash),
+		"generateSeed":       js.FuncOf(generateSeed),
+		"generateAddresses":  js.FuncOf(generateAddresses),
+		"recoverAddresses":   js.FuncOf(recoverAddresses),
+		"getTransactions":    js.FuncOf(getTransactions),
+		"encodeTransaction":  js.FuncOf(encodeTransaction),
+		"signTransaction":    js.FuncOf(signTransaction),
+		"encodeUnlockHash":   js.FuncOf(encodeUnlockHash),
+		"encodeUnlockHashes": js.FuncOf(encodeUnlockHashes),
 	})
 
 	c := make(chan bool, 1)
@@ -102,6 +104,35 @@ func encodeUnlockHash(this js.Value, args []js.Value) interface{} {
 		}
 
 		callback.Invoke(js.Null(), unlockConds.UnlockHash().String())
+	}()
+
+	return true
+}
+
+func encodeUnlockHashes(this js.Value, args []js.Value) interface{} {
+	if !checkArgs(args, js.TypeObject, js.TypeFunction) {
+		log.Println("wrong arguments")
+		return false
+	}
+
+	length := args[0].Length()
+	addresses := make([]interface{}, 0, length)
+	callback := args[1]
+
+	go func() {
+		for i := 0; i < length; i++ {
+			var uc siatypes.UnlockConditions
+
+			if err := json.Unmarshal([]byte(args[0].Index(i).String()), &uc); err != nil {
+				log.Println(err)
+				callback.Invoke(err.Error(), js.Null())
+				return
+			}
+
+			addresses = append(addresses, uc.UnlockHash().String())
+		}
+
+		callback.Invoke(js.Null(), addresses)
 	}()
 
 	return true
