@@ -94,7 +94,7 @@ export default {
 	overflow: hidden;
 
 	@media screen and (min-width: 767px) {
-		grid-template-columns: minmax(auto, 200px) minmax(0, 1fr);
+		grid-template-columns: auto minmax(0, 1fr);
 	}
 }
 
