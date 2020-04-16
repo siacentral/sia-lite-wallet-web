@@ -25,7 +25,7 @@
 		</div>
 		<import-address-list v-model="addresses" :wallet="wallet" :publickey="displayPublicKey" />
 		<div class="buttons">
-			<button class="btn btn-inline btn-success" @click="onAddAddresses" :disabled="!valid || !ready">{{ translate('add') }}</button>
+			<button class="btn btn-inline btn-success" @click="onAddAddresses" :disabled="!valid || !ready">{{ translate('done') }}</button>
 		</div>
 	</div>
 </template>
