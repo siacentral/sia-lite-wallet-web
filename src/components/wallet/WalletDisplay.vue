@@ -349,6 +349,9 @@ export default {
 	display: inline-block;
 	right: 0;
 	top: 3px;
+	outline: none;
+	border: none;
+	background: transparent;
 	color: rgba(255, 255, 255, 0.54);
 
 	@media screen and (min-width: 767px) {
