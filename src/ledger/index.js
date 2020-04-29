@@ -1,3 +1,4 @@
+import { ledgerUSBVendorId } from '@ledgerhq/devices';
 import TransportWebHID from '@ledgerhq/hw-transport-webhid';
 import { listen } from '@ledgerhq/logs';
 import { Buffer } from 'buffer';
@@ -10,6 +11,23 @@ const CODE_SUCCESS = 0x9000,
 	CODE_USER_REJECTED = 0x6985,
 	CODE_INVALID_PARAM = 0x6b01,
 	CODE_INVALID_INIT = 0x6b02;
+
+function getHID() {
+	const { hid } = navigator;
+	if (!hid)
+		throw new Error('navigator.hid is not supported');
+
+	return hid;
+};
+
+async function requestLedgerDevice() {
+	const device = await getHID().requestDevice({ filters: [{ vendorId: ledgerUSBVendorId }] });
+
+	if (device.length === 0)
+		throw new Error('no device selected');
+
+	return device;
+}
 
 function buildAPDU(cmd, p1, p2, data) {
 	if (data && !(data instanceof Uint8Array))
@@ -46,9 +64,14 @@ async function connect() {
 
 	const transports = await supportedTransports();
 
-	if (transports.indexOf('hid') !== -1)
-		transport = await TransportWebHID.create();
-	else
+	if (transports.indexOf('hid') !== -1) {
+		const approved = await TransportWebHID.list();
+
+		if (!Array.isArray(approved) || approved.length === 0)
+			await requestLedgerDevice();
+
+		transport = await TransportWebHID.openConnected();
+	} else
 		throw new Error('no supported transports');
 
 	transport.setScrambleKey('');
@@ -86,8 +109,12 @@ export async function connected() {
 }
 
 export async function getVersion() {
-	if (!transport)
+	console.log(transport);
+
+	if (!transport) {
+		console.log('transport disconnected');
 		await connect();
+	}
 
 	const resp = await exchange(0x01, 0x00, 0x00, null, false);
 
