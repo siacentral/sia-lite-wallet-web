@@ -92,6 +92,9 @@ export default {
 
 			return unspent;
 		},
+		fees() {
+			return this.siaFee.plus(this.apiFee);
+		},
 		transactionFeeSC() {
 			const siacoins = formatPriceString(this.fees, 2);
 
@@ -136,29 +139,15 @@ export default {
 				return this.translate('sendSiacoinsModal.errorBadRecipient');
 
 			return null;
-		},
-		minInputs() {
-			return this.fundTransaction(this.sendAmount).inputs.length;
-		},
-		apiFee() {
-			if (this.wallet.server_type && this.wallet.server_type !== 'siacentral')
-				return new BigNumber(0);
-
-			return calculateFee(this.minInputs, 3,
-				new BigNumber(this.networkFees.api.fee));
-		},
-		siaFee() {
-			return calculateFee(this.minInputs, 3,
-				new BigNumber(this.networkFees.minimum).plus(this.networkFees.maximum).div(2));
-		},
-		fees() {
-			return this.apiFee.plus(this.siaFee);
 		}
 	},
 	data() {
 		return {
 			recipientAddress: '',
+			inputs: [],
 			sendAmount: new BigNumber(0),
+			siaFee: new BigNumber(0),
+			apiFee: new BigNumber(0),
 			sending: false,
 			ownedAddresses: []
 		};
@@ -188,11 +177,18 @@ export default {
 		ownsAddress(address) {
 			return this.ownedAddresses.findIndex(a => a.address === address && a.unlock_conditions) !== -1;
 		},
-		fundTransaction(amount) {
+		calcTxnFees(inputs) {
+			const sia = calculateFee(inputs, 3, new BigNumber(this.networkFees.minimum));
+			let api = new BigNumber(0);
+
+			if (this.wallet.server_type && this.wallet.server_type === 'siacentral')
+				api = calculateFee(inputs, 3, new BigNumber(this.networkFees.api.fee));
+
+			return { sia, api, total: sia.plus(api) };
+		},
+		addInputs(amount) {
 			const inputs = [];
 			let added = new BigNumber(0);
-
-			console.log(this.unspent);
 
 			for (let i = 0; i < this.unspent.length; i++) {
 				const output = this.unspent[i],
@@ -212,16 +208,21 @@ export default {
 					break;
 			}
 
-			return {
-				inputs,
-				added
-			};
+			return inputs;
+		},
+		fundTransactionWithFees(amount) {
+			const minInputs = this.addInputs(amount),
+				{ sia, api } = this.calcTxnFees(minInputs.length);
+
+			this.inputs = this.addInputs(amount.plus(sia).plus(api));
+			this.siaFee = sia;
+			this.apiFee = api;
 		},
 		buildTransaction() {
-			const { inputs, added } = this.fundTransaction(this.sendAmount.plus(this.fees)),
+			const added = this.inputs.reduce((v, i) => v.plus(i.value), new BigNumber(0)),
 				txn = {
 					miner_fees: [this.siaFee.toString(10)],
-					siacoin_inputs: inputs,
+					siacoin_inputs: this.inputs,
 					siacoin_outputs: []
 				},
 				feeAddress = this.networkFees.api.address,
@@ -273,6 +274,13 @@ export default {
 				}
 
 				this.sendAmount = unspentTotal.div(2).dp(0, BigNumber.ROUND_DOWN);
+				this.inputs = this.addInputs(this.sendAmount);
+
+				const { sia, api } = this.calcTxnFees(this.inputs.length);
+
+				this.siaFee = sia;
+				this.apiFee = api;
+
 				this.onFormatValues();
 			} catch (ex) {
 				console.error('onSendHalf', ex);
@@ -284,20 +292,19 @@ export default {
 		},
 		onSendFull() {
 			try {
-				const inputs = this.unspent.length,
-					networkFees = calculateFee(inputs, 3,
-						new BigNumber(this.networkFees.minimum).plus(this.networkFees.maximum).div(2)),
-					siaFees = calculateFee(inputs, 3,
-						new BigNumber(this.networkFees.api.fee)),
-					totalFee = networkFees.plus(siaFees),
+				const { sia, api, total } = this.calcTxnFees(this.unspent.length),
 					unspentTotal = this.unspent.reduce((v, u) => v.plus(u.value), new BigNumber(0));
 
-				if (unspentTotal.eq(0) || unspentTotal.lt(totalFee)) {
+				if (unspentTotal.eq(0) || unspentTotal.lt(total)) {
 					this.sendAmount = new BigNumber(0);
 					return;
 				}
 
-				this.sendAmount = unspentTotal.minus(totalFee);
+				this.siaFee = sia;
+				this.apiFee = api;
+				this.sendAmount = unspentTotal.minus(total);
+				this.inputs = this.addInputs(unspentTotal);
+
 				this.onFormatValues();
 			} catch (ex) {
 				console.error('onSendFull', ex);
@@ -346,6 +353,7 @@ export default {
 
 				this.sendAmount = parsed;
 				this.$refs.txtCurrency.value = this.formatCurrencyString(parsed);
+				this.fundTransactionWithFees(this.sendAmount);
 			} catch (ex) {
 				console.error('onChangeSiacoin', ex);
 				this.pushNotification({
@@ -362,6 +370,7 @@ export default {
 
 				this.sendAmount = parsed;
 				this.$refs.txtSiacoin.value = siacoins.value;
+				this.fundTransactionWithFees(this.sendAmount);
 			} catch (ex) {
 				console.error('onChangeCurrency', ex);
 				this.pushNotification({
