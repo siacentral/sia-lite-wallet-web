@@ -22,7 +22,7 @@
 			<div>{{ translate('transactionFee') }}</div>
 			<div class="text-right" v-html="transactionFeeSC" />
 			<div class="text-right" v-html="transactionFeeCurrency" />
-			<div>{{ translate('sendSiacoinsModal.spendableBalance') }}</div>
+			<div>{{ translate('sendSiacoinsModal.remainingBalance') }}</div>
 			<div class="text-right" v-html="remainingBalanceSC" />
 			<div class="text-right" v-html="remainingBalanceCurrency" />
 		</div>
