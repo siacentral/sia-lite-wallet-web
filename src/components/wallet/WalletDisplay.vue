@@ -29,6 +29,9 @@
 									v-if="wallet.server_type === 'walrus' || wallet.type === 'watch' || wallet.type === 'ledger'"
 									@click="onDropdownModal('add')">
 									<icon icon="plus" />{{ translate('addAddresses') }}</button>
+								<button class="dropdown-item" @click="onDefragWallet"
+									:disabled="walletQueued">
+									<icon icon="redo" />{{ translate('defragWallet') }}</button>
 								<button class="dropdown-item" @click="onDropdownModal('export')" v-if="wallet.type === 'default'">
 									<icon icon="file-export" />{{ translate('exportSeed') }}</button>
 								<button class="dropdown-item" @click="onDropdownModal('delete')">
@@ -60,6 +63,7 @@
 				@close="modal = null" @selected="onDeleteWallet">
 				<p>{{ translate('deleteWalletModal.pDeleteConfirm', name) }}</p>
 			</confirm-modal>
+			<defrag-siacoin-modal v-else-if="modal === 'defrag'" :wallet="wallet" @close="modal = null" />
 			<send-siacoin-modal v-else-if="modal === 'send'" :wallet="wallet" @close="modal = null" />
 			<receive-siacoin-modal v-else-if="modal === 'receive'" :wallet="wallet" @close="modal = null" />
 			<transaction-detail-modal v-else-if="modal === 'transaction'" :transaction="walletTransactions[selectedTransaction]" @close="modal = null" />
@@ -81,6 +85,7 @@ import { formatPriceString, formatSiafundString } from '@/utils/format';
 
 import AddAddressesModal from '@/modal/AddAddressesModal';
 import ConfirmModal from '@/modal/ConfirmModal';
+import DefragSiacoinModal from '@/modal/DefragSiacoinModal';
 import ExportSeedModal from '@/modal/ExportSeedModal';
 import ReceiveSiacoinModal from '@/modal/ReceiveSiacoinModal';
 import SendSiacoinModal from '@/modal/SendSiacoinModal';
@@ -92,6 +97,7 @@ export default {
 	components: {
 		AddAddressesModal,
 		ConfirmModal,
+		DefragSiacoinModal,
 		ExportSeedModal,
 		ReceiveSiacoinModal,
 		SendSiacoinModal,
@@ -242,6 +248,18 @@ export default {
 				console.error('onQueueWallet', ex);
 			} finally {
 				this.showMore = false;
+			}
+		},
+		onDefragWallet() {
+			try {
+				this.modal = 'defrag';
+			} catch (ex) {
+				this.pushNotification({
+					severity: 'danger',
+					icon: 'redo',
+					message: ex.message
+				});
+				console.error('onQueueWallet', ex);
 			}
 		},
 		onDropdownModal(modal) {

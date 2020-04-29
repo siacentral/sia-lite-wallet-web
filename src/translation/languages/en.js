@@ -9,6 +9,8 @@ export default {
 		getStarted: 'Get Started',
 		addWallet: 'Add Wallet',
 		rescanWallet: 'Rescan Wallet',
+		defragWallet: 'Defrag Wallet',
+		defrag: 'Defrag',
 		addAddresses: 'Add Addresses',
 		exportSeed: 'Export Seed',
 		deleteWallet: 'Delete Wallet',
@@ -138,6 +140,7 @@ export default {
 		sendSiacoinsModal: {
 			spendableBalance: 'Spendable Balance',
 			recipientAddress: 'Recipient Address',
+			receiveAddress: 'Receive Address',
 			spent: 'Spent',
 			remainingBalance: 'Remaining Balance',
 			txtRecipientPlaceholder: 'Send Siacoin to...',
@@ -147,6 +150,12 @@ export default {
 			errorBadRecipient: 'Invalid recipient address',
 			statusSigning: 'Signing transaction...',
 			statusBroadcasting: 'Broadcasting transaction...'
+		},
+		defragModal: {
+			defragExplain: 'Defragmenting a wallet combines spendable outputs into as few as possible to make it easier to send transactions. This is only necessary if your wallet controls a lot of small outputs or you have had trouble sending transactions. Each transaction on the Sia network is limited to 4MB',
+			defragUnnecessary: 'Wallet does not need to be defragmented',
+			receiveAmount: 'Receive Amount',
+			sendAmount: 'Send Amount'
 		},
 		transactionTypes: {
 			contractRevision: 'Contract Revision',
