@@ -38,7 +38,7 @@ func SignTransaction(txn siatypes.Transaction, phrase string, requiredSignatures
 		return
 	}
 
-	if err = w.SignTransaction(&txn, requiredSignatures); err != nil {
+	if err := w.SignTransaction(&txn, requiredSignatures); err != nil {
 		callback.Invoke(err.Error(), js.Null())
 		return
 	}
@@ -51,6 +51,42 @@ func SignTransaction(txn siatypes.Transaction, phrase string, requiredSignatures
 	}
 
 	callback.Invoke(js.Null(), data)
+}
+
+//SignTransactions signs a list of transaction using the seed and required signatures returns an error if any of the transactions cannot be signed
+func SignTransactions(transactions []UnsignedTransaction, phrase string, callback js.Value) {
+	w, err := recoverWallet(phrase)
+
+	if err != nil {
+		callback.Invoke(err.Error(), js.Null())
+		return
+	}
+
+	signed := make([]interface{}, len(transactions))
+
+	for i, unsigned := range transactions {
+		txn := unsigned.Transaction
+
+		if err = w.SignTransaction(&txn, unsigned.RequiredSigs); err != nil {
+			callback.Invoke(err.Error(), js.Null())
+			return
+		}
+
+		data, err := interfaceToJSON(txn)
+		if err != nil {
+			callback.Invoke(err.Error(), js.Null())
+			return
+		}
+
+		signed[i] = data
+	}
+
+	if err != nil {
+		callback.Invoke(err.Error(), js.Null())
+		return
+	}
+
+	callback.Invoke(js.Null(), signed)
 }
 
 //GetTransactions gets all transactions belonging to the addresses

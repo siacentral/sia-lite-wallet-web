@@ -6,7 +6,7 @@ import (
 	"strings"
 	"unicode"
 
-	"gitlab.com/NebulousLabs/Sia/crypto"
+	siacrypto "gitlab.com/NebulousLabs/Sia/crypto"
 	mnemonics "gitlab.com/NebulousLabs/entropy-mnemonics"
 	"gitlab.com/NebulousLabs/fastrand"
 )
@@ -21,11 +21,11 @@ var englishWordMap = func() map[string]bool {
 
 //NewSiaRecoveryPhrase creates a new unique 28 or 29 word wallet seed
 func NewSiaRecoveryPhrase() (string, error) {
-	var entropy [crypto.EntropySize]byte
+	var entropy [siacrypto.EntropySize]byte
 
 	fastrand.Read(entropy[:])
 
-	fullChecksum := crypto.HashObject(entropy)
+	fullChecksum := siacrypto.HashObject(entropy)
 	checksumSeed := append(entropy[:], fullChecksum[:SeedChecksumSize]...)
 	phrase, err := mnemonics.ToPhrase(checksumSeed, mnemonics.DictionaryID("english"))
 

@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"syscall/js"
 
@@ -17,6 +18,7 @@ func main() {
 		"getTransactions":    js.FuncOf(getTransactions),
 		"encodeTransaction":  js.FuncOf(encodeTransaction),
 		"signTransaction":    js.FuncOf(signTransaction),
+		"signTransactions":   js.FuncOf(signTransactions),
 		"encodeUnlockHash":   js.FuncOf(encodeUnlockHash),
 		"encodeUnlockHashes": js.FuncOf(encodeUnlockHashes),
 	})
@@ -87,6 +89,27 @@ func signTransaction(this js.Value, args []js.Value) interface{} {
 	return true
 }
 
+func signTransactions(this js.Value, args []js.Value) interface{} {
+	var unsigned []modules.UnsignedTransaction
+
+	if !checkArgs(args, js.TypeString, js.TypeString, js.TypeFunction) {
+		return false
+	}
+
+	phrase := args[0].String()
+	jsonTxns := args[1].String()
+	callback := args[2]
+
+	if err := json.Unmarshal([]byte(jsonTxns), &unsigned); err != nil {
+		callback.Invoke(fmt.Sprintf("error decoding transactions: %s", err), js.Null())
+		return false
+	}
+
+	go modules.SignTransactions(unsigned, phrase, callback)
+
+	return true
+}
+
 func encodeUnlockHash(this js.Value, args []js.Value) interface{} {
 	if !checkArgs(args, js.TypeString, js.TypeFunction) {
 		return false
@@ -111,7 +134,6 @@ func encodeUnlockHash(this js.Value, args []js.Value) interface{} {
 
 func encodeUnlockHashes(this js.Value, args []js.Value) interface{} {
 	if !checkArgs(args, js.TypeObject, js.TypeFunction) {
-		log.Println("wrong arguments")
 		return false
 	}
 

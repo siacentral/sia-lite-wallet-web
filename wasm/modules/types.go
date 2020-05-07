@@ -88,4 +88,10 @@ type (
 		UnconfirmedSiacoinDelta string                   `json:"unconfirmed_siacoin_delta"`
 		UnconfirmedSiafundDelta string                   `json:"unconfirmed_siafund_delta"`
 	}
+
+	// UnsignedTransaction a transaction and the required signature indices to sign that transaction
+	UnsignedTransaction struct {
+		Transaction  siatypes.Transaction `json:"transaction"`
+		RequiredSigs []uint64             `json:"requiredSignatures"`
+	}
 )

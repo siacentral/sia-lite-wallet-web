@@ -68,6 +68,10 @@ export function generateAddresses(seed, i, n) {
 	return defaultSpawnWorker(['generateAddresses', seed, i, n], 15000);
 }
 
+export function signTransactions(seed, unsigned) {
+	return defaultSpawnWorker(['signTransactions', seed, JSON.stringify(unsigned)], 15000);
+}
+
 export function getTransactions(addresses) {
 	return defaultSpawnWorker(['getTransactions', addresses], 30000);
 }

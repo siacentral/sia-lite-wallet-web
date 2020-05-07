@@ -1,7 +1,7 @@
 package wallet
 
 import (
-	"gitlab.com/NebulousLabs/Sia/crypto"
+	siacrypto "gitlab.com/NebulousLabs/Sia/crypto"
 	"gitlab.com/NebulousLabs/Sia/types"
 )
 
@@ -24,7 +24,7 @@ type (
 	//Siafund outputs with unlock hashes matching the unlock conditions can be spent by the seed
 	SpendableKey struct {
 		UnlockConditions types.UnlockConditions `json:"unlock_conditions"`
-		SecretKeys       []crypto.SecretKey     `json:"private_key"`
+		SecretKeys       []siacrypto.SecretKey  `json:"private_key"`
 	}
 
 	//SpendableOutput an output known to be spendable by a seed with the index of the seed used

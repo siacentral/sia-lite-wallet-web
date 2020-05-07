@@ -3,27 +3,27 @@ package wallet
 import (
 	"errors"
 
-	"gitlab.com/NebulousLabs/Sia/crypto"
+	siacrypto "gitlab.com/NebulousLabs/Sia/crypto"
 	"gitlab.com/NebulousLabs/Sia/types"
 )
 
 type (
 	//SeedWallet creates keys and addresses for the generated seed. Wallet is stateless for ease of use
 	SeedWallet struct {
-		s [crypto.EntropySize]byte
+		s [siacrypto.EntropySize]byte
 	}
 )
 
 //GetAddress returns the spendable address at the specified index
 func (wallet *SeedWallet) GetAddress(index uint64) SpendableKey {
-	sk, pk := crypto.GenerateKeyPairDeterministic(crypto.HashAll(wallet.s, index))
+	sk, pk := siacrypto.GenerateKeyPairDeterministic(siacrypto.HashAll(wallet.s, index))
 
 	return SpendableKey{
 		UnlockConditions: types.UnlockConditions{
 			PublicKeys:         []types.SiaPublicKey{types.Ed25519PublicKey(pk)},
 			SignaturesRequired: 1,
 		},
-		SecretKeys: []crypto.SecretKey{sk},
+		SecretKeys: []siacrypto.SecretKey{sk},
 	}
 }
 
@@ -65,7 +65,7 @@ func (wallet *SeedWallet) SignTransaction(txn *types.Transaction, requiredSigInd
 		}
 
 		sigHash := txn.SigHash(i, asicHardForkHeight)
-		encodedSig := crypto.SignHash(sigHash, key.SecretKeys[0])
+		encodedSig := siacrypto.SignHash(sigHash, key.SecretKeys[0])
 
 		txn.TransactionSignatures[i].Signature = encodedSig[:]
 	}
