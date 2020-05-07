@@ -1,6 +1,5 @@
 <template>
 	<div>
-		<p class="text-warning">{{ translate('defragModal.defragExplain') }}</p>
 		<div class="identifier">
 			<identicon :value="recipientAddress" />
 		</div>
@@ -86,7 +85,7 @@ export default {
 					return v;
 				}, []),
 				unspent = outputs.reduce((a, o) => {
-					if (addrMap[o.unlock_hash] === undefined || spent.indexOf(o.id) !== -1)
+					if (addrMap[o.unlock_hash] === undefined || spent.indexOf(o.output_id) !== -1)
 						return a;
 
 					o.index = addrMap[o.unlock_hash];
