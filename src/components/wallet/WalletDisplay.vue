@@ -29,7 +29,8 @@
 									v-if="wallet.server_type === 'walrus' || wallet.type === 'watch' || wallet.type === 'ledger'"
 									@click="onDropdownModal('add')">
 									<icon icon="plus" />{{ translate('addAddresses') }}</button>
-								<button class="dropdown-item" @click="onDefragWallet"
+								<button class="dropdown-item" v-if="wallet.type !== 'watch' && wallet.type !== 'ledger' && outputsLen > 100"
+									@click="onDefragWallet"
 									:disabled="walletQueued">
 									<icon icon="redo" />{{ translate('defragWallet') }}</button>
 								<button class="dropdown-item" @click="onDropdownModal('export')" v-if="wallet.type === 'default'">
@@ -133,6 +134,12 @@ export default {
 				return new BigNumber(0);
 
 			return this.wallet.unconfirmedSiafundBalance();
+		},
+		outputsLen() {
+			if (!this.wallet || !Array.isArray(this.wallet.unspent_siacoin_outputs))
+				return 0;
+
+			return this.wallet.unspent_siacoin_outputs.length;
 		},
 		name() {
 			if (!this.wallet || !this.wallet.title || this.wallet.title.length === 0)

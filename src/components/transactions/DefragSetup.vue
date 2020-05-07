@@ -40,7 +40,7 @@
 			</transition>
 		</div>
 		<div class="buttons">
-			<button class="btn btn-success btn-inline" :disabled="transactionError || sending" @click="onSendTxn">{{ translate('defrag') }}</button>
+			<button class="btn btn-success btn-inline" :disabled="transactionError || sending" @click="onDefrag">{{ translate('defrag') }}</button>
 		</div>
 	</div>
 </template>
@@ -69,9 +69,6 @@ export default {
 		receiveTextKey() {
 			return this.sendOther ? 'defragModal.sendAmount' : 'sendSiacoinsModal.remainingBalance';
 		},
-		walletBalance() {
-			return this.wallet.unconfirmedSiacoinBalance();
-		},
 		changeAddress() {
 			let addr = this.ownedAddresses.find(a => a.usage_type !== 'sent');
 
@@ -83,7 +80,20 @@ export default {
 		unspent() {
 			const outputs = this.wallet && Array.isArray(this.wallet.unspent_siacoin_outputs) ? this.wallet.unspent_siacoin_outputs : [],
 				spent = this.wallet && Array.isArray(this.wallet.spent_siacoin_outputs) ? this.wallet.spent_siacoin_outputs : [],
-				unspent = outputs.filter(o => spent.indexOf(o.output_id) === -1);
+				addrMap = (Array.isArray(this.ownedAddresses) ? this.ownedAddresses : []).reduce((v, a) => {
+					v[a.address] = a.index;
+
+					return v;
+				}, []),
+				unspent = outputs.reduce((a, o) => {
+					if (addrMap[o.unlock_hash] === undefined || spent.indexOf(o.id) !== -1)
+						return a;
+
+					o.index = addrMap[o.unlock_hash];
+					a.push(o);
+
+					return a;
+				}, []);
 
 			if (!Array.isArray(unspent) || unspent.length === 0)
 				return [];
@@ -102,9 +112,6 @@ export default {
 			const currency = formatPriceString(this.balance, 2, this.currency, this.exchangeRateSC[this.currency]);
 
 			return `${currency.value} <span class="currency-display">${this.translate(`currency.${currency.label}`)}</span>`;
-		},
-		sendAmount() {
-			return this.balance.minus(this.fees);
 		},
 		sendAmountSC() {
 			const siacoins = formatPriceString(this.sendAmount, 2);
@@ -127,11 +134,12 @@ export default {
 			return `${currency.value} <span class="currency-display">${this.translate(`currency.${currency.label}`)}</span>`;
 		},
 		transactionCount() {
-			return Math.ceil(this.unspent.length / 50);
+			return Math.ceil(this.unspent.length / this.outputsPerTxn);
 		},
 		transactionError() {
-			if (this.unspent < 10)
+			if (this.unspent.length < 90)
 				return this.translate('defragModal.defragUnnecessary');
+
 			if (this.balance.lte(0))
 				return this.translate('sendSiacoinsModal.errorGreaterThan0');
 
@@ -142,52 +150,26 @@ export default {
 				return this.translate('sendSiacoinsModal.errorBadRecipient');
 
 			return null;
-		},
-		apiFee() {
-			let apiFeeTotal = new BigNumber(0);
-
-			if (this.wallet.server_type && this.wallet.server_type !== 'siacentral')
-				return apiFeeTotal;
-
-			for (let i = 0; i < this.transactionCount; i++) {
-				apiFeeTotal = apiFeeTotal.plus(calculateFee(
-					this.unspent.length - (50 * i),
-					2,
-					new BigNumber(this.networkFees.api.fee)
-				));
-			}
-
-			return apiFeeTotal;
-		},
-		siaFee() {
-			let siaFeeTotal = new BigNumber(0);
-
-			for (let i = 0; i < this.transactionCount; i++) {
-				siaFeeTotal = siaFeeTotal.plus(calculateFee(
-					this.unspent.length - (50 * i),
-					2,
-					new BigNumber(this.networkFees.maximum).div(2)
-				));
-			}
-
-			return siaFeeTotal;
-		},
-		fees() {
-			return this.apiFee.plus(this.siaFee);
 		}
 	},
 	data() {
 		return {
+			outputsPerTxn: 90,
 			recipientAddress: '',
 			sendOther: false,
 			sending: false,
-			ownedAddresses: []
+			sendAmount: new BigNumber(0),
+			fees: new BigNumber(0),
+			ownedAddresses: [],
+			transactions: []
 		};
 	},
 	async beforeMount() {
 		try {
 			await this.loadAddresses();
 			this.recipientAddress = this.changeAddress.address;
+
+			this.defrag();
 		} catch (ex) {
 			console.error('DefragSetup.beforeMount', ex);
 			this.pushNotification({
@@ -247,22 +229,26 @@ export default {
 				throw new Error('not enough siacoins to defrag');
 
 			return {
-				miner_fees: [siaFee.toString(10)],
-				siacoin_inputs: inputs,
-				siacoin_outputs: [
-					{
-						unlock_hash: this.recipientAddress,
-						value: sendAmount.minus(apiFee).toString(10),
-						tag: 'Recipient',
-						owned: this.ownsAddress(this.recipientAddress)
-					},
-					{
-						unlock_hash: feeAddress,
-						value: apiFee.toString(10),
-						tag: 'API Fee',
-						owned: false
-					}
-				]
+				txn: {
+					miner_fees: [siaFee.toString(10)],
+					siacoin_inputs: inputs,
+					siacoin_outputs: [
+						{
+							unlock_hash: this.recipientAddress,
+							value: sendAmount.minus(siaFee).minus(apiFee).toString(10),
+							tag: 'Recipient',
+							owned: this.ownsAddress(this.recipientAddress)
+						},
+						{
+							unlock_hash: feeAddress,
+							value: apiFee.toString(10),
+							tag: 'API Fee',
+							owned: false
+						}
+					]
+				},
+				sent: sendAmount.minus(apiFee).minus(siaFee),
+				fees: apiFee.plus(siaFee)
 			};
 		},
 		formatCurrencyString(value) {
@@ -278,21 +264,37 @@ export default {
 				console.error('DefragSetup.onChangeSendOther', ex);
 			}
 		},
-		async onSendTxn() {
+		async defrag() {
+			const txns = [];
+			let totalSent = new BigNumber(0),
+				totalFees = new BigNumber(0);
+
+			for (let i = 0; i < this.transactionCount; i++) {
+				const { txn, sent, fees } = this.buildTransaction(i * this.outputsPerTxn, (i + 1) * this.outputsPerTxn);
+
+				totalSent = totalSent.plus(sent);
+				totalFees = totalFees.plus(fees);
+
+				txns.push(txn);
+			}
+
+			this.transactions = txns;
+			this.sendAmount = totalSent;
+			this.fees = totalFees;
+		},
+		onDefrag() {
 			if (this.sending)
 				return;
 
 			this.sending = true;
 
 			try {
-				const txns = [];
-
-				for (let i = 0; i < this.transactionCount; i++)
-					txns.push(this.buildTransaction(i * 50, (i + 1) * 50));
-
-				this.$emit('built', txns);
+				this.$emit('built', {
+					transactions: this.transactions,
+					recipient: this.recipientAddress
+				});
 			} catch (ex) {
-				console.error('onSendTxn', ex);
+				console.error('DefragSetup.onDefrag', ex);
 				this.pushNotification({
 					severity: 'danger',
 					message: ex.message
@@ -300,6 +302,11 @@ export default {
 			} finally {
 				this.sending = false;
 			}
+		}
+	},
+	watch: {
+		recipientAddress() {
+			this.defrag();
 		}
 	}
 };

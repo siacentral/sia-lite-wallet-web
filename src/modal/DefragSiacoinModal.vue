@@ -1,8 +1,8 @@
 <template>
 	<modal @close="$emit('close')">
 		<transition name="fade-top" mode="out-in" appear>
-			<defrag-setup class="transaction-step" :wallet="wallet" :address="address" v-if="step === 'setup'" key="setup" />
-			<transaction-verify class="transaction-step" :wallet="wallet" :transaction="transaction" v-else-if="step === 'verify'" key="verify" @done="$emit('close')" />
+			<defrag-setup class="transaction-step" :wallet="wallet" :address="address" v-if="step === 'setup'" key="setup" @built="onTransactionsBuilt" />
+			<div v-else-if="step === 'sending'" :key="status">{{ status }}</div>
 		</transition>
 	</modal>
 </template>
@@ -10,13 +10,16 @@
 <script>
 import Modal from './Modal';
 import DefragSetup from '@/components/transactions/DefragSetup';
-import TransactionVerify from '@/components/transactions/send/TransactionVerify';
+import { signTransactions } from '@/utils/sia';
+import { scanTransactions } from '@/sync/scanner';
+import { broadcastTransaction } from '@/api/siacentral';
+import WalrusClient from '@/api/walrus';
+// import TransactionVerify from '@/components/transactions/send/TransactionVerify';
 
 export default {
 	components: {
 		Modal,
-		DefragSetup,
-		TransactionVerify
+		DefragSetup
 	},
 	props: {
 		address: String,
@@ -25,8 +28,9 @@ export default {
 	data() {
 		return {
 			step: '',
-			transaction: null,
-			sigIndexes: []
+			status: '',
+			sending: false,
+			transactions: []
 		};
 	},
 	mounted() {
@@ -35,16 +39,76 @@ export default {
 		}, 300);
 	},
 	methods: {
-		onTransactionBuilt(txn) {
+		async onTransactionsBuilt(txns) {
+			if (this.sending)
+				return;
+
 			try {
-				this.transaction = txn;
-				this.step = 'verify';
+				this.sending = true;
+				this.step = 'sending';
+
+				this.status = this.translate('sendSiacoinsModal.statusSigning');
+
+				const unsigned = txns.transactions.map(txn => ({
+					transaction: {
+						minerfees: txn.miner_fees,
+						siacoininputs: txn.siacoin_inputs.map(i => ({
+							parentid: i.output_id,
+							unlockconditions: i.unlock_conditions
+						})),
+						siacoinoutputs: txn.siacoin_outputs.map(o => ({
+							unlockhash: o.unlock_hash,
+							value: o.value
+						})),
+						transactionsignatures: txn.siacoin_inputs.map(i => ({
+							parentid: i.output_id,
+							coveredfields: { wholetransaction: true }
+						}))
+					},
+					requiredSignatures: txn.siacoin_inputs.map(i => i.index)
+				}));
+				let signed = [];
+
+				switch (this.wallet.type) {
+				case 'ledger':
+					throw new Error('Ledger does not support defragmenting');
+				case 'default':
+					signed = await signTransactions(this.wallet.seed, unsigned);
+					break;
+				default:
+					throw new Error('unsupported wallet type');
+				}
+
+				this.status = this.translate('sendSiacoinsModal.statusBroadcasting');
+
+				console.log(signed);
+				await this.broadcastTxnset(signed);
+				await scanTransactions(this.wallet);
+
+				this.$emit('close');
 			} catch (ex) {
 				console.error('onTransactionBuilt', ex);
 				this.pushNotification({
 					severity: 'danger',
 					message: ex.message
 				});
+			} finally {
+				this.sending = false;
+			}
+		},
+		broadcastTxnset(txnset) {
+			switch (this.wallet.server_type) {
+			case 'walrus':
+				const client = new WalrusClient(this.wallet.server_url);
+
+				return client.broadcastTransaction(txnset.map(txn => ({
+					siacoinInputs: txn.siacoininputs,
+					siacoinOutputs: txn.siacoinoutputs,
+					minerFees: txn.minerfees,
+					transactionSignatures: txn.transactionsignatures
+				})));
+			default:
+				return broadcastTransaction(txnset);
 			}
 		}
 	}
