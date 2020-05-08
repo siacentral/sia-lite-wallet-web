@@ -32,7 +32,7 @@
 								<button class="dropdown-item" v-if="wallet.type !== 'watch' && wallet.type !== 'ledger' && outputsLen > 100"
 									@click="onDefragWallet"
 									:disabled="walletQueued">
-									<icon icon="redo" />{{ translate('defragWallet') }}</button>
+									<icon icon="sitemap" />{{ translate('defragWallet') }}</button>
 								<button class="dropdown-item" @click="onDropdownModal('export')" v-if="wallet.type === 'default'">
 									<icon icon="file-export" />{{ translate('exportSeed') }}</button>
 								<button class="dropdown-item" @click="onDropdownModal('delete')">
