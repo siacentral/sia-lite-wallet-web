@@ -1,7 +1,8 @@
 <template>
 	<modal @close="$emit('close')">
+		<p class="text-warning">{{ translate('defragModal.defragExplain') }}</p>
 		<transition name="fade-top" mode="out-in" appear>
-			<defrag-setup class="transaction-step" :wallet="wallet" :address="address" v-if="step === 'setup'" key="setup" @built="onTransactionsBuilt" />
+			<defrag-setup :wallet="wallet" :address="address" v-if="step === 'setup'" key="setup" @built="onTransactionsBuilt" />
 			<div v-else-if="step === 'sending'" :key="status">{{ status }}</div>
 		</transition>
 	</modal>
@@ -14,7 +15,6 @@ import { signTransactions } from '@/utils/sia';
 import { scanTransactions } from '@/sync/scanner';
 import { broadcastTransaction } from '@/api/siacentral';
 import WalrusClient from '@/api/walrus';
-// import TransactionVerify from '@/components/transactions/send/TransactionVerify';
 
 export default {
 	components: {
@@ -116,9 +116,4 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
-.transaction-step {
-	display: grid;
-	height: 100%;
-	align-content: safe center;
-}
 </style>

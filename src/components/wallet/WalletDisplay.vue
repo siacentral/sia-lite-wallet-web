@@ -136,10 +136,11 @@ export default {
 			return this.wallet.unconfirmedSiafundBalance();
 		},
 		outputsLen() {
-			if (!this.wallet || !Array.isArray(this.wallet.unspent_siacoin_outputs))
-				return 0;
+			const outputs = this.wallet && Array.isArray(this.wallet.unspent_siacoin_outputs) ? this.wallet.unspent_siacoin_outputs : [],
+				spent = this.wallet && Array.isArray(this.wallet.spent_siacoin_outputs) ? this.wallet.spent_siacoin_outputs : [],
+				filtered = outputs.filter(o => spent.indexOf(o.output_id) === -1);
 
-			return this.wallet.unspent_siacoin_outputs.length;
+			return filtered.length;
 		},
 		name() {
 			if (!this.wallet || !this.wallet.title || this.wallet.title.length === 0)
