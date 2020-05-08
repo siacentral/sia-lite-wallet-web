@@ -1,8 +1,8 @@
 <template>
 	<modal @close="$emit('close')">
 		<p class="text-warning">{{ translate('defragModal.defragExplain') }}</p>
-		<transition name="fade-top" mode="out-in" appear>
-			<defrag-setup :wallet="wallet" :address="address" v-if="step === 'setup'" key="setup" @built="onTransactionsBuilt" />
+		<transition name="fade-top" mode="out-in">
+			<defrag-setup :wallet="wallet" v-if="step === 'setup'" key="setup" @built="onTransactionsBuilt" />
 			<div v-else-if="step === 'sending'" :key="status">{{ status }}</div>
 		</transition>
 	</modal>
@@ -22,21 +22,15 @@ export default {
 		DefragSetup
 	},
 	props: {
-		address: String,
 		wallet: Object
 	},
 	data() {
 		return {
-			step: '',
+			step: 'setup',
 			status: '',
 			sending: false,
 			transactions: []
 		};
-	},
-	mounted() {
-		setTimeout(() => {
-			this.step = 'setup';
-		}, 300);
 	},
 	methods: {
 		async onTransactionsBuilt(txns) {
