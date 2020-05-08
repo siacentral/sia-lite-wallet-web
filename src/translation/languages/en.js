@@ -152,7 +152,9 @@ export default {
 			statusBroadcasting: 'Broadcasting transaction...'
 		},
 		defragModal: {
-			defragExplain: 'Defragmenting a wallet creates transactions to combine spendable Siacoin outputs into as few as possible to make it easier to send transactions. This is only necessary if your wallet controls a lot of small outputs or you have had trouble sending transactions. Transactions on the Sia network are limited to 32 KB, or about 95 Siacoin inputs.',
+			outputCount: '# of Outputs (Before)',
+			transactionCount: '# of Transactions',
+			defragExplain: 'Transactions on the Sia network are limited to 32 KB, or about 90 inputs. Defragmenting a wallet will combine and send all of your outputs to an address in your wallet or an address in another wallet. It is only necessary if your wallet controls a lot of small outputs and you are having trouble sending transactions.',
 			defragUnnecessary: 'Wallet does not need to be defragmented',
 			receiveAmount: 'Receive Amount',
 			sendAmount: 'Send Amount'

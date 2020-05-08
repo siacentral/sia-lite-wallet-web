@@ -14,10 +14,10 @@
 			<label for="chkSendOther">Send to Separate Wallet</label>
 		</div>
 		<div class="extras-info">
-			<div># of Outputs</div>
+			<div>{{ translate('defragModal.outputCount') }}</div>
 			<div />
 			<div class="text-right">{{ formatNumber(unspent.length) }}</div>
-			<div># of Transactions</div>
+			<div>{{ translate('defragModal.transactionCount') }}</div>
 			<div />
 			<div class="text-right">{{ formatNumber(transactionCount) }}</div>
 			<div>{{ translate('importAddresses.balance') }}</div>
