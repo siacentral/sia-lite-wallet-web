@@ -81,7 +81,6 @@ export default {
 
 				this.status = this.translate('sendSiacoinsModal.statusBroadcasting');
 
-				console.log(signed);
 				await this.broadcastTxnset(signed);
 				await scanTransactions(this.wallet);
 

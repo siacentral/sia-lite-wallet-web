@@ -98,7 +98,6 @@ export default {
 				return false;
 
 			return this.addresses.filter(a => {
-				console.log(a);
 				return !verifyAddress(a.address);
 			}).length === 0;
 		}

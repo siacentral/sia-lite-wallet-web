@@ -60,7 +60,7 @@ function typedArrayToUint16(val) {
 }
 
 async function connect() {
-	listen((log) => console.log(log));
+	listen((log) => console.debug(log));
 
 	const transports = await supportedTransports();
 
@@ -109,12 +109,8 @@ export async function connected() {
 }
 
 export async function getVersion() {
-	console.log(transport);
-
-	if (!transport) {
-		console.log('transport disconnected');
+	if (!transport)
 		await connect();
-	}
 
 	const resp = await exchange(0x01, 0x00, 0x00, null, false);
 
