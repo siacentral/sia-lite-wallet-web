@@ -3,6 +3,9 @@
 		<div class="step-icon"><icon :icon="['fab', 'usb']" /></div>
 		<div class="title">{{ translate('ledger.instructions') }}</div>
 		<button class="btn btn-inline btn-success" @click="onConnect" :disabled="connected">{{ translate('connect') }}</button>
+		<transition name="fade-top" appear>
+			<div class="text-error" v-if="error">{{ error }}</div>
+		</transition>
 	</div>
 </template>
 
@@ -13,12 +16,19 @@ export default {
 	props: {
 		connected: Boolean
 	},
+	data() {
+		return {
+			error: null
+		};
+	},
 	methods: {
 		async onConnect() {
 			try {
+				this.error = null;
 				await getVersion();
 				this.$emit('connected', true);
 			} catch (ex) {
+				this.error = `Unable to connect to Ledger. Try reconnecting the device, opening the Sia App, using a different USB cable, and closing Ledger Live. (error: ${ex.message})`;
 				console.error('onConnect', ex);
 				this.pushNotification({
 					severity: 'danger',
@@ -41,6 +51,10 @@ export default {
 	align-items: center;
 	border-radius: 4px;
 	background: dark-gray;
+
+	.text-error {
+		grid-column: 1 / -1;
+	}
 
 	svg {
 		width: 32px;
