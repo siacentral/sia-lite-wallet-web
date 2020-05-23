@@ -148,6 +148,7 @@ export default {
 			errorNotEnough: 'Send amount more than balance',
 			errorHighFee: 'Amount sent is less than transaction fees',
 			errorBadRecipient: 'Invalid recipient address',
+			errorTooManyInputs: 'Transaction has too many inputs. Wallet needs to be defragmented before sending.',
 			statusSigning: 'Signing transaction...',
 			statusBroadcasting: 'Broadcasting transaction...'
 		},

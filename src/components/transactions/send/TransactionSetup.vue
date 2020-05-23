@@ -138,6 +138,9 @@ export default {
 			if (!verifyAddress(this.recipientAddress))
 				return this.translate('sendSiacoinsModal.errorBadRecipient');
 
+			if (this.inputs.length >= 95)
+				return this.translate('sendSiacoinsModal.errorTooManyInputs');
+
 			return null;
 		}
 	},
