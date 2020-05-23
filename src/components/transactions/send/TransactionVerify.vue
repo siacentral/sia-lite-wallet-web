@@ -179,14 +179,16 @@ export default {
 					minerfees: this.signed.minerfees,
 					transactionsignatures: this.signed.transactionsignatures
 				}]);
-				await scanTransactions(this.wallet);
 
-				this.status = 'Transaction sent...';
-				this.$emit('done');
+				this.status = 'Transaction sent! Updating balance...';
 				this.pushNotification({
 					icon: 'wallet',
 					message: this.translate('alerts.transactionBroadcast')
 				});
+
+				await scanTransactions(this.wallet);
+
+				this.$emit('done');
 			} catch (ex) {
 				console.error('onVerifyTxn', ex);
 				this.pushNotification({
