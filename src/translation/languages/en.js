@@ -8,6 +8,7 @@ export default {
 	translations: {
 		getStarted: 'Get Started',
 		addWallet: 'Add Wallet',
+		buySiacoin: 'Purchase Siacoin',
 		rescanWallet: 'Rescan Wallet',
 		defragWallet: 'Defrag Wallet',
 		defrag: 'Defrag',

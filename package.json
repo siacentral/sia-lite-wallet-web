@@ -16,6 +16,7 @@
     "@ledgerhq/logs": "^4.72.0",
     "@stablelib/base64": "^0.7.2",
     "@stablelib/utf8": "^0.10.1",
+    "@transak/transak-sdk": "^1.0.19",
     "babel-polyfill": "^6.26.0",
     "bignumber.js": "^9.0.0",
     "buffer": "^5.5.0",

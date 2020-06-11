@@ -63,7 +63,7 @@ export default {
 .page-unlock {
 	position: fixed;
 	background: bg-dark;
-	z-index: 999;
+	z-index: 99;
 }
 
 h2, p {

@@ -20,7 +20,7 @@
 	align-content: safe center;
 	background: bg-dark-accent;
 	overflow: hidden;
-	z-index: 999;
+	z-index: 99;
 }
 
 h2 {

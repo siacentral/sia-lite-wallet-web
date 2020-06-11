@@ -22,6 +22,8 @@
 						<button class="more-btn" @click="showMore = !showMore"><icon icon="ellipsis-v" /></button>
 						<transition name="fade-top" mode="out-in">
 							<div class="dropdown" v-if="showMore">
+								<button class="dropdown-item" @click="onBuySiacoin">
+									<icon icon="credit-card" />{{ translate('buySiacoin') }}</button>
 								<button class="dropdown-item" @click="onQueueWallet"
 									:disabled="walletQueued">
 									<icon icon="redo" />{{ translate('rescanWallet') }}</button>
@@ -82,6 +84,8 @@
 <script>
 import { mapState, mapActions } from 'vuex';
 import BigNumber from 'bignumber.js';
+import Transak from '@transak/transak-sdk';
+import { getLastWalletAddresses } from '@/store/db';
 import { formatPriceString, formatSiafundString } from '@/utils/format';
 
 import AddAddressesModal from '@/modal/AddAddressesModal';
@@ -283,6 +287,46 @@ export default {
 				this.showMore = false;
 			}
 		},
+		async onBuySiacoin() {
+			this.showMore = false;
+
+			try {
+				const addresses = await getLastWalletAddresses(this.wallet.id, 1, 0);
+
+				if (!Array.isArray(addresses) || addresses.length === 0)
+					throw new Error('unable to buy siacoin no known addresses');
+
+				const transak = new Transak({
+					apiKey: '4fcd6904-706b-4aff-bd9d-77422813bbb7', // Your API Key
+					environment: 'STAGING', // STAGING/PRODUCTION
+					cryptoCurrencyCode: 'SC',
+					walletAddress: addresses[0].address,
+					themeColor: '19cf86',
+					countryCode: 'US',
+					widgetHeight: `${window.innerHeight * 0.8}px`,
+					hostURL: window.location.origin
+				});
+
+				transak.init();
+
+				// To get all the events
+				transak.on(transak.ALL_EVENTS, (data) => {
+					console.log(data);
+				});
+
+				// This will trigger when the user marks payment is made.
+				transak.on(transak.EVENTS.TRANSAK_ORDER_SUCCESSFUL, (orderData) => {
+					console.log(orderData);
+					transak.close();
+				});
+			} catch (ex) {
+				console.error('WalletDisplay.onBuySiacoin', ex);
+				this.pushNotification({
+					severity: 'danger',
+					message: ex.message
+				});
+			}
+		},
 		async onDeleteWallet(button) {
 			try {
 				this.modal = null;
@@ -396,7 +440,7 @@ export default {
 		background: bg-dark-accent;
 		border-radius: 4px;
 		border-top-right-radius: 0;
-		z-index: 999;
+		z-index: 99;
 		box-shadow: global-shadow;
 
 		&:before {
@@ -409,7 +453,7 @@ export default {
 			background: #25272a;
 			-webkit-transform: rotateZ(45deg);
 			transform: rotateZ(45deg);
-			z-index: 998;
+			z-index: 98;
 		}
 
 		.dropdown-item {

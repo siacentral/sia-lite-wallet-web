@@ -49,7 +49,7 @@ export default {
 .mobile-nav-wrapper {
 	position: fixed;
 	display: block;
-	z-index: 999;
+	z-index: 99;
 
 	@media screen and (min-width: 767px) {
 		display: none;
@@ -66,7 +66,7 @@ export default {
 	font-size: 1rem;
 	text-align: center;
 	border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-	z-index: 999;
+	z-index: 99;
 
 	@media screen and (min-width: 767px) {
 		display: none;
@@ -86,7 +86,7 @@ export default {
 	box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
 	overflow: hidden;
 	align-items: center;
-	z-index: 998;
+	z-index: 98;
 
 	.nav-section:first-child {
 		padding-left: 8px;
@@ -130,7 +130,7 @@ export default {
 	align-content: space-between;
 	background: bg-dark-accent;
 	box-shadow: 2px 0px 5px rgba(0, 0, 0, 0.22);
-	z-index: 999;
+	z-index: 99;
 
 	.upper, .lower {
 		width: 100%;
@@ -171,7 +171,7 @@ export default {
 	left: 0;
 	bottom: 0;
 	right: 0;
-	z-index: 998;
+	z-index: 98;
 }
 
 .hamburger-btn {
