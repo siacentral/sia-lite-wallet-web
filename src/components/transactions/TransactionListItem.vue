@@ -72,31 +72,28 @@ export default {
 			if (!this.transaction || !Array.isArray(this.transaction.tags))
 				return this.translate('transactionTypes.siacoinTransaction');
 
-			switch (this.transaction.tags[0]) {
-			case 'contract_revision':
+			if (this.transaction.tags.indexOf('contract_revision') !== -1)
 				return this.translate('transactionTypes.contractRevision');
-			case 'contract_formation':
+			else if (this.transaction.tags.indexOf('contract_formation') !== -1)
 				return this.translate('transactionTypes.contractFormation');
-			case 'storage_proof':
+			else if (this.transaction.tags.indexOf('storage_proof') !== -1)
 				return this.translate('transactionTypes.storageProof');
-			case 'host_announcements':
+			else if (this.transaction.tags.indexOf('host_announcement') !== -1)
 				return this.translate('transactionTypes.hostAnnouncement');
-			case 'contract_valid_output':
-			case 'contract_missed_output':
+			else if (this.transaction.tags.indexOf('contract_valid_output') !== -1 || this.transaction.tags.indexOf('contract_missed_output') !== -1)
 				return this.translate('transactionTypes.contractCompleted');
-			case 'block_reward':
+			else if (this.transaction.tags.indexOf('block_reward') !== -1)
 				return this.translate('transactionTypes.blockReward');
-			case 'siacoin_transaction':
+			else if (this.transaction.tags.indexOf('siacoin_transaction') !== -1)
 				return this.translate('transactionTypes.siacoinTransaction');
-			case 'siafund_transaction':
+			else if (this.transaction.tags.indexOf('siafund_transaction') !== -1)
 				return this.translate('transactionTypes.siafundTransaction');
-			case 'siafund_claim':
+			else if (this.transaction.tags.indexOf('siafund_claim') !== -1)
 				return this.translate('transactionTypes.siafundClaim');
-			case 'defrag':
+			else if (this.transaction.tags.indexOf('defrag') !== -1)
 				return this.translate('transactionTypes.defrag');
-			default:
-				return this.transaction.tags[0];
-			}
+
+			return this.transaction.tags[0];
 		},
 		displayConfirmations() {
 			if (this.transaction && this.transaction.confirmations === 0)

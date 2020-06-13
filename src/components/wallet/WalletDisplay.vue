@@ -22,8 +22,8 @@
 						<button class="more-btn" @click="showMore = !showMore"><icon icon="ellipsis-v" /></button>
 						<transition name="fade-top" mode="out-in">
 							<div class="dropdown" v-if="showMore">
-								<button class="dropdown-item" @click="onBuySiacoin">
-									<icon icon="credit-card" />{{ translate('buySiacoin') }}</button>
+								<!--TRANSAK INTEGRATION TESTING <button class="dropdown-item" @click="onBuySiacoin">
+									<icon icon="credit-card" />{{ translate('buySiacoin') }}</button>-->
 								<button class="dropdown-item" @click="onQueueWallet"
 									:disabled="walletQueued">
 									<icon icon="redo" />{{ translate('rescanWallet') }}</button>
