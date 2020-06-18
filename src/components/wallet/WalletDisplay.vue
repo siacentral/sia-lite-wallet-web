@@ -22,8 +22,8 @@
 						<button class="more-btn" @click="showMore = !showMore"><icon icon="ellipsis-v" /></button>
 						<transition name="fade-top" mode="out-in">
 							<div class="dropdown" v-if="showMore">
-								<!--TRANSAK INTEGRATION TESTING <button class="dropdown-item" @click="onBuySiacoin">
-									<icon icon="credit-card" />{{ translate('buySiacoin') }}</button>-->
+								<button class="dropdown-item" @click="onBuySiacoin">
+									<icon icon="credit-card" />{{ translate('buySiacoin') }}</button>
 								<button class="dropdown-item" @click="onQueueWallet"
 									:disabled="walletQueued">
 									<icon icon="redo" />{{ translate('rescanWallet') }}</button>
@@ -297,8 +297,8 @@ export default {
 					throw new Error('unable to buy siacoin no known addresses');
 
 				const transak = new Transak({
-					apiKey: '4fcd6904-706b-4aff-bd9d-77422813bbb7', // Your API Key
-					environment: 'STAGING', // STAGING/PRODUCTION
+					apiKey: process.env.VUE_APP_TRANSAK_KEY,
+					environment: 'PRODUCTION',
 					cryptoCurrencyCode: 'SC',
 					walletAddress: addresses[0].address,
 					themeColor: '19cf86',
