@@ -20,7 +20,7 @@ yarn-error.log*
 *.sln
 *.sw?
 
-deploy.sh
+publish.sh
 
 #Electron-builder output
 /dist_electron

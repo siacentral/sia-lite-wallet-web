@@ -13,6 +13,8 @@ RUN cp "$(go env GOROOT)/misc/wasm/wasm_exec.js" /app
 # build web app
 FROM node:12 AS buildnode
 
+ARG TRANSAK_API_KEY
+
 WORKDIR /app
 
 COPY package*.json ./
@@ -21,7 +23,7 @@ RUN npm install
 
 COPY . .
 
-RUN npm run build
+RUN VUE_APP_TRANSAK_KEY=$TRANSAK_API_KEY npm run build
 
 # production
 FROM n8maninger/vue-router
