@@ -12,7 +12,7 @@
 				<div class="transaction-data">{{ friendlyType(transaction) }}</div>
 			</div>
 			<div class="summary-type">
-				<button @click="mode = 'summary'" :class="summaryClasses('summary')">{{ translate('summary') }}</button>
+				<button v-if="showSummary" @click="mode = 'summary'" :class="summaryClasses('summary')">{{ translate('summary') }}</button>
 				<button @click="mode = 'outputs'" :class="summaryClasses('outputs')">{{ translate('outputs') }}</button>
 				<button @click="mode = 'siafundOutputs'" :class="summaryClasses('siafundOutputs')">{{ translate('siafundOutputs') }}</button>
 			</div>
@@ -89,12 +89,30 @@ export default {
 				return false;
 
 			return new BigNumber(this.transaction.siafund_value.value).gt(0);
+		},
+		showSummary() {
+			return Array.isArray(this.transaction.siacoin_outputs) && this.transaction.siacoin_outputs.length !== 0;
+		},
+		defaultMode() {
+			if (!this.transaction)
+				return 'summary';
+
+			if (Array.isArray(this.transaction.siafund_outputs) && this.transaction.siafund_outputs.length !== 0)
+				return 'siafundOutputs';
+
+			if (!Array.isArray(this.transaction.siacoin_outputs) || this.transaction.siacoin_outputs.length === 0)
+				return 'outputs';
+
+			return 'summary';
 		}
 	},
 	data() {
 		return {
 			mode: 'summary'
 		};
+	},
+	beforeMount() {
+		this.mode = this.defaultMode;
 	},
 	methods: {
 		siacoinDisplay(value) {
