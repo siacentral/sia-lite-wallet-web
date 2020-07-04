@@ -85,10 +85,7 @@ export default {
 			return new BigNumber(this.transaction.fees).plus(this.apiFees);
 		},
 		showSiafunds() {
-			if (!this.transaction.siafund_value)
-				return false;
-
-			return new BigNumber(this.transaction.siafund_value.value).gt(0);
+			return this.transaction && Array.isArray(this.transaction.siafund_inputs) && this.transaction.siafund_inputs.length > 0;
 		},
 		showSummary() {
 			return Array.isArray(this.transaction.siacoin_outputs) && this.transaction.siacoin_outputs.length !== 0;

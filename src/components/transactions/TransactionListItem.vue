@@ -6,7 +6,7 @@
 		<td class="transaction-amount fit-text">
 			<div :class="siacoinClass" v-html="displaySiacoins"/>
 			<div class="transaction-currency" v-html="displayCurrency" />
-			<div :class="siafundClass" v-if="siafundAmount.gt(0)" v-html="displaySiafunds"/>
+			<div :class="siafundClass" v-if="showSiafunds" v-html="displaySiafunds"/>
 		</td>
 	</tr>
 </template>
@@ -44,10 +44,13 @@ export default {
 
 			return value;
 		},
+		showSiafunds() {
+			return this.transaction && Array.isArray(this.transaction.siafund_inputs) && this.transaction.siafund_inputs.length > 0;
+		},
 		displaySiacoins() {
 			const format = formatPriceString(this.siacoinAmount, 2);
 
-			if (this.transaction.siacoin_value.direction === 'sent')
+			if (this.transaction.siacoin_value.direction === 'sent' && !new BigNumber(this.transaction.siacoin_value.value).eq(0))
 				return `-${format.value} <span class="currency-display">${this.translate(`currency.${format.label}`)}</span>`;
 
 			return `${format.value} <span class="currency-display">${this.translate(`currency.${format.label}`)}</span>`;
@@ -55,7 +58,7 @@ export default {
 		displaySiafunds() {
 			const format = formatSiafundString(this.siafundAmount);
 
-			if (this.transaction.siafund_value.direction === 'sent')
+			if (this.transaction.siafund_value.direction === 'sent' && !new BigNumber(this.transaction.siafund_value.value).eq(0))
 				return `-${format.value} <span class="currency-display">${this.translate(`currency.${format.label}`)}</span>`;
 
 			return `${format.value} <span class="currency-display">${this.translate(`currency.${format.label}`)}</span>`;
