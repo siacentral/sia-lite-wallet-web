@@ -5,8 +5,8 @@
 		<td class="transaction-confirms fit-text"><span>{{ displayConfirmations }}</span></td>
 		<td class="transaction-amount fit-text">
 			<div :class="siacoinClass" v-html="displaySiacoins"/>
-			<!--<div :class="siafundClass" v-if="siafundAmount.gt(0)" v-html="displaySiafunds"/>-->
 			<div class="transaction-currency" v-html="displayCurrency" />
+			<div :class="siafundClass" v-if="siafundAmount.gt(0)" v-html="displaySiafunds"/>
 		</td>
 	</tr>
 </template>
@@ -120,8 +120,8 @@ export default {
 		siafundClass() {
 			const classes = {};
 
-			if (this.transaction && this.transaction.siacoin_value)
-				classes[`value-${this.transaction.siacoin_value.direction}`] = true;
+			if (this.transaction && this.transaction.siafund_value)
+				classes[`value-${this.transaction.siafund_value.direction}`] = true;
 
 			return classes;
 		}

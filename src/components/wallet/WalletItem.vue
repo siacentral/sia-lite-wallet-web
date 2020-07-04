@@ -2,7 +2,7 @@
 	<div :class="{ 'wallet': true, 'active-wallet': active }">
 		<div class="wallet-name">{{ wallet.title || translate('wallet') }}</div>
 		<div class="wallet-balance" v-html="displaySiacoins"></div>
-		<!--<div class="wallet-balance" v-if="walletSiafundBalance.gt(0)" v-html="displaySiafunds"></div>-->
+		<div class="wallet-balance" v-if="walletSiafundBalance.gt(0)" v-html="displaySiafunds"></div>
 	</div>
 </template>
 

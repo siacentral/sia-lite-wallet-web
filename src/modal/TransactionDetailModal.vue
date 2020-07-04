@@ -14,13 +14,18 @@
 			<div class="summary-type">
 				<button @click="mode = 'summary'" :class="summaryClasses('summary')">{{ translate('summary') }}</button>
 				<button @click="mode = 'outputs'" :class="summaryClasses('outputs')">{{ translate('outputs') }}</button>
+				<button @click="mode = 'siafundOutputs'" :class="summaryClasses('siafundOutputs')">{{ translate('siafundOutputs') }}</button>
 			</div>
 			<div class="transaction-mode">
 				<transition name="fade-top" mode="out-in">
+					<transaction-siafund-outputs
+						:transaction="transaction"
+						key="siafundOutputs"
+						v-if="mode === 'siafundOutputs'" />
 					<transaction-outputs
 						:transaction="transaction"
 						key="outputs"
-						v-if="mode === 'outputs'" />
+						v-else-if="mode === 'outputs'" />
 					<transaction-summary
 						:transaction="transaction"
 						key="summary"
@@ -34,9 +39,14 @@
 					<div class="transaction-data" v-html="siacoinDisplay(fees)" />
 					<div class="transaction-data" v-html="currencyDisplay(fees)" />
 				</template>
-				<div class="transaction-data-label">{{ translate('total') }}</div>
+				<div class="transaction-data-label">{{ translate('siacoinTotal') }}</div>
 				<div class="transaction-data" v-html="siacoinDisplay(transaction.siacoin_value.value)" />
 				<div class="transaction-data" v-html="currencyDisplay(transaction.siacoin_value.value)" />
+				<template v-if="showSiafunds">
+					<div class="transaction-data-label">{{ translate('siafundTotal') }}</div>
+					<div class="transaction-data" v-html="siafundDisplay(transaction.siafund_value.value)" />
+					<div class="transaction-data" v-html="siafundCurrencyDisplay(transaction.siafund_value.value)" />
+				</template>
 			</div>
 		</div>
 	</modal>
@@ -45,23 +55,25 @@
 <script>
 import { mapState } from 'vuex';
 import BigNumber from 'bignumber.js';
-import { formatPriceString } from '@/utils/format';
+import { formatPriceString, formatSiafundString } from '@/utils/format';
 
 import Modal from './Modal';
 import TransactionOutputs from '@/components/transactions/TransactionOutputs';
+import TransactionSiafundOutputs from '@/components/transactions/TransactionSiafundOutputs';
 import TransactionSummary from '@/components/transactions/TransactionSummary';
 
 export default {
 	components: {
 		Modal,
 		TransactionOutputs,
+		TransactionSiafundOutputs,
 		TransactionSummary
 	},
 	props: {
 		transaction: Object
 	},
 	computed: {
-		...mapState(['currency', 'exchangeRateSC', 'feeAddresses']),
+		...mapState(['currency', 'exchangeRateSC', 'exchangeRateSF', 'feeAddresses']),
 		apiFees() {
 			if (!this.transaction || !Array.isArray(this.transaction.siacoin_outputs))
 				return new BigNumber(0);
@@ -71,6 +83,12 @@ export default {
 		},
 		fees() {
 			return new BigNumber(this.transaction.fees).plus(this.apiFees);
+		},
+		showSiafunds() {
+			if (!this.transaction.siafund_value)
+				return false;
+
+			return new BigNumber(this.transaction.siafund_value.value).gt(0);
 		}
 	},
 	data() {
@@ -84,8 +102,18 @@ export default {
 
 			return `${siacoins.value} <span class="currency-display">${this.translate('currency.sc')}</span>`;
 		},
+		siafundDisplay(value) {
+			const siafunds = formatSiafundString(new BigNumber(value), 2);
+
+			return `${siafunds.value} <span class="currency-display">${this.translate('currency.sf')}</span>`;
+		},
 		currencyDisplay(value) {
 			const currency = formatPriceString(new BigNumber(value), 2, this.currency, this.exchangeRateSC[this.currency]);
+
+			return `${currency.value} <span class="currency-display">${this.translate(`currency.${currency.label}`)}</span>`;
+		},
+		siafundCurrencyDisplay(value) {
+			const currency = formatPriceString(new BigNumber(value).times(1e24), 2, this.currency, this.exchangeRateSF[this.currency]);
 
 			return `${currency.value} <span class="currency-display">${this.translate(`currency.${currency.label}`)}</span>`;
 		},
@@ -170,6 +198,16 @@ export default {
 		text-align: right;
 		text-overflow: ellipsis;
 		overflow: hidden;
+	}
+}
+
+.summary-type {
+	.btn {
+		opacity: 0.6;
+
+		&.btn-enabled {
+			opacity: 1;
+		}
 	}
 }
 </style>

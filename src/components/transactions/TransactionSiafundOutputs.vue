@@ -2,9 +2,9 @@
 	<div class="transaction-outputs">
 		<table>
 			<tr class="header" v-if="inputs && inputs.length !== 0"><td colspan="5">{{ translate('inputs') }}</td></tr>
-			<siacoin-output-list v-if="inputs && inputs.length !== 0" :outputs="inputs" />
+			<siafund-output-list v-if="inputs && inputs.length !== 0" :outputs="inputs" />
 			<tr class="header" v-if="outputs && outputs.length !== 0"><td colspan="5">{{ translate('outputs') }}</td></tr>
-			<siacoin-output-list v-if="outputs && outputs.length !== 0" :outputs="outputs" />
+			<siafund-output-list v-if="outputs && outputs.length !== 0" :outputs="outputs" />
 		</table>
 	</div>
 </template>
@@ -12,31 +12,31 @@
 <script>
 import { mapState } from 'vuex';
 
-import SiacoinOutputList from '@/components/transactions/SiacoinOutputList';
+import SiafundOutputList from '@/components/transactions/SiafundOutputList';
 
 export default {
 	components: {
-		SiacoinOutputList
+		SiafundOutputList
 	},
 	props: {
 		transaction: Object
 	},
 	computed: {
-		...mapState(['currency', 'exchangeRateSC', 'feeAddresses']),
+		...mapState(['feeAddresses']),
 		outputs() {
-			if (!this.transaction || !Array.isArray(this.transaction.siacoin_outputs))
+			if (!this.transaction || !Array.isArray(this.transaction.siafund_outputs))
 				return [];
 
-			return this.transaction.siacoin_outputs.map(o => ({
+			return this.transaction.siafund_outputs.map(o => ({
 				...o,
 				tag: this.getOutputTag(o)
 			}));
 		},
 		inputs() {
-			if (!this.transaction || !Array.isArray(this.transaction.siacoin_inputs))
+			if (!this.transaction || !Array.isArray(this.transaction.siafund_inputs))
 				return [];
 
-			return this.transaction.siacoin_inputs.map(i => ({
+			return this.transaction.siafund_inputs.map(i => ({
 				...i,
 				tag: this.getInputTag(i)
 			}));

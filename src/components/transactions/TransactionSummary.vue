@@ -2,8 +2,8 @@
 	<div class="transaction-summary">
 		<div class="transaction-outputs">
 			<table>
-				<output-list v-if="direction === 'send'" :outputs="recipients" />
-				<output-list v-else :outputs="received" />
+				<siacoin-output-list v-if="direction === 'send'" :outputs="recipients" />
+				<siacoin-output-list v-else :outputs="received" />
 			</table>
 		</div>
 	</div>
@@ -13,11 +13,11 @@
 import { mapState } from 'vuex';
 import BigNumber from 'bignumber.js';
 
-import OutputList from '@/components/transactions/OutputList';
+import SiacoinOutputList from '@/components/transactions/SiacoinOutputList';
 
 export default {
 	components: {
-		OutputList
+		SiacoinOutputList
 	},
 	props: {
 		transaction: Object

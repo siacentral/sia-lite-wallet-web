@@ -15,8 +15,8 @@
 			<div>{{ translate('importAddresses.balance') }}</div>
 			<div />
 			<div class="text-right" v-html="balanceSC" />
-			<!--<div class="text-right" v-if="siafundBalance.gt(0)" v-html="balanceSF" />-->
 			<div class="text-right" v-html="balanceCurrency" />
+			<!--<div class="text-right" v-if="siafundBalance.gt(0)" v-html="balanceSF" />-->
 		</div>
 		<div class="buttons text-right">
 			<button class="btn btn-inline"
@@ -122,8 +122,7 @@ export default {
 				existing.reverse();
 
 				this.addresses = existing.map(a => ({
-					...a,
-					pubkey: a.unlock_conditions.publickeys[0].substr(8)
+					...a
 				}));
 			}
 
