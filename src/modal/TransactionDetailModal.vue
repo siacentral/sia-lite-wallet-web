@@ -14,7 +14,7 @@
 			<div class="summary-type">
 				<button v-if="showSummary" @click="mode = 'summary'" :class="summaryClasses('summary')">{{ translate('summary') }}</button>
 				<button @click="mode = 'outputs'" :class="summaryClasses('outputs')">{{ translate('outputs') }}</button>
-				<button @click="mode = 'siafundOutputs'" :class="summaryClasses('siafundOutputs')">{{ translate('siafundOutputs') }}</button>
+				<button v-if="showSiafunds" @click="mode = 'siafundOutputs'" :class="summaryClasses('siafundOutputs')">{{ translate('siafundOutputs') }}</button>
 			</div>
 			<div class="transaction-mode">
 				<transition name="fade-top" mode="out-in">
