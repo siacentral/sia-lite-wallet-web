@@ -64,7 +64,8 @@ async function unlockWallet(wallet, password) {
 
 // temporary function to migrate wallet seeds encrypted with p to encrypted with h(p)
 export async function migrateWallets(password) {
-	let wallets, promises = [];
+	const promises = [];
+	let wallets;
 
 	try {
 		wallets = await loadWallets(encodeUTF8(password));

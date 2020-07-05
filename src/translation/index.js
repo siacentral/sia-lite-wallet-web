@@ -25,7 +25,8 @@ export function languageSupported(language) {
 }
 
 export function translate(id, language) {
-	let group, params = Array.from(arguments).slice(2);
+	const params = Array.from(arguments).slice(2);
+	let group;
 
 	if (!translations[language])
 		throw new Error(`unknown language ${language}`);

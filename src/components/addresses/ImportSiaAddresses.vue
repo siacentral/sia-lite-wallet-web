@@ -138,6 +138,22 @@ export default {
 	},
 	methods: {
 		formatNumber,
+		async generateLedgerAddr(nextIndex) {
+			const key = await generateLedgerPubKey(nextIndex),
+				unlockConditions = {
+					timelock: 0,
+					signaturesrequired: 1,
+					publickeys: [key]
+				},
+				address = await encodeUnlockHash(unlockConditions);
+
+			return {
+				address: address,
+				pubkey: key.substr(8),
+				unlock_conditions: unlockConditions,
+				index: nextIndex
+			};
+		},
 		async generateAddress() {
 			const nextIndex = this.addresses.reduce((v, a) => a.index > v ? a.index : v, -1) + 1;
 			let addr;
@@ -150,21 +166,8 @@ export default {
 				};
 				break;
 			case 'ledger':
-				const key = await generateLedgerPubKey(nextIndex),
-					unlockConditions = {
-						timelock: 0,
-						signaturesrequired: 1,
-						publickeys: [key]
-					},
-					address = await encodeUnlockHash(unlockConditions);
-
 				this.displayPublicKey = true;
-				addr = {
-					address: address,
-					pubkey: key.substr(8),
-					unlock_conditions: unlockConditions,
-					index: nextIndex
-				};
+				addr = await this.generateLedgerAddr(nextIndex);
 				break;
 			default:
 				addr = await generateSiaAddresses(this.wallet.seed, nextIndex, 1);

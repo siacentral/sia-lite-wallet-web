@@ -2,7 +2,7 @@ let siaModule;
 
 async function load() {
 	if (WebAssembly.compileStreaming)
-		siaModule = await WebAssembly.compileStreaming(fetch(`/sia/sia.wasm`));
+		siaModule = await WebAssembly.compileStreaming(fetch('/sia/sia.wasm'));
 	else {
 		const resp = await fetch('/sia/sia.wasm'),
 			buf = await resp.arrayBuffer();
@@ -14,13 +14,12 @@ async function load() {
 const loaded = load();
 
 async function defaultSpawnWorker(params, timeout) {
-	let worker = new Worker('/sia/sia.worker.js'),
-		work;
+	let worker = new Worker('/sia/sia.worker.js');
 
 	await Promise.resolve(loaded);
 
-	work = new Promise((resolve, reject) => {
-		let workerDeadline = setTimeout(() => {
+	const work = new Promise((resolve, reject) => {
+		const workerDeadline = setTimeout(() => {
 			reject(new Error('response timeout'));
 		}, timeout);
 
@@ -93,12 +92,11 @@ export function encodeUnlockHashes(unencoded) {
 }
 
 export async function recoverAddresses(seed, i, n, count, last, progress) {
-	let worker = new Worker('/sia/sia.worker.js'),
-		work;
+	let worker = new Worker('/sia/sia.worker.js');
 
 	await Promise.resolve(loaded);
 
-	work = new Promise((resolve, reject) => {
+	const work = new Promise((resolve, reject) => {
 		let workerDeadline = setTimeout(() => {
 			reject(new Error('response timeout'));
 		}, 30000);

@@ -27,7 +27,7 @@ export default {
 	methods: {
 		buttonClasses(button) {
 			const classes = {
-				'btn': true,
+				btn: true,
 				'btn-inline': true
 			};
 

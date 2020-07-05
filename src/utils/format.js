@@ -18,8 +18,8 @@ export function formatFriendlyStatus(status) {
 export function numberToString(number, divisor, units, decimals) {
 	decimals = isFinite(decimals) ? decimals : 2;
 
+	const num = new BigNumber(number);
 	let unit = units[0],
-		num = new BigNumber(number),
 		mag = new BigNumber(divisor);
 
 	for (let i = 0; i < units.length; i++) {
@@ -46,7 +46,7 @@ export function formatBlockTimeString(blocks) {
 	if (blocks <= 0)
 		return '0 hr';
 
-	const denoms = { 'month': 4320, 'week': 1008, 'day': 144, 'hour': 6 };
+	const denoms = { month: 4320, week: 1008, day: 144, hour: 6 };
 
 	for (let key in denoms) {
 		const d = denoms[key];
@@ -98,9 +98,9 @@ export function formatDuration(sec, short) {
 	let denoms;
 
 	if (short)
-		denoms = { 'd': 86400, 'h': 3600, 'm': 60 };
+		denoms = { d: 86400, h: 3600, m: 60 };
 	else
-		denoms = { 'day': 86400, 'hour': 3600, 'min': 60 };
+		denoms = { day: 86400, hour: 3600, min: 60 };
 
 	const keys = Object.keys(denoms), len = keys.length;
 
@@ -120,7 +120,7 @@ export function formatDuration(sec, short) {
 		return `${amt} ${amt > 1 && !short ? label + 's' : label}`;
 	}
 
-	return `< 1 m`;
+	return '< 1 m';
 }
 
 export function formatByteString(val, unit, dec) {

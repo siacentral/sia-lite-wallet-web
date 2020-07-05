@@ -92,9 +92,7 @@ export default {
 		broadcastTxnset(txnset) {
 			switch (this.wallet.server_type) {
 			case 'walrus':
-				const client = new WalrusClient(this.wallet.server_url);
-
-				return client.broadcastTransaction(txnset.map(txn => ({
+				return new WalrusClient(this.wallet.server_url).broadcastTransaction(txnset.map(txn => ({
 					siacoinInputs: txn.siacoininputs,
 					siacoinOutputs: txn.siacoinoutputs,
 					minerFees: txn.minerfees,

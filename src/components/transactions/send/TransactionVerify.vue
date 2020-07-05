@@ -84,8 +84,8 @@ export default {
 			return `${format.value} <span class="currency-display">${format.label}</div>`;
 		},
 		remainder() {
-			let input = this.transaction.siacoin_inputs.reduce((v, i) => v.plus(i.value), new BigNumber(0)),
-				output = this.transaction.siacoin_outputs.reduce((v, o) => v.plus(o.value), new BigNumber(0));
+			const input = this.transaction.siacoin_inputs.reduce((v, i) => v.plus(i.value), new BigNumber(0));
+			let output = this.transaction.siacoin_outputs.reduce((v, o) => v.plus(o.value), new BigNumber(0));
 
 			output = output.plus(this.transaction.miner_fees.reduce((v, f) => v.plus(f), new BigNumber(0)));
 
@@ -116,7 +116,7 @@ export default {
 	methods: {
 		getSummaryClasses(mode) {
 			return {
-				'btn': true,
+				btn: true,
 				'btn-inline': true,
 				'btn-enabled': mode === this.mode
 			};
@@ -137,9 +137,7 @@ export default {
 		broadcastTxnset(txnset) {
 			switch (this.wallet.server_type) {
 			case 'walrus':
-				const client = new WalrusClient(this.wallet.server_url);
-
-				return client.broadcastTransaction(txnset.map(txn => ({
+				return new WalrusClient(this.wallet.server_url).broadcastTransaction(txnset.map(txn => ({
 					siacoinInputs: txn.siacoininputs,
 					siacoinOutputs: txn.siacoinoutputs,
 					minerFees: txn.minerfees,

@@ -13,7 +13,7 @@ export function getLastItems(arr, n) {
 		min = Math.min(len, n),
 		d = len - min;
 
-	let values = [];
+	const values = [];
 
 	for (let i = len - 1; i >= d; i--)
 		values.unshift(arr[i]);
@@ -23,13 +23,12 @@ export function getLastItems(arr, n) {
 
 export function concatUint8Array() {
 	let totalSize = 0,
-		offset = 0,
-		array;
+		offset = 0;
 
 	for (let i = 0; i < arguments.length; i++)
 		totalSize += arguments[i].length;
 
-	array = new Uint8Array(totalSize);
+	const array = new Uint8Array(totalSize);
 
 	for (let i = 0; i < arguments.length; i++) {
 		array.set(arguments[i], offset);
@@ -47,7 +46,7 @@ export function concatUint8Array() {
  */
 export function splitArray(arr, len) {
 	const segments = Math.floor(arr.length / len);
-	let ret = [];
+	const ret = [];
 
 	for (let i = 0; i < segments; i++)
 		ret.push(arr.slice(len * i, len));
@@ -73,14 +72,14 @@ export function compareVersions(ver1, ver2) {
 	return 0;
 }
 
-let timeouts = {};
+const timeouts = {};
 
 export function debounce(fn, delay) {
 	return () => {
 		if (timeouts[fn])
 			clearTimeout(timeouts[fn]);
 
-		let args = arguments,
+		const args = arguments,
 			that = this;
 
 		timeouts[fn] = setTimeout(() => {

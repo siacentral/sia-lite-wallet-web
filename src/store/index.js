@@ -11,7 +11,7 @@ import Wallet from '@/types/wallet';
 Vue.use(Vuex);
 
 function getLocalStorageNumeric(key, def) {
-	let v = localStorage.getItem(key);
+	const v = localStorage.getItem(key);
 
 	if (!v || isNaN(v) || !isFinite(v))
 		return def;

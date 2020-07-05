@@ -112,18 +112,24 @@ export default {
 			}
 		},
 		async generateWalletSeed() {
+			let seed;
+
 			switch (this.createType) {
 			case 'ledger':
 			case 'watch':
-				return encode(randomBytes(64));
+				seed = encode(randomBytes(64));
+				break;
 			case 'recover':
 				await generateAddresses(this.recoverySeed, 0, 1);
-				return this.recoverySeed;
+				seed = this.recoverySeed;
+				break;
 			default:
-				const seed = await generateSeed(this.seedType);
+				seed = await generateSeed(this.seedType);
 				await generateAddresses(seed, 0, 1);
-				return seed;
+				break;
 			}
+
+			return seed;
 		},
 		async onCreateWallet() {
 			if (this.creating)

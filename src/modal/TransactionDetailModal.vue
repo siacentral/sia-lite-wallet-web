@@ -134,7 +134,7 @@ export default {
 		},
 		summaryClasses(mode) {
 			return {
-				'btn': true,
+				btn: true,
 				'btn-inline': true,
 				'btn-enabled': mode === this.mode
 			};

@@ -189,7 +189,7 @@ export default {
 				return m;
 			}, {});
 
-			for (let date in days) {
+			for (const date in days) {
 				groupedTxns.push({
 					date: date,
 					transactions: days[date]

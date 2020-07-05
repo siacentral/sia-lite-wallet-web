@@ -23,7 +23,7 @@ export default {
 			return this.notification && this.notification.icon ? this.notification.icon : 'wallet';
 		},
 		classes() {
-			const classes = { 'notification': true };
+			const classes = { notification: true };
 
 			switch (this.notification.severity) {
 			case 'danger':

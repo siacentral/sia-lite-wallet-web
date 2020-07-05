@@ -19,7 +19,7 @@ export async function getBlock(height) {
 }
 
 export async function getCoinPrice() {
-	const resp = await sendJSONRequest(`https://api.siacentral.com/v2/market/exchange-rate`, {
+	const resp = await sendJSONRequest('https://api.siacentral.com/v2/market/exchange-rate', {
 		method: 'GET'
 	});
 
@@ -30,7 +30,7 @@ export async function getCoinPrice() {
 }
 
 export async function getNetworkFees() {
-	const resp = await sendJSONRequest(`https://api.siacentral.com/v2/wallet/fees`, {
+	const resp = await sendJSONRequest('https://api.siacentral.com/v2/wallet/fees', {
 		method: 'GET'
 	});
 
@@ -56,7 +56,7 @@ export async function getFeeAddresses() {
 }
 
 export async function broadcastTransaction(transactions) {
-	const resp = await sendJSONRequest(`https://api.siacentral.com/v2/wallet/broadcast`, {
+	const resp = await sendJSONRequest('https://api.siacentral.com/v2/wallet/broadcast', {
 		method: 'POST',
 		body: {
 			transactions
