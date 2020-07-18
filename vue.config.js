@@ -2,6 +2,8 @@ const path = require('path');
 
 module.exports = {
 	parallel: false,
+	crossorigin: 'anonymous',
+	integrity: true,
 	pwa: {
 		name: 'Sia Lite Wallet',
 		themeColor: '#1d1e21',
