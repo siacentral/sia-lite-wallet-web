@@ -32,7 +32,7 @@
 					<p>{{ translate('setup.password2') }}</p>
 					<div class="control">
 						<label>{{ translate('unlockPassword') }}</label>
-						<input type="password" v-model="unlockPassword" />
+						<input type="password" v-model="unlockPassword" autocomplete="new-password" />
 					</div>
 					<div class="buttons">
 						<button class="btn btn-success btn-inline" @click="onSetPassword" :disabled="unlockPassword.length === 0">{{ translate('next') }}</button>

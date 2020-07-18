@@ -7,7 +7,7 @@
 			<form @submit.prevent="onUnlockWallets">
 				<div class="control">
 					<label>{{ translate('walletPassword') }}</label>
-					<input type="password" v-model="password" />
+					<input type="password" v-model="password" autocomplete="current-password" />
 				</div>
 				<div class="buttons">
 					<button class="btn btn-success btn-inline" :disabled="unlocking">{{ translate('unlock') }}</button>
