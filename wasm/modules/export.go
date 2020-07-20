@@ -4,10 +4,8 @@ import (
 	"bytes"
 	"encoding/csv"
 	"fmt"
-	"log"
 	"math"
 	"sort"
-	"strings"
 	"time"
 
 	"syscall/js"
@@ -23,6 +21,8 @@ type exportTransaction struct {
 	Type      string
 	Inputs    siatypes.Currency
 	Outputs   siatypes.Currency
+	Fee       siatypes.Currency
+	AllInputs bool
 	Timestamp time.Time
 }
 
@@ -32,6 +32,18 @@ func transactionType(txn types.Transaction) string {
 	}
 
 	if len(txn.SiacoinInputs) == 0 && len(txn.SiacoinOutputs) != 0 {
+		switch txn.SiacoinOutputs[0].Source {
+		case "contract_valid_output":
+			fallthrough
+		case "contract_missed_output":
+			return "Contract Completion"
+		case "block_reward":
+			return "Block Reward"
+		case "siafund_claim":
+			return "Siafund Dividend"
+		default:
+			return txn.SiacoinOutputs[0].Source
+		}
 		return txn.SiacoinOutputs[0].Source
 	}
 
@@ -52,6 +64,20 @@ func transactionType(txn types.Transaction) string {
 	}
 
 	return "Siacoin Transaction"
+}
+
+// feesPaid attempts to determine if the wallet owner paid the transaction fees of if
+// another party paid the fee.
+func feesPaid(txn types.Transaction, ownedInput, unownedInput siatypes.Currency, ownedOutput, unownedOutput siatypes.Currency) siatypes.Currency {
+	if unownedInput.Equals64(0) {
+		return txn.Fees
+	}
+
+	if ownedOutput.Cmp(ownedInput) == 1 {
+		return siatypes.ZeroCurrency
+	}
+
+	return txn.Fees
 }
 
 func currencyString(c siatypes.Currency) string {
@@ -76,18 +102,18 @@ func addressWorker(ownedAddresses map[string]bool, work <-chan []string, results
 			}
 
 			for _, txn := range balanceResp.Transactions {
+				var unownedInputs, unownedOutputs siatypes.Currency
+
+				ownedInputs := 0
 				exportTxn := exportTransaction{
 					ID:        txn.ID,
 					Type:      transactionType(txn),
 					Timestamp: txn.Timestamp,
 				}
 
-				if strings.HasPrefix(txn.ID, "nontxn") && len(txn.SiacoinOutputs) != 0 {
-					exportTxn.Type = txn.SiacoinOutputs[0].Source
-				}
-
 				for _, output := range txn.SiacoinOutputs {
 					if _, exists := ownedAddresses[output.UnlockHash]; !exists {
+						unownedOutputs = unownedOutputs.Add(output.Value)
 						continue
 					}
 
@@ -96,15 +122,15 @@ func addressWorker(ownedAddresses map[string]bool, work <-chan []string, results
 
 				for _, input := range txn.SiacoinInputs {
 					if _, exists := ownedAddresses[input.UnlockHash]; !exists {
+						unownedInputs = unownedInputs.Add(input.Value)
 						continue
 					}
 
 					exportTxn.Inputs = exportTxn.Inputs.Add(input.Value)
+					ownedInputs++
 				}
 
-				if exportTxn.Outputs.Equals(exportTxn.Inputs) {
-					continue
-				}
+				exportTxn.Fee = feesPaid(txn, exportTxn.Inputs, unownedInputs, exportTxn.Outputs, unownedOutputs)
 
 				transactions = append(transactions, exportTxn)
 			}
@@ -132,27 +158,19 @@ func ExportTransactions(addresses []string, callback js.Value) {
 	results := make(chan []exportTransaction)
 	errors := make(chan error, 1)
 
-	log.Println(len(addresses), rounds)
-
 	for i := 0; i < 5; i++ {
 		go addressWorker(ownedAddresses, work, results, errors)
 	}
 
 	go func() {
 		for i := 0; i < count; i += 5000 {
-			var round []string
-
 			end := i + 5000
 
-			if len(addresses) < end {
-				end = len(addresses)
+			if end > count {
+				end = count
 			}
 
-			for _, addr := range addresses[i:end] {
-				round = append(round, addr)
-			}
-
-			work <- round
+			work <- addresses[i:end]
 		}
 	}()
 
@@ -167,6 +185,11 @@ func ExportTransactions(addresses []string, callback js.Value) {
 				}
 
 				walletTransactions[txn.ID] = true
+
+				if txn.Outputs.Equals(txn.Inputs) {
+					continue
+				}
+
 				transactions = append(transactions, txn)
 			}
 
@@ -183,8 +206,6 @@ func ExportTransactions(addresses []string, callback js.Value) {
 			}
 		}
 	}
-
-	log.Println(len(transactions))
 
 	close(work)
 	close(results)
@@ -203,13 +224,14 @@ func ExportTransactions(addresses []string, callback js.Value) {
 		"Type",
 		"Timestamp",
 		"Amount",
+		"Fee",
 		"Balance",
 	})
 
 	for _, txn := range transactions {
-		var fee, amount string
+		var amount string
 
-		balance = balance.Sub(txn.Inputs).Add(txn.Outputs)
+		balance = balance.Add(txn.Outputs).Sub(txn.Inputs)
 
 		if txn.Inputs.Cmp(txn.Outputs) == 1 {
 			amount = "-" + currencyString(txn.Inputs.Sub(txn.Outputs))
@@ -222,7 +244,7 @@ func ExportTransactions(addresses []string, callback js.Value) {
 			txn.Type,
 			txn.Timestamp.UTC().Format(time.RFC1123Z),
 			amount,
-			fee,
+			currencyString(txn.Fee),
 			currencyString(balance),
 		})
 		if err != nil {
