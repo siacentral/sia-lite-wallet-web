@@ -21,6 +21,7 @@ func main() {
 		"signTransactions":   js.FuncOf(signTransactions),
 		"encodeUnlockHash":   js.FuncOf(encodeUnlockHash),
 		"encodeUnlockHashes": js.FuncOf(encodeUnlockHashes),
+		"exportTransactions": js.FuncOf(exportTransactions),
 	})
 
 	c := make(chan bool, 1)
@@ -219,6 +220,24 @@ func getTransactions(this js.Value, args []js.Value) interface{} {
 	}
 
 	go modules.GetTransactions(addresses, callback)
+
+	return true
+}
+
+func exportTransactions(this js.Value, args []js.Value) interface{} {
+	if !checkArgs(args, js.TypeObject, js.TypeFunction) {
+		return false
+	}
+
+	count := args[0].Length()
+	callback := args[1]
+	addresses := make([]string, count)
+
+	for i := 0; i < count; i++ {
+		addresses[i] = args[0].Index(i).String()
+	}
+
+	go modules.ExportTransactions(addresses, callback)
 
 	return true
 }

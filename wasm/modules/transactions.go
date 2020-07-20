@@ -89,7 +89,7 @@ func SignTransactions(transactions []UnsignedTransaction, phrase string, callbac
 	callback.Invoke(js.Null(), signed)
 }
 
-//GetTransactions gets all transactions belonging to the addresses
+//GetTransactions gets the last 500 transactions belonging to each address
 func GetTransactions(addresses []string, callback js.Value) {
 	transactions := make(map[string]apitypes.Transaction)
 	ownedAddresses := make(map[string]bool)

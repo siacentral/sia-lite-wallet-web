@@ -75,6 +75,58 @@ export function getTransactions(addresses) {
 	return defaultSpawnWorker(['getTransactions', addresses], 30000);
 }
 
+export async function exportTransactions(addresses, progress) {
+	let worker = new Worker('/sia/sia.worker.js');
+
+	await Promise.resolve(loaded);
+
+	const work = new Promise((resolve, reject) => {
+		let workerDeadline = setTimeout(() => {
+			reject(new Error('response timeout'));
+		}, 30000);
+
+		worker.onmessage = (e) => {
+			const data = e.data;
+
+			clearTimeout(workerDeadline);
+
+			if (data === 'ready') {
+				worker.postMessage(['exportTransactions', addresses]);
+				return;
+			}
+
+			if (!Array.isArray(data))
+				return reject(new Error('unexpected data'));
+
+			if (data[0] === 'log') {
+				console.debug(data[1]);
+				return;
+			}
+
+			if (data[0] === null)
+				return resolve(data[1]);
+
+			if (data[0] === 'progress')
+				progress(data[1]);
+
+			if (data[0] !== 'progress')
+				return reject(new Error(data[0]));
+
+			workerDeadline = setTimeout(() => {
+				reject(new Error('response timeout'));
+			}, 30000);
+		};
+	});
+
+	worker.postMessage(['module', siaModule]);
+	work.finally(() => {
+		worker.terminate();
+		worker = null;
+	});
+
+	return work;
+}
+
 export function signTransaction(seed, txn, indexes) {
 	return defaultSpawnWorker(['signTransaction', seed, JSON.stringify(txn), indexes], 15000);
 }
