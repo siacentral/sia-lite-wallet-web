@@ -24,7 +24,7 @@
 				@click="displayPublicKey = !displayPublicKey">{{ displayText }}</button>
 			<button class="btn btn-inline btn-success" @click="onAddAddress" :disabled="!ready">{{ addText }}</button>
 		</div>
-		<import-address-list v-model="addresses" :wallet="wallet" :publickey="displayPublicKey" />
+		<import-address-list v-model="addresses" :wallet="wallet" :publickey="displayPublicKey" :readonly="walletType === 'ledger'" />
 		<div class="buttons">
 			<button class="btn btn-inline btn-success" @click="onAddAddresses" :disabled="!valid || !ready">{{ translate('done') }}</button>
 		</div>
@@ -121,9 +121,18 @@ export default {
 
 				existing.reverse();
 
-				this.addresses = existing.map(a => ({
-					...a
-				}));
+				console.log(existing);
+
+				this.addresses = existing.map(a => {
+					const addr = {
+						...a
+					};
+
+					if (a.unlock_conditions && Array.isArray(a.unlock_conditions.publickeys) && a.unlock_conditions.publickeys.length !== 0)
+						addr.pubkey = a.unlock_conditions.publickeys[0].substr(8);
+
+					return addr;
+				});
 			}
 
 			await this.refreshWalletBalance();
