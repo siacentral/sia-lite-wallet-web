@@ -16,15 +16,23 @@ import (
 	siatypes "gitlab.com/NebulousLabs/Sia/types"
 )
 
-type exportTransaction struct {
-	ID        string
-	Type      string
-	Inputs    siatypes.Currency
-	Outputs   siatypes.Currency
-	Fee       siatypes.Currency
-	AllInputs bool
-	Timestamp time.Time
-}
+type (
+	exportTransaction struct {
+		ID             string
+		Type           string
+		SiacoinInputs  siatypes.Currency
+		SiacoinOutputs siatypes.Currency
+		SiafundInputs  siatypes.Currency
+		SiafundOutputs siatypes.Currency
+		Fee            siatypes.Currency
+		Timestamp      time.Time
+	}
+
+	apiResults struct {
+		Done         bool
+		Transactions []exportTransaction
+	}
+)
 
 func transactionType(txn types.Transaction) string {
 	if len(txn.SiafundInputs) != 0 && len(txn.SiafundOutputs) != 0 {
@@ -73,25 +81,29 @@ func feesPaid(txn types.Transaction, ownedInput, unownedInput siatypes.Currency,
 		return txn.Fees
 	}
 
-	if ownedOutput.Cmp(ownedInput) == 1 {
+	if txn.Fees.Cmp(ownedInput) == 1 || ownedOutput.Cmp(ownedInput) == 1 {
 		return siatypes.ZeroCurrency
 	}
 
 	return txn.Fees
 }
 
-func currencyString(c siatypes.Currency) string {
+func siacoinString(c siatypes.Currency) string {
 	d := decimal.NewFromBigInt(c.Big(), -24)
 
-	return fmt.Sprintf("%s SC", d)
+	return d.String()
 }
 
-func addressWorker(ownedAddresses map[string]bool, work <-chan []string, results chan<- []exportTransaction, errors chan<- error) {
-	for addresses := range work {
-		var transactions []exportTransaction
+func siafundString(c siatypes.Currency) string {
+	return c.String()
+}
 
+func addressWorker(ownedAddresses map[string]bool, work <-chan []string, results chan<- apiResults, errors chan<- error) {
+	for addresses := range work {
 		for j := 0; j < 1e4; j++ {
-			balanceResp, err := apiclient.FindAddressBalance(500, j, addresses)
+			var transactions []exportTransaction
+
+			balanceResp, err := apiclient.FindAddressBalance(2000, j, addresses)
 			if err != nil {
 				errors <- fmt.Errorf("unable to get wallet transactions: %s", err)
 				return
@@ -117,7 +129,7 @@ func addressWorker(ownedAddresses map[string]bool, work <-chan []string, results
 						continue
 					}
 
-					exportTxn.Outputs = exportTxn.Outputs.Add(output.Value)
+					exportTxn.SiacoinOutputs = exportTxn.SiacoinOutputs.Add(output.Value)
 				}
 
 				for _, input := range txn.SiacoinInputs {
@@ -126,24 +138,47 @@ func addressWorker(ownedAddresses map[string]bool, work <-chan []string, results
 						continue
 					}
 
-					exportTxn.Inputs = exportTxn.Inputs.Add(input.Value)
+					exportTxn.SiacoinInputs = exportTxn.SiacoinInputs.Add(input.Value)
 					ownedInputs++
 				}
 
-				exportTxn.Fee = feesPaid(txn, exportTxn.Inputs, unownedInputs, exportTxn.Outputs, unownedOutputs)
+				for _, output := range txn.SiafundOutputs {
+					if _, exists := ownedAddresses[output.UnlockHash]; !exists {
+						continue
+					}
+
+					exportTxn.SiafundOutputs = exportTxn.SiafundOutputs.Add(output.Value)
+				}
+
+				for _, input := range txn.SiafundInputs {
+					if _, exists := ownedAddresses[input.UnlockHash]; !exists {
+						continue
+					}
+
+					exportTxn.SiafundInputs = exportTxn.SiafundInputs.Add(input.Value)
+				}
+
+				exportTxn.Fee = feesPaid(txn, exportTxn.SiacoinInputs, unownedInputs, exportTxn.SiacoinOutputs, unownedOutputs)
 
 				transactions = append(transactions, exportTxn)
 			}
+
+			results <- apiResults{
+				Transactions: transactions,
+			}
 		}
 
-		results <- transactions
+		results <- apiResults{
+			Done: true,
+		}
 	}
 }
 
 //ExportTransactions gets all transactions belonging to the addresses
-func ExportTransactions(addresses []string, callback js.Value) {
+func ExportTransactions(addresses []string, min, max time.Time, callback js.Value) {
 	var buf []byte
 	var transactions []exportTransaction
+	var matching uint64
 
 	ownedAddresses := make(map[string]bool)
 	count := len(addresses)
@@ -152,10 +187,10 @@ func ExportTransactions(addresses []string, callback js.Value) {
 		ownedAddresses[addr] = true
 	}
 
-	rounds := int(math.Ceil(float64(len(addresses)) / 5000))
+	rounds := int(math.Ceil(float64(len(addresses)) / 10000))
 
 	work := make(chan []string, 5)
-	results := make(chan []exportTransaction)
+	results := make(chan apiResults)
 	errors := make(chan error, 1)
 
 	for i := 0; i < 5; i++ {
@@ -163,8 +198,8 @@ func ExportTransactions(addresses []string, callback js.Value) {
 	}
 
 	go func() {
-		for i := 0; i < count; i += 5000 {
-			end := i + 5000
+		for i := 0; i < count; i += 10000 {
+			end := i + 10000
 
 			if end > count {
 				end = count
@@ -179,24 +214,32 @@ func ExportTransactions(addresses []string, callback js.Value) {
 	for n := rounds; n > 0; {
 		select {
 		case res := <-results:
-			for _, txn := range res {
+			for _, txn := range res.Transactions {
 				if _, exists := walletTransactions[txn.ID]; exists {
 					continue
 				}
 
 				walletTransactions[txn.ID] = true
 
-				if txn.Outputs.Equals(txn.Inputs) {
+				if txn.SiacoinOutputs.Equals(txn.SiacoinInputs) && txn.SiafundOutputs.Equals(txn.SiafundInputs) {
 					continue
+				}
+
+				if (min.IsZero() || txn.Timestamp.After(min)) && (max.IsZero() || txn.Timestamp.Before(max)) {
+					matching++
 				}
 
 				transactions = append(transactions, txn)
 			}
 
-			n--
+			if res.Done {
+				n--
+			}
+
 			callback.Invoke("progress", map[string]interface{}{
 				"progress":     int(100 - math.Ceil((float64(n) / float64(rounds) * 100))),
 				"transactions": len(transactions),
+				"matching":     matching,
 				"addresses":    len(addresses),
 			})
 		case err := <-errors:
@@ -217,35 +260,51 @@ func ExportTransactions(addresses []string, callback js.Value) {
 
 	out := bytes.NewBuffer(buf)
 	cw := csv.NewWriter(out)
-	balance := siatypes.ZeroCurrency
+	siacoinBalance := siatypes.ZeroCurrency
+	siafundBalance := siatypes.ZeroCurrency
 
 	cw.Write([]string{
 		"ID",
 		"Type",
 		"Timestamp",
-		"Amount",
 		"Fee",
-		"Balance",
+		"SC Amount",
+		"SC Balance",
+		"SF Amount",
+		"SF Balance",
 	})
 
 	for _, txn := range transactions {
-		var amount string
+		var siacoinAmount, siafundAmount string
 
-		balance = balance.Add(txn.Outputs).Sub(txn.Inputs)
+		siacoinBalance = siacoinBalance.Add(txn.SiacoinOutputs).Sub(txn.SiacoinInputs)
+		siafundBalance = siafundBalance.Add(txn.SiafundOutputs).Sub(txn.SiafundInputs)
 
-		if txn.Inputs.Cmp(txn.Outputs) == 1 {
-			amount = "-" + currencyString(txn.Inputs.Sub(txn.Outputs))
+		if txn.SiacoinInputs.Cmp(txn.SiacoinOutputs) == 1 {
+			siacoinAmount = "-" + siacoinString(txn.SiacoinInputs.Sub(txn.SiacoinOutputs))
 		} else {
-			amount = currencyString(txn.Outputs.Sub(txn.Inputs))
+			siacoinAmount = siacoinString(txn.SiacoinOutputs.Sub(txn.SiacoinInputs))
+		}
+
+		if txn.SiafundInputs.Cmp(txn.SiafundOutputs) == 1 {
+			siafundAmount = "-" + siafundString(txn.SiafundInputs.Sub(txn.SiafundOutputs))
+		} else {
+			siafundAmount = siafundString(txn.SiafundOutputs.Sub(txn.SiafundInputs))
+		}
+
+		if (!min.IsZero() && txn.Timestamp.Before(min)) || (!max.IsZero() && txn.Timestamp.After(max)) {
+			continue
 		}
 
 		err := cw.Write([]string{
 			txn.ID,
 			txn.Type,
-			txn.Timestamp.UTC().Format(time.RFC1123Z),
-			amount,
-			currencyString(txn.Fee),
-			currencyString(balance),
+			txn.Timestamp.Local().Format(time.RFC1123Z),
+			siacoinString(txn.Fee),
+			siacoinAmount,
+			siacoinString(siacoinBalance),
+			siafundAmount,
+			siafundString(siafundBalance),
 		})
 		if err != nil {
 			callback.Invoke(err.Error(), js.Null())

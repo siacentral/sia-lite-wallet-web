@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"syscall/js"
+	"time"
 
 	"github.com/siacentral/sia-lite-wallet-web/wasm/modules"
 	siatypes "gitlab.com/NebulousLabs/Sia/types"
@@ -225,19 +226,31 @@ func getTransactions(this js.Value, args []js.Value) interface{} {
 }
 
 func exportTransactions(this js.Value, args []js.Value) interface{} {
-	if !checkArgs(args, js.TypeObject, js.TypeFunction) {
+	var min, max time.Time
+
+	if !checkArgs(args, js.TypeObject, js.TypeNumber, js.TypeNumber, js.TypeFunction) {
 		return false
 	}
 
 	count := args[0].Length()
-	callback := args[1]
+	minTimestamp := args[1].Int()
+	maxTimestamp := args[2].Int()
+	callback := args[3]
 	addresses := make([]string, count)
 
 	for i := 0; i < count; i++ {
 		addresses[i] = args[0].Index(i).String()
 	}
 
-	go modules.ExportTransactions(addresses, callback)
+	if minTimestamp > 0 {
+		min = time.Unix(int64(minTimestamp), 0)
+	}
+
+	if maxTimestamp > 0 {
+		max = time.Unix(int64(maxTimestamp), 0)
+	}
+
+	go modules.ExportTransactions(addresses, min, max, callback)
 
 	return true
 }
