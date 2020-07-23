@@ -78,7 +78,7 @@ label {
 		line-height: 36px;
 	}
 
-	input[type="checkbox"] {
+	input[type="checkbox"], input[type="radio"] {
 		position: absolute;
 		display: inline-block;
 		width: auto;
@@ -86,7 +86,7 @@ label {
 		opacity: 0;
 		padding: 0;
 
-		&:checked {
+		&:checked, &:selected {
 			+ label {
 				&:before {
 					border-color: primary;

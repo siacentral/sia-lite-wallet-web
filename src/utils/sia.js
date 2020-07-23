@@ -75,7 +75,7 @@ export function getTransactions(addresses) {
 	return defaultSpawnWorker(['getTransactions', addresses], 30000);
 }
 
-export async function exportTransactions(addresses, progress) {
+export async function exportTransactions(addresses, min, max, progress) {
 	let worker = new Worker('/sia/sia.worker.js');
 
 	await Promise.resolve(loaded);
@@ -91,7 +91,7 @@ export async function exportTransactions(addresses, progress) {
 			clearTimeout(workerDeadline);
 
 			if (data === 'ready') {
-				worker.postMessage(['exportTransactions', addresses]);
+				worker.postMessage(['exportTransactions', addresses, min, max]);
 				return;
 			}
 

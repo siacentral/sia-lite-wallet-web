@@ -14,6 +14,7 @@ export default {
 		defrag: 'Defrag',
 		addAddresses: 'Add Addresses',
 		exportSeed: 'Export Seed',
+		exportTransactions: 'Export Transactions',
 		deleteWallet: 'Delete Wallet',
 		unlockWallet: 'Unlock Wallet',
 		walletPassword: 'Wallet Password',
@@ -163,6 +164,18 @@ export default {
 			defragUnnecessary: 'Wallet does not need to be defragmented',
 			receiveAmount: 'Receive Amount',
 			sendAmount: 'Send Amount'
+		},
+		exportTransactionsModal: {
+			dateRangeAll: 'All',
+			dateRangeYear: 'This Year',
+			dateRangeLastYear: 'Last Year',
+			dateRangeMonth: 'This Month',
+			dateRangeLastMonth: 'Last Month',
+			dateRangeCustom: 'Custom',
+			labelMin: 'Min',
+			labelMax: 'Max',
+			errMaxGtMin: 'Min must be greater than Max',
+			exportMessage: 'Exporting {{0}}/{{1}} transactions from {{2}} addresses'
 		},
 		transactionTypes: {
 			contractRevision: 'Contract Revision',

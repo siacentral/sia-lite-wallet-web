@@ -35,6 +35,8 @@
 									@click="onDefragWallet"
 									:disabled="walletQueued">
 									<icon icon="sitemap" />{{ translate('defragWallet') }}</button>
+								<button class="dropdown-item" @click="onDropdownModal('exportTransactions')" v-if="wallet.server_type === 'siacentral'">
+									<icon icon="file-export" />{{ translate('exportTransactions') }}</button>
 								<button class="dropdown-item" @click="onDropdownModal('export')" v-if="wallet.type === 'default'">
 									<icon icon="file-export" />{{ translate('exportSeed') }}</button>
 								<button class="dropdown-item" @click="onDropdownModal('delete')">
@@ -71,6 +73,7 @@
 			<receive-siacoin-modal v-else-if="modal === 'receive'" :wallet="wallet" @close="modal = null" />
 			<transaction-detail-modal v-else-if="modal === 'transaction'" :transaction="walletTransactions[selectedTransaction]" @close="modal = null" />
 			<export-seed-modal v-else-if="modal === 'export'" :wallet="wallet" @close="modal = null" />
+			<export-transactions-modal v-else-if="modal === 'exportTransactions'" :wallet="wallet" @close="modal = null" />
 			<select-wallet-modal
 				v-else-if="modal === 'wallet'"
 				:wallets="wallets"
@@ -92,6 +95,7 @@ import AddAddressesModal from '@/modal/AddAddressesModal';
 import ConfirmModal from '@/modal/ConfirmModal';
 import DefragSiacoinModal from '@/modal/DefragSiacoinModal';
 import ExportSeedModal from '@/modal/ExportSeedModal';
+import ExportTransactionsModal from '@/modal/ExportTransactionsModal';
 import ReceiveSiacoinModal from '@/modal/ReceiveSiacoinModal';
 import SendSiacoinModal from '@/modal/SendSiacoinModal';
 import SelectWalletModal from '@/modal/SelectWalletModal';
@@ -104,6 +108,7 @@ export default {
 		ConfirmModal,
 		DefragSiacoinModal,
 		ExportSeedModal,
+		ExportTransactionsModal,
 		ReceiveSiacoinModal,
 		SendSiacoinModal,
 		SelectWalletModal,
