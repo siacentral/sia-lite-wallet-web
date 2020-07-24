@@ -1,74 +1,221 @@
 package modules
 
 import (
+	"fmt"
+	"log"
+	"sync"
 	"syscall/js"
+	"time"
 
 	apiclient "github.com/siacentral/apisdkgo"
 	"github.com/siacentral/sia-lite-wallet-web/wasm/wallet"
 )
 
-//RecoverAddresses scans for addresses on the blockchain addressCount at a time up to a maximum of 100,000,000
-//addresses. Considers all addresses found if the scan goes more than minRounds * addressCount
-//addresses without seeing any used. It's possible the ranges will need to be tweaked for older or
-//larger wallets
-func RecoverAddresses(seed string, i uint64, maxEmptyRounds uint64, addressCount uint64, lastKnownIndex uint64, callback js.Value) {
-	var emptyRounds, lastUsedIndex uint64
+type (
+	recoveryWork struct {
+		Round, Start, End uint64
+	}
 
+	recoveredAddress struct {
+		Address          string                  `json:"address"`
+		UsageType        string                  `json:"usage_type"`
+		Index            uint64                  `json:"index"`
+		UnlockConditions wallet.UnlockConditions `json:"unlock_conditions"`
+	}
+
+	recoveryResults struct {
+		Round, LastUsedIndex, Start, End uint64
+		LastUsedType                     string
+		Addresses                        []recoveredAddress
+		Error                            error
+	}
+)
+
+func longestConsecutive(rounds []uint64) (max uint64) {
+	roundMap := make(map[uint64]bool)
+
+	for _, r := range rounds {
+		roundMap[r] = true
+	}
+
+	for _, r := range rounds {
+		i := r + 1
+
+		for {
+			if exists := roundMap[i]; !exists {
+				break
+			}
+
+			i++
+		}
+
+		consecutive := i - r
+
+		if max < consecutive {
+			max = consecutive
+		}
+	}
+
+	return
+}
+
+func generateAddress(w *wallet.SeedWallet, i uint64) recoveredAddress {
+	key := w.GetAddress(i)
+	addr := recoveredAddress{
+		Address:          key.UnlockConditions.UnlockHash().String(),
+		Index:            i,
+		UnlockConditions: mapUnlockConditions(key.UnlockConditions),
+	}
+
+	return addr
+}
+
+func recoveryWorker(seed string, work <-chan recoveryWork, results chan<- recoveryResults) {
 	w, err := recoverWallet(seed)
 
 	if err != nil {
-		callback.Invoke(err.Error(), js.Null())
+		results <- recoveryResults{
+			Error: fmt.Errorf("unable to recover wallet: %w", err),
+		}
 		return
 	}
 
-	//hard limit of 1e7 addresses after the starting index
-	limit := i + 1e7
+	for r := range work {
+		var addresses []string
+		recovered := recoveryResults{
+			Round: r.Round,
+			Start: r.Start,
+			End:   r.End,
+		}
 
-	for i < limit && emptyRounds < maxEmptyRounds {
-		addresses := make([]string, 0, addressCount)
-		indexMap := make(map[string]uint64)
-		unlockMap := make(map[string]wallet.UnlockConditions)
+		addressMap := make(map[string]recoveredAddress)
 
-		for ; uint64(len(addresses)) < addressCount; i++ {
-			key := w.GetAddress(i)
-			address := key.UnlockConditions.UnlockHash().String()
-			addresses = append(addresses, address)
-			unlockMap[address] = mapUnlockConditions(key.UnlockConditions)
-			indexMap[address] = i
+		for i := r.Start; i < r.End; i++ {
+			addr := generateAddress(w, i)
+			addressMap[addr.Address] = addr
+			addresses = append(addresses, addr.Address)
 		}
 
 		used, err := apiclient.FindUsedAddresses(addresses)
 
 		if err != nil {
-			callback.Invoke(err.Error(), js.Null())
+			results <- recoveryResults{
+				Error: fmt.Errorf("unable to get used addresses: %w", err),
+			}
 			return
 		}
 
-		if len(used) != 0 {
-			emptyRounds = 0
-		} else if i >= lastKnownIndex {
-			emptyRounds++
-		}
-
-		foundAddresses := []interface{}{}
-
-		for _, addr := range used {
-			if indexMap[addr.Address] > lastUsedIndex {
-				lastUsedIndex = indexMap[addr.Address]
+		for _, usage := range used {
+			addr, exists := addressMap[usage.Address]
+			if !exists {
+				continue
 			}
 
-			foundAddresses = append(foundAddresses, map[string]interface{}{
-				"index":             indexMap[addr.Address],
-				"unlock_conditions": unlockMap[addr.Address],
-				"address":           addr.Address,
-				"usage_type":        addr.UsageType,
-			})
+			addr.UsageType = usage.UsageType
+			recovered.Addresses = append(recovered.Addresses, addr)
+
+			if recovered.LastUsedIndex < addr.Index {
+				recovered.LastUsedIndex = addr.Index
+				recovered.LastUsedType = addr.UsageType
+			}
+		}
+
+		results <- recovered
+	}
+}
+
+// RecoverAddresses scans for addresses on the blockchain addressCount at a time up to a maximum of 100,000,000
+//addresses. Considers all addresses found if the scan goes more than minRounds * addressCount
+//addresses without seeing any used. It's possible the ranges will need to be tweaked for older or
+//larger wallets
+func RecoverAddresses(seed string, startIndex, maxEmptyRounds, addressCount, lastKnownIndex uint64, callback js.Value) {
+	var wg sync.WaitGroup
+
+	w, err := recoverWallet(seed)
+
+	if err != nil {
+		callback.Invoke(fmt.Errorf("unable to recover wallet: %w", err).Error(), js.Null())
+		return
+	}
+
+	workers := 5
+	work := make(chan recoveryWork, workers)
+	results := make(chan recoveryResults)
+	done := make(chan bool)
+
+	wg.Add(workers)
+
+	for i := 0; i < workers; i++ {
+		go func() {
+			recoveryWorker(seed, work, results)
+			wg.Done()
+		}()
+	}
+
+	go func() {
+		// wait for all workers to drain the work channel, then stop
+		wg.Wait()
+		close(results)
+	}()
+
+	start := time.Now()
+
+	go func() {
+		var round uint64
+
+		for i := startIndex; ; i += addressCount {
+			select {
+			case <-done:
+				close(work)
+				return
+			default:
+			}
+
+			work <- recoveryWork{
+				Start: i,
+				End:   i + addressCount,
+				Round: round,
+			}
+
+			round++
+		}
+	}()
+
+	var lastIndex, usedTotal uint64
+	var lastUsageType string
+	var empty []uint64
+
+	for res := range results {
+		if res.Error != nil {
+			close(done)
+			continue
+		}
+
+		if consecutive := longestConsecutive(empty); res.End >= lastKnownIndex && consecutive >= 25 {
+			//close the done channel to signal completion only if it isn't already closed
+			select {
+			case <-done:
+				break
+			default:
+				close(done)
+			}
+		}
+
+		if len(res.Addresses) == 0 {
+			empty = append(empty, res.Round)
+		}
+
+		usedTotal += uint64(len(res.Addresses))
+
+		if res.LastUsedIndex > lastIndex {
+			lastIndex = res.LastUsedIndex
+			lastUsageType = res.LastUsedType
 		}
 
 		data, err := interfaceToJSON(map[string]interface{}{
-			"found":     len(foundAddresses),
-			"addresses": foundAddresses,
-			"index":     lastUsedIndex,
+			"found":     len(res.Addresses),
+			"addresses": res.Addresses,
+			"index":     lastIndex,
 			"done":      false,
 		})
 
@@ -80,19 +227,17 @@ func RecoverAddresses(seed string, i uint64, maxEmptyRounds uint64, addressCount
 		callback.Invoke(js.Null(), data)
 	}
 
-	additional := []map[string]interface{}{}
-	key := w.GetAddress(lastUsedIndex + 1)
+	var additional []recoveredAddress
 
-	additional = append(additional, map[string]interface{}{
-		"index":             lastUsedIndex + 1,
-		"unlock_conditions": mapUnlockConditions(key.UnlockConditions),
-		"address":           key.UnlockConditions.UnlockHash().String(),
-		"usage_type":        "none",
-	})
+	if lastUsageType == "sent" {
+		lastIndex++
+
+		additional = append(additional, generateAddress(w, lastIndex))
+	}
 
 	data, err := interfaceToJSON(map[string]interface{}{
 		"addresses": additional,
-		"index":     lastUsedIndex + 1,
+		"index":     lastIndex,
 		"done":      true,
 	})
 
@@ -100,6 +245,8 @@ func RecoverAddresses(seed string, i uint64, maxEmptyRounds uint64, addressCount
 		callback.Invoke(err.Error(), js.Null())
 		return
 	}
+
+	log.Printf("Recovery complete: found %d addresses (%s)", lastIndex, time.Since(start))
 
 	callback.Invoke(js.Null(), data)
 }
