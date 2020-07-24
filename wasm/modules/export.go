@@ -197,8 +197,6 @@ func ExportTransactions(addresses []string, min, max time.Time, callback js.Valu
 		go addressWorker(ownedAddresses, work, results, errors)
 	}
 
-	start := time.Now()
-
 	go func() {
 		for i := 0; i < count; i += 1000 {
 			end := i + 1000

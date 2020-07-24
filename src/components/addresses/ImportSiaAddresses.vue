@@ -121,8 +121,6 @@ export default {
 
 				existing.reverse();
 
-				console.log(existing);
-
 				this.addresses = existing.map(a => {
 					const addr = {
 						...a
