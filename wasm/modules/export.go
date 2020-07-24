@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/csv"
 	"fmt"
-	"log"
 	"math"
 	"sort"
 	"time"
@@ -256,8 +255,6 @@ func ExportTransactions(addresses []string, min, max time.Time, callback js.Valu
 	close(work)
 	close(results)
 	close(errors)
-
-	log.Printf("Data retrieval completed in %s", time.Since(start))
 
 	sort.Slice(transactions, func(i, j int) bool {
 		return transactions[i].Timestamp.Before(transactions[j].Timestamp)

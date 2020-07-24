@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"syscall/js"
 	"time"
 
@@ -148,7 +147,6 @@ func encodeUnlockHashes(this js.Value, args []js.Value) interface{} {
 			var uc siatypes.UnlockConditions
 
 			if err := json.Unmarshal([]byte(args[0].Index(i).String()), &uc); err != nil {
-				log.Println(err)
 				callback.Invoke(err.Error(), js.Null())
 				return
 			}

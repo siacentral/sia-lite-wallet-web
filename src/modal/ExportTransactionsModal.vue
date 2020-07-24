@@ -139,15 +139,11 @@ export default {
 					this.max = 0;
 					break;
 				}
-
-				console.log(this.min, this.max);
 			} catch (ex) {
 				console.error('ExportTransactionsModal.onSelectRange', ex);
 			}
 		},
 		onExportProgress({ matching, transactions, addresses }) {
-			console.log(matching, transactions, addresses);
-
 			this.matching = matching;
 			this.total = transactions;
 			this.addresses = addresses;
