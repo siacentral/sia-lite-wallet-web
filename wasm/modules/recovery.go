@@ -127,7 +127,7 @@ func RecoverAddresses(seed string, startIndex, maxEmptyRounds, addressCount, las
 		return
 	}
 
-	workers := 10
+	workers := 5
 	work := make(chan recoveryWork, workers)
 	results := make(chan recoveryResults)
 	done := make(chan bool)
@@ -179,7 +179,7 @@ func RecoverAddresses(seed string, startIndex, maxEmptyRounds, addressCount, las
 		}
 
 		if consecutive := longestConsecutive(empty); res.End >= lastKnownIndex && consecutive >= maxEmptyRounds {
-			//close the done channel to signal completion only if it isn't already closed
+			//close the done channel to signal completion if it isn't already closed
 			select {
 			case <-done:
 				break
