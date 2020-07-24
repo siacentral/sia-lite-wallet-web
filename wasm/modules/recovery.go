@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"sync"
 	"syscall/js"
-	"time"
 
 	apiclient "github.com/siacentral/apisdkgo"
 	"github.com/siacentral/sia-lite-wallet-web/wasm/wallet"
@@ -147,8 +146,6 @@ func RecoverAddresses(seed string, startIndex, maxEmptyRounds, addressCount, las
 		wg.Wait()
 		close(results)
 	}()
-
-	start := time.Now()
 
 	go func() {
 		var round uint64
