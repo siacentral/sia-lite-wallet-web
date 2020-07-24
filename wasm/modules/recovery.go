@@ -2,7 +2,6 @@ package modules
 
 import (
 	"fmt"
-	"log"
 	"sync"
 	"syscall/js"
 	"time"
@@ -70,16 +69,7 @@ func generateAddress(w *wallet.SeedWallet, i uint64) recoveredAddress {
 	return addr
 }
 
-func recoveryWorker(seed string, work <-chan recoveryWork, results chan<- recoveryResults) {
-	w, err := recoverWallet(seed)
-
-	if err != nil {
-		results <- recoveryResults{
-			Error: fmt.Errorf("unable to recover wallet: %w", err),
-		}
-		return
-	}
-
+func recoveryWorker(w *wallet.SeedWallet, work <-chan recoveryWork, results chan<- recoveryResults) {
 	for r := range work {
 		var addresses []string
 		recovered := recoveryResults{
@@ -138,7 +128,7 @@ func RecoverAddresses(seed string, startIndex, maxEmptyRounds, addressCount, las
 		return
 	}
 
-	workers := 5
+	workers := 10
 	work := make(chan recoveryWork, workers)
 	results := make(chan recoveryResults)
 	done := make(chan bool)
@@ -147,7 +137,7 @@ func RecoverAddresses(seed string, startIndex, maxEmptyRounds, addressCount, las
 
 	for i := 0; i < workers; i++ {
 		go func() {
-			recoveryWorker(seed, work, results)
+			recoveryWorker(w, work, results)
 			wg.Done()
 		}()
 	}
@@ -191,7 +181,7 @@ func RecoverAddresses(seed string, startIndex, maxEmptyRounds, addressCount, las
 			continue
 		}
 
-		if consecutive := longestConsecutive(empty); res.End >= lastKnownIndex && consecutive >= 25 {
+		if consecutive := longestConsecutive(empty); res.End >= lastKnownIndex && consecutive >= maxEmptyRounds {
 			//close the done channel to signal completion only if it isn't already closed
 			select {
 			case <-done:
@@ -245,8 +235,6 @@ func RecoverAddresses(seed string, startIndex, maxEmptyRounds, addressCount, las
 		callback.Invoke(err.Error(), js.Null())
 		return
 	}
-
-	log.Printf("Recovery complete: found %d addresses (%s)", lastIndex, time.Since(start))
 
 	callback.Invoke(js.Null(), data)
 }
