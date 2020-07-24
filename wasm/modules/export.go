@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/csv"
 	"fmt"
+	"log"
 	"math"
 	"sort"
 	"time"
@@ -187,7 +188,7 @@ func ExportTransactions(addresses []string, min, max time.Time, callback js.Valu
 		ownedAddresses[addr] = true
 	}
 
-	rounds := int(math.Ceil(float64(len(addresses)) / 10000))
+	rounds := int(math.Ceil(float64(len(addresses)) / 1000))
 
 	work := make(chan []string, 5)
 	results := make(chan apiResults)
@@ -197,9 +198,11 @@ func ExportTransactions(addresses []string, min, max time.Time, callback js.Valu
 		go addressWorker(ownedAddresses, work, results, errors)
 	}
 
+	start := time.Now()
+
 	go func() {
-		for i := 0; i < count; i += 10000 {
-			end := i + 10000
+		for i := 0; i < count; i += 1000 {
+			end := i + 1000
 
 			if end > count {
 				end = count
@@ -253,6 +256,8 @@ func ExportTransactions(addresses []string, min, max time.Time, callback js.Valu
 	close(work)
 	close(results)
 	close(errors)
+
+	log.Printf("Data retrieval completed in %s", time.Since(start))
 
 	sort.Slice(transactions, func(i, j int) bool {
 		return transactions[i].Timestamp.Before(transactions[j].Timestamp)
