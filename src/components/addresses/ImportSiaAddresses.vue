@@ -192,7 +192,7 @@ export default {
 					addrs.push(a.address);
 
 				return addrs;
-			}, []));
+			}, []), this.wallet.currency);
 
 			let deltaSC = new BigNumber(balance.unconfirmed_siacoin_delta),
 				deltaSF = new BigNumber(balance.unconfirmed_siafund_delta);
