@@ -28,32 +28,29 @@ type (
 	}
 )
 
-func longestConsecutive(rounds []uint64) (max uint64) {
+func consecutiveEmptyRounds(rounds []uint64) uint64 {
+	var lastRound uint64
 	roundMap := make(map[uint64]bool)
 
 	for _, r := range rounds {
 		roundMap[r] = true
-	}
 
-	for _, r := range rounds {
-		i := r + 1
-
-		for {
-			if exists := roundMap[i]; !exists {
-				break
-			}
-
-			i++
-		}
-
-		consecutive := i - r
-
-		if max < consecutive {
-			max = consecutive
+		if lastRound < r {
+			lastRound = r
 		}
 	}
 
-	return
+	i := lastRound
+
+	for {
+		if exists := roundMap[i]; !exists {
+			break
+		}
+
+		i--
+	}
+
+	return lastRound - i
 }
 
 func generateAddress(w *wallet.SeedWallet, i uint64) recoveredAddress {
@@ -181,7 +178,7 @@ func RecoverAddresses(seed, currency string, startIndex, maxEmptyRounds, address
 		if len(res.Addresses) == 0 && res.End >= lastKnownIndex {
 			empty = append(empty, res.Round)
 
-			if consecutive := longestConsecutive(empty); consecutive >= maxEmptyRounds {
+			if consecutive := consecutiveEmptyRounds(empty); consecutive >= maxEmptyRounds {
 				//close the done channel to signal completion if it isn't already closed
 				select {
 				case <-done:
