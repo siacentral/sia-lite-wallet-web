@@ -178,7 +178,7 @@ func RecoverAddresses(seed, currency string, startIndex, maxEmptyRounds, address
 			continue
 		}
 
-		if consecutive := longestConsecutive(empty); res.End >= lastKnownIndex && consecutive >= maxEmptyRounds {
+		if consecutive := longestConsecutive(empty); consecutive >= maxEmptyRounds {
 			//close the done channel to signal completion if it isn't already closed
 			select {
 			case <-done:
@@ -188,7 +188,7 @@ func RecoverAddresses(seed, currency string, startIndex, maxEmptyRounds, address
 			}
 		}
 
-		if len(res.Addresses) == 0 {
+		if len(res.Addresses) == 0 && res.End >= lastKnownIndex {
 			empty = append(empty, res.Round)
 		}
 
