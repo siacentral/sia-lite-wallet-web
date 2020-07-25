@@ -5,7 +5,7 @@
  * @param {BigNumber} fee the fee that will be charged
  */
 export function calculateFee(inputs, outputs, fee) {
-	return fee.times(100 + ((inputs + 2) * 313) + (outputs * 50));
+	return fee.times(100 + ((inputs + 1) * 313) + (outputs * 50));
 }
 
 export function getLastItems(arr, n) {
