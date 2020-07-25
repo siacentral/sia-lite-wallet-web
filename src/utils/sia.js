@@ -63,12 +63,12 @@ export function generateSeed(type) {
 	return defaultSpawnWorker(['generateSeed', type], 15000);
 }
 
-export function generateAddresses(seed, i, n) {
-	return defaultSpawnWorker(['generateAddresses', seed, i, n], 15000);
+export function generateAddresses(seed, currency, i, n) {
+	return defaultSpawnWorker(['generateAddresses', seed, currency, i, n], 15000);
 }
 
-export function signTransactions(seed, unsigned) {
-	return defaultSpawnWorker(['signTransactions', seed, JSON.stringify(unsigned)], 15000);
+export function signTransactions(seed, currency, unsigned) {
+	return defaultSpawnWorker(['signTransactions', seed, currency, JSON.stringify(unsigned)], 15000);
 }
 
 export function getTransactions(addresses, currency) {
@@ -127,8 +127,8 @@ export async function exportTransactions(addresses, currency, min, max, progress
 	return work;
 }
 
-export function signTransaction(seed, txn, indexes) {
-	return defaultSpawnWorker(['signTransaction', seed, JSON.stringify(txn), indexes], 15000);
+export function signTransaction(seed, currency, txn, indexes) {
+	return defaultSpawnWorker(['signTransaction', seed, currency, JSON.stringify(txn), indexes], 15000);
 }
 
 export function encodeTransaction(txn) {

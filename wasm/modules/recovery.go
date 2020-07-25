@@ -120,7 +120,7 @@ func recoveryWorker(w *wallet.SeedWallet, currency string, work <-chan recoveryW
 func RecoverAddresses(seed, currency string, startIndex, maxEmptyRounds, addressCount, lastKnownIndex uint64, callback js.Value) {
 	var wg sync.WaitGroup
 
-	w, err := recoverWallet(seed)
+	w, err := recoverWallet(seed, currency)
 
 	if err != nil {
 		callback.Invoke(fmt.Errorf("unable to recover wallet: %w", err).Error(), js.Null())

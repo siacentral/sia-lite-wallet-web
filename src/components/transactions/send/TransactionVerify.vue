@@ -152,7 +152,7 @@ export default {
 					transactionSignatures: txn.transactionsignatures
 				})));
 			default:
-				switch (this.currency) {
+				switch (this.wallet.currency) {
 				case 'scp':
 					return scprimeAPI.broadcastTransaction(txnset);
 				default:
@@ -175,7 +175,7 @@ export default {
 						throw new Error('transaction not signed');
 					break;
 				case 'default':
-					this.signed = await signTransaction(this.wallet.seed,
+					this.signed = await signTransaction(this.wallet.seed, this.wallet.currency,
 						this.siaTransaction, this.requiredSignatures);
 					break;
 				default:

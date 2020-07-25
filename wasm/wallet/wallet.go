@@ -10,7 +10,8 @@ import (
 type (
 	//SeedWallet creates keys and addresses for the generated seed. Wallet is stateless for ease of use
 	SeedWallet struct {
-		s [siacrypto.EntropySize]byte
+		s        [siacrypto.EntropySize]byte
+		Currency string
 	}
 )
 
@@ -41,6 +42,8 @@ func (wallet *SeedWallet) GetAddresses(idx uint64, keys []SpendableKey) {
 //SignTransaction signs a transaction, for simplicity only supports standard 1 signature keys
 //and siacoin inputs
 func (wallet *SeedWallet) SignTransaction(txn *types.Transaction, requiredSigIndices []uint64) error {
+	var asicHardForkHeight types.BlockHeight
+
 	unlockHashMap := make(map[string]SpendableKey)
 
 	for _, index := range requiredSigIndices {
@@ -55,6 +58,12 @@ func (wallet *SeedWallet) SignTransaction(txn *types.Transaction, requiredSigInd
 
 	if len(txn.TransactionSignatures) != len(requiredSigIndices) {
 		return errors.New("missing signature key indexes")
+	}
+
+	if wallet.Currency == "scp" {
+		asicHardForkHeight = scprimeASICHardForkHeight
+	} else {
+		asicHardForkHeight = siaASICHardForkHeight
 	}
 
 	for i, input := range txn.SiacoinInputs {

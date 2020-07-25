@@ -159,7 +159,7 @@ export default {
 				addr = await this.generateLedgerAddr(nextIndex);
 				break;
 			default:
-				addr = (await generateSiaAddresses(this.wallet.seed, nextIndex, 1))[0];
+				addr = (await generateSiaAddresses(this.wallet.seed, this.wallet.currency, nextIndex, 1))[0];
 				break;
 			}
 

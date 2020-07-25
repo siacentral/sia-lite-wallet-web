@@ -36,12 +36,12 @@ func interfaceToJSON(obj interface{}) (con map[string]interface{}, err error) {
 	return
 }
 
-func recoverWallet(seed string) (*wallet.SeedWallet, error) {
+func recoverWallet(seed, currency string) (*wallet.SeedWallet, error) {
 	if len(strings.Split(seed, " ")) < 20 {
-		return wallet.RecoverBIP39Seed(seed)
+		return wallet.RecoverBIP39Seed(seed, currency)
 	}
 
-	return wallet.RecoverSiaSeed(seed)
+	return wallet.RecoverSiaSeed(seed, currency)
 }
 
 func mapUnlockConditions(sia siatypes.UnlockConditions) (unlockConds wallet.UnlockConditions) {

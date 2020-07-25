@@ -31,8 +31,8 @@ func GenerateSeed(seedType string, callback js.Value) {
 }
 
 //GetAddresses generates n addresses using the seed phrase starting at index i
-func GetAddresses(phrase string, i uint64, n uint64, callback js.Value) {
-	w, err := recoverWallet(phrase)
+func GetAddresses(phrase, currency string, i uint64, n uint64, callback js.Value) {
+	w, err := recoverWallet(phrase, currency)
 
 	if err != nil {
 		callback.Invoke(err.Error(), js.Null())

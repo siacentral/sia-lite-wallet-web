@@ -17,7 +17,7 @@ func NewBIP39RecoveryPhrase() (string, error) {
 }
 
 //RecoverBIP39Seed loads a 12 word BIP-39 seed phrase
-func RecoverBIP39Seed(phrase string) (*SeedWallet, error) {
+func RecoverBIP39Seed(phrase, currency string) (*SeedWallet, error) {
 	wallet := new(SeedWallet)
 
 	entropy, err := decodeBIP39Phrase(phrase)
@@ -29,6 +29,8 @@ func RecoverBIP39Seed(phrase string) (*SeedWallet, error) {
 	seed := blake2b.Sum256(entropy[:])
 
 	copy(wallet.s[:], seed[:])
+
+	wallet.Currency = currency
 
 	return wallet, nil
 }

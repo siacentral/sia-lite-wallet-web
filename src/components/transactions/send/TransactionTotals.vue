@@ -32,7 +32,7 @@ export default {
 		mode: String
 	},
 	computed: {
-		...mapState(['currency', 'exchangeRateSC', 'siaNetworkFees', 'scprimeNetworkFees']),
+		...mapState(['currency', 'exchangeRateSC', 'exchangeRateSCP', 'siaNetworkFees', 'scprimeNetworkFees']),
 		networkFees() {
 			if (this.wallet && this.wallet.currency === 'scp')
 				return this.scprimeNetworkFees;
@@ -115,9 +115,9 @@ export default {
 	},
 	methods: {
 		getSiacoin(value) {
-			const siacoins = formatPriceString(new BigNumber(value), 2);
+			const siacoins = formatPriceString(new BigNumber(value), 2, this.wallet.currency, 1, this.wallet.precision());
 
-			return `${siacoins.value} <span class="currency-display">${this.translate('currency.sc')}</span>`;
+			return `${siacoins.value} <span class="currency-display">${this.translate(`currency.${this.wallet.currency}`)}</span>`;
 		},
 		getCurrency(value) {
 			let exchangeRate = this.exchangeRateSC;

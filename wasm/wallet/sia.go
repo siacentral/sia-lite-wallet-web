@@ -39,7 +39,7 @@ func NewSiaRecoveryPhrase() (string, error) {
 //RecoverSiaSeed loads a standard 29 word wallet phrase.
 //Wanted to import this directly from modules, but cannot because of bbolt
 //https://gitlab.com/NebulousLabs/Sia/blob/fb65620/modules/go#L526
-func RecoverSiaSeed(phrase string) (*SeedWallet, error) {
+func RecoverSiaSeed(phrase, currency string) (*SeedWallet, error) {
 	wallet := new(SeedWallet)
 
 	for _, char := range phrase {
@@ -73,6 +73,8 @@ func RecoverSiaSeed(phrase string) (*SeedWallet, error) {
 	}
 
 	copy(wallet.s[:], checksumSeedBytes)
+
+	wallet.Currency = currency
 
 	return wallet, nil
 }

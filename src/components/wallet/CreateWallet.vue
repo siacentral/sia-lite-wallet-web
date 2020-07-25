@@ -162,7 +162,7 @@ export default {
 				case 'watch':
 					break;
 				default:
-					this.addresses = await generateAddresses(this.wallet.seed, 0, 10);
+					this.addresses = await generateAddresses(this.wallet.seed, this.wallet.currency, 0, 10);
 					break;
 				}
 

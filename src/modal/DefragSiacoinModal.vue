@@ -67,7 +67,7 @@ export default {
 				case 'ledger':
 					throw new Error('Ledger does not support defragmenting');
 				case 'default':
-					signed = await signTransactions(this.wallet.seed, unsigned);
+					signed = await signTransactions(this.wallet.seed, this.wallet.currency, unsigned);
 					break;
 				default:
 					throw new Error('unsupported wallet type');

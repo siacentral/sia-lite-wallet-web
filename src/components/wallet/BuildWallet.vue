@@ -128,12 +128,12 @@ export default {
 				seed = encode(randomBytes(64));
 				break;
 			case 'recover':
-				await generateAddresses(this.recoverySeed, 0, 1);
+				await generateAddresses(this.recoverySeed, this.currencyType, 0, 1);
 				seed = this.recoverySeed;
 				break;
 			default:
 				seed = await generateSeed(this.seedType);
-				await generateAddresses(seed, 0, 1);
+				await generateAddresses(seed, this.currencyType, 0, 1);
 				break;
 			}
 

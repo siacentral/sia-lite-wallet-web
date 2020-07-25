@@ -66,14 +66,15 @@ func encodeTransaction(this js.Value, args []js.Value) interface{} {
 func signTransaction(this js.Value, args []js.Value) interface{} {
 	var txn siatypes.Transaction
 
-	if !checkArgs(args, js.TypeString, js.TypeString, js.TypeObject, js.TypeFunction) {
+	if !checkArgs(args, js.TypeString, js.TypeString, js.TypeString, js.TypeObject, js.TypeFunction) {
 		return false
 	}
 
 	phrase := args[0].String()
-	jsonTxn := args[1].String()
-	length := args[2].Length()
-	callback := args[3]
+	currency := args[1].String()
+	jsonTxn := args[2].String()
+	length := args[3].Length()
+	callback := args[4]
 	requiredSigs := make([]uint64, length)
 
 	if err := json.Unmarshal([]byte(jsonTxn), &txn); err != nil {
@@ -82,10 +83,10 @@ func signTransaction(this js.Value, args []js.Value) interface{} {
 	}
 
 	for i := 0; i < length; i++ {
-		requiredSigs[i] = uint64(args[2].Index(i).Int())
+		requiredSigs[i] = uint64(args[3].Index(i).Int())
 	}
 
-	go modules.SignTransaction(txn, phrase, requiredSigs, callback)
+	go modules.SignTransaction(txn, phrase, currency, requiredSigs, callback)
 
 	return true
 }
@@ -93,20 +94,21 @@ func signTransaction(this js.Value, args []js.Value) interface{} {
 func signTransactions(this js.Value, args []js.Value) interface{} {
 	var unsigned []modules.UnsignedTransaction
 
-	if !checkArgs(args, js.TypeString, js.TypeString, js.TypeFunction) {
+	if !checkArgs(args, js.TypeString, js.TypeString, js.TypeString, js.TypeFunction) {
 		return false
 	}
 
 	phrase := args[0].String()
-	jsonTxns := args[1].String()
-	callback := args[2]
+	currency := args[1].String()
+	jsonTxns := args[2].String()
+	callback := args[3]
 
 	if err := json.Unmarshal([]byte(jsonTxns), &unsigned); err != nil {
 		callback.Invoke(fmt.Sprintf("error decoding transactions: %s", err), js.Null())
 		return false
 	}
 
-	go modules.SignTransactions(unsigned, phrase, callback)
+	go modules.SignTransactions(unsigned, phrase, currency, callback)
 
 	return true
 }
@@ -174,16 +176,17 @@ func generateSeed(this js.Value, args []js.Value) interface{} {
 }
 
 func generateAddresses(this js.Value, args []js.Value) interface{} {
-	if !checkArgs(args, js.TypeString, js.TypeNumber, js.TypeNumber, js.TypeFunction) {
+	if !checkArgs(args, js.TypeString, js.TypeString, js.TypeNumber, js.TypeNumber, js.TypeFunction) {
 		return false
 	}
 
 	phrase := args[0].String()
-	i := args[1].Int()
-	n := args[2].Int()
-	callback := args[3]
+	currency := args[1].String()
+	i := args[2].Int()
+	n := args[3].Int()
+	callback := args[4]
 
-	go modules.GetAddresses(phrase, uint64(i), uint64(n), callback)
+	go modules.GetAddresses(phrase, currency, uint64(i), uint64(n), callback)
 
 	return true
 }

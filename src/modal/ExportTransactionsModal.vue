@@ -160,7 +160,7 @@ export default {
 				if (!Array.isArray(addresses) || addresses.length === 0)
 					throw new Error('wallet has no addresses');
 
-				const buf = await exportTransactions(addresses.map(a => a.address), this.min, this.max, this.onExportProgress);
+				const buf = await exportTransactions(addresses.map(a => a.address), this.wallet.currency, this.min, this.max, this.onExportProgress);
 
 				this.downloadFile(buf);
 				this.$emit('close');

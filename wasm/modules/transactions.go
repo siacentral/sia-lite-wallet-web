@@ -29,8 +29,8 @@ func EncodeTransaction(txn siatypes.Transaction, callback js.Value) {
 }
 
 //SignTransaction signs a transaction using the seed and required signatures
-func SignTransaction(txn siatypes.Transaction, phrase string, requiredSignatures []uint64, callback js.Value) {
-	w, err := recoverWallet(phrase)
+func SignTransaction(txn siatypes.Transaction, phrase, currency string, requiredSignatures []uint64, callback js.Value) {
+	w, err := recoverWallet(phrase, currency)
 
 	if err != nil {
 		callback.Invoke(err.Error(), js.Null())
@@ -53,8 +53,8 @@ func SignTransaction(txn siatypes.Transaction, phrase string, requiredSignatures
 }
 
 //SignTransactions signs a list of transaction using the seed and required signatures returns an error if any of the transactions cannot be signed
-func SignTransactions(transactions []UnsignedTransaction, phrase string, callback js.Value) {
-	w, err := recoverWallet(phrase)
+func SignTransactions(transactions []UnsignedTransaction, phrase, currency string, callback js.Value) {
+	w, err := recoverWallet(phrase, currency)
 
 	if err != nil {
 		callback.Invoke(err.Error(), js.Null())
