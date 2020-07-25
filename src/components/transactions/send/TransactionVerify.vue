@@ -9,10 +9,12 @@
 			<transition name="fade-top" mode="out-in" appear>
 				<transaction-outputs
 					:transaction="transaction"
+					:wallet="wallet"
 					key="outputs"
 					v-if="mode === 'outputs'" />
 				<transaction-summary
 					:transaction="transaction"
+					:wallet="wallet"
 					key="summary"
 					v-else />
 			</transition>
@@ -40,7 +42,7 @@ import { formatPriceString } from '@/utils/format';
 import { mapState } from 'vuex';
 import { signTransaction } from '@/utils/sia';
 import { scanTransactions } from '@/sync/scanner';
-import { broadcastTransaction } from '@/api/siacentral';
+import { siaAPI, scprimeAPI } from '@/api/siacentral';
 import WalrusClient from '@/api/walrus';
 
 import SignLedgerTransaction from '@/components/ledger/SignLedgerTransaction';
@@ -60,7 +62,13 @@ export default {
 		transaction: Object
 	},
 	computed: {
-		...mapState(['currency', 'exchangeRateSC', 'networkFees']),
+		...mapState(['currency', 'exchangeRateSC', 'siaNetworkFees', 'scprimeNetworkFees']),
+		networkFees() {
+			if (this.wallet && this.wallet.currency === 'scp')
+				return this.scprimeNetworkFees;
+
+			return this.siaNetworkFees;
+		},
 		siaTransaction() {
 			return {
 				minerfees: this.transaction.miner_fees,
@@ -144,7 +152,12 @@ export default {
 					transactionSignatures: txn.transactionsignatures
 				})));
 			default:
-				return broadcastTransaction(txnset);
+				switch (this.currency) {
+				case 'scp':
+					return scprimeAPI.broadcastTransaction(txnset);
+				default:
+					return siaAPI.broadcastTransaction(txnset);
+				}
 			}
 		},
 		async onVerifyTxn() {

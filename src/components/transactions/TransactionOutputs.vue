@@ -2,9 +2,9 @@
 	<div class="transaction-outputs">
 		<table>
 			<tr class="header" v-if="inputs && inputs.length !== 0"><td colspan="5">{{ translate('inputs') }}</td></tr>
-			<siacoin-output-list v-if="inputs && inputs.length !== 0" :outputs="inputs" />
+			<siacoin-output-list v-if="inputs && inputs.length !== 0" :wallet="wallet" :outputs="inputs" />
 			<tr class="header" v-if="outputs && outputs.length !== 0"><td colspan="5">{{ translate('outputs') }}</td></tr>
-			<siacoin-output-list v-if="outputs && outputs.length !== 0" :outputs="outputs" />
+			<siacoin-output-list v-if="outputs && outputs.length !== 0" :wallet="wallet" :outputs="outputs" />
 		</table>
 	</div>
 </template>
@@ -19,10 +19,11 @@ export default {
 		SiacoinOutputList
 	},
 	props: {
-		transaction: Object
+		transaction: Object,
+		wallet: Object
 	},
 	computed: {
-		...mapState(['currency', 'exchangeRateSC', 'feeAddresses']),
+		...mapState(['feeAddresses']),
 		outputs() {
 			if (!this.transaction || !Array.isArray(this.transaction.siacoin_outputs))
 				return [];

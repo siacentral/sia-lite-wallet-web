@@ -13,7 +13,7 @@ import Modal from './Modal';
 import DefragSetup from '@/components/transactions/DefragSetup';
 import { signTransactions } from '@/utils/sia';
 import { scanTransactions } from '@/sync/scanner';
-import { broadcastTransaction } from '@/api/siacentral';
+import { siaAPI, scprimeAPI } from '@/api/siacentral';
 import WalrusClient from '@/api/walrus';
 
 export default {
@@ -99,7 +99,12 @@ export default {
 					transactionSignatures: txn.transactionsignatures
 				})));
 			default:
-				return broadcastTransaction(txnset);
+				switch (this.wallet.currency) {
+				case 'scp':
+					return scprimeAPI.broadcastTransaction(txnset);
+				default:
+					return siaAPI.broadcastTransaction(txnset);
+				}
 			}
 		}
 	}

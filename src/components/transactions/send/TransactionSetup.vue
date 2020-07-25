@@ -10,7 +10,7 @@
 		<label>{{ translate('amount') }}</label>
 		<div class="currency-control">
 			<input ref="txtSiacoin" type="text" value="0 SC" @input="onChangeSiacoin" @blur="onFormatValues" />
-			<label>{{ translate('currency.sc') }}</label>
+			<label>{{ baseCurrencyLabel }}</label>
 			<input ref="txtCurrency" type="text" value="$0.00" @input="onChangeCurrency" @blur="onFormatValues" />
 			<label>{{ translate(`currency.${currency}`) }}</label>
 			<div class="transaction-buttons">
@@ -57,7 +57,19 @@ export default {
 		wallet: Object
 	},
 	computed: {
-		...mapState(['currency', 'exchangeRateSC', 'networkFees']),
+		...mapState(['currency', 'exchangeRateSC', 'siaNetworkFees', 'scprimeNetworkFees']),
+		baseCurrencyLabel() {
+			if (this.wallet && this.wallet.currency === 'scp')
+				return this.translate('currency.scp');
+
+			return this.translate('currency.sc');
+		},
+		networkFees() {
+			if (this.wallet && this.wallet.currency === 'scp')
+				return this.scprimeNetworkFees;
+
+			return this.siaNetworkFees;
+		},
 		walletBalance() {
 			return this.wallet.unconfirmedSiacoinBalance();
 		},
@@ -96,9 +108,9 @@ export default {
 			return this.siaFee.plus(this.apiFee);
 		},
 		transactionFeeSC() {
-			const siacoins = formatPriceString(this.fees, 2);
+			const siacoins = formatPriceString(this.fees, 2, this.wallet.currency, 1, this.wallet.precision());
 
-			return `${siacoins.value} <span class="currency-display">${this.translate('currency.sc')}</span>`;
+			return `${siacoins.value} <span class="currency-display">${this.translate(`currency.${siacoins.label}`)}</span>`;
 		},
 		transactionFeeCurrency() {
 			const currency = formatPriceString(this.fees, 2, this.currency, this.exchangeRateSC[this.currency]);
@@ -115,9 +127,9 @@ export default {
 		},
 		remainingBalanceSC() {
 			const rem = this.walletBalance.minus(this.calculatedAmount).minus(this.fees),
-				siacoins = formatPriceString(rem, 2);
+				siacoins = formatPriceString(rem, 2, this.wallet.currency, 1, this.wallet.precision());
 
-			return `${siacoins.value} <span class="currency-display">${this.translate('currency.sc')}</span>`;
+			return `${siacoins.value} <span class="currency-display">${this.translate(`currency.${siacoins.label}`)}</span>`;
 		},
 		remainingBalanceCurrency() {
 			const rem = this.walletBalance.minus(this.calculatedAmount).minus(this.fees),
@@ -337,7 +349,7 @@ export default {
 		},
 		onFormatValues() {
 			try {
-				const siacoins = formatPriceString(this.sendAmount, 2);
+				const siacoins = formatPriceString(this.sendAmount, 2, this.wallet.currency, 1, this.wallet.precision());
 
 				this.$refs.txtCurrency.value = this.formatCurrencyString(this.sendAmount);
 				this.$refs.txtSiacoin.value = siacoins.value;

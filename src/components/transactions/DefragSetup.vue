@@ -61,7 +61,13 @@ export default {
 		wallet: Object
 	},
 	computed: {
-		...mapState(['currency', 'exchangeRateSC', 'networkFees']),
+		...mapState(['currency', 'exchangeRateSC', 'exchangeRateSCP', 'siaNetworkFees', 'scprimeNetworkFees']),
+		networkFees() {
+			if (this.wallet && this.wallet.currency === 'scp')
+				return this.scprimeNetworkFees;
+
+			return this.siaNetworkFees;
+		},
 		sendTextKey() {
 			return this.sendOther ? 'sendSiacoinsModal.recipientAddress' : 'sendSiacoinsModal.receiveAddress';
 		},
@@ -113,7 +119,7 @@ export default {
 			return `${currency.value} <span class="currency-display">${this.translate(`currency.${currency.label}`)}</span>`;
 		},
 		sendAmountSC() {
-			const siacoins = formatPriceString(this.sendAmount, 2);
+			const siacoins = formatPriceString(this.sendAmount, 2, this.wallet.currency, 1, this.wallet.precision());
 
 			return `${siacoins.value} <span class="currency-display">${this.translate('currency.sc')}</span>`;
 		},
@@ -123,7 +129,7 @@ export default {
 			return `${currency.value} <span class="currency-display">${this.translate(`currency.${currency.label}`)}</span>`;
 		},
 		transactionFeeSC() {
-			const siacoins = formatPriceString(this.fees, 2);
+			const siacoins = formatPriceString(this.fees, 2, this.wallet.currency, 1, this.wallet.precision());
 
 			return `${siacoins.value} <span class="currency-display">${this.translate('currency.sc')}</span>`;
 		},

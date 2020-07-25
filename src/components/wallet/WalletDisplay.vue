@@ -55,6 +55,7 @@
 						<transaction-list-item v-for="(transaction, i) in group.transactions"
 							:key="`${group.date}-${i}`"
 							:transaction="transaction"
+							:wallet="wallet"
 							@click="onSelectTransaction(transaction.transaction_id)" />
 					</template>
 				</tbody>
@@ -71,7 +72,7 @@
 			<defrag-siacoin-modal v-else-if="modal === 'defrag'" :wallet="wallet" @close="modal = null" />
 			<send-siacoin-modal v-else-if="modal === 'send'" :wallet="wallet" @close="modal = null" />
 			<receive-siacoin-modal v-else-if="modal === 'receive'" :wallet="wallet" @close="modal = null" />
-			<transaction-detail-modal v-else-if="modal === 'transaction'" :transaction="walletTransactions[selectedTransaction]" @close="modal = null" />
+			<transaction-detail-modal v-else-if="modal === 'transaction'" :transaction="walletTransactions[selectedTransaction]" :wallet="wallet" @close="modal = null" />
 			<export-seed-modal v-else-if="modal === 'export'" :wallet="wallet" @close="modal = null" />
 			<export-transactions-modal v-else-if="modal === 'exportTransactions'" :wallet="wallet" @close="modal = null" />
 			<select-wallet-modal
@@ -128,7 +129,7 @@ export default {
 		};
 	},
 	computed: {
-		...mapState(['currency', 'exchangeRateSC', 'scanQueue']),
+		...mapState(['currency', 'exchangeRateSC', 'exchangeRateSCP', 'scanQueue']),
 		walletQueued() {
 			return this.wallet.scanning === 'full' || this.scanQueue.filter(s => s.walletID === this.wallet.id && s.full).length !== 0;
 		},
@@ -351,7 +352,7 @@ export default {
 			}
 		},
 		formatSiacoinString(val) {
-			const format = formatPriceString(val, 2);
+			const format = formatPriceString(val, 2, this.wallet.currency, 1, this.wallet.precision());
 
 			return `${format.value} <span class="currency-display">${this.translate(`currency.${format.label}`)}</span>`;
 		},
@@ -361,7 +362,12 @@ export default {
 			return `${format.value} <span class="currency-display">${this.translate(`currency.${format.label}`)}</span>`;
 		},
 		formatCurrencyString(val) {
-			const format = formatPriceString(val, 2, this.currency, this.exchangeRateSC[this.currency]);
+			let exchangeRate = this.exchangeRateSC;
+
+			if (this.wallet.currency && this.wallet.currency === 'scp')
+				exchangeRate = this.exchangeRateSCP;
+
+			const format = formatPriceString(val, 2, this.currency, exchangeRate[this.currency], this.wallet.precision());
 
 			return `${format.value} <span class="currency-display">${this.translate(`currency.${format.label}`)}</span>`;
 		}

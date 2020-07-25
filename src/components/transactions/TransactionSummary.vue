@@ -2,8 +2,8 @@
 	<div class="transaction-summary">
 		<div class="transaction-outputs">
 			<table>
-				<siacoin-output-list v-if="direction === 'send'" :outputs="recipients" />
-				<siacoin-output-list v-else :outputs="received" />
+				<siacoin-output-list v-if="direction === 'send'" :wallet="wallet" :outputs="recipients" />
+				<siacoin-output-list v-else :wallet="wallet" :outputs="received" />
 			</table>
 		</div>
 	</div>
@@ -20,6 +20,7 @@ export default {
 		SiacoinOutputList
 	},
 	props: {
+		wallet: Object,
 		transaction: Object
 	},
 	computed: {

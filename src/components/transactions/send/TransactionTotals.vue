@@ -32,7 +32,13 @@ export default {
 		mode: String
 	},
 	computed: {
-		...mapState(['currency', 'exchangeRateSC', 'networkFees']),
+		...mapState(['currency', 'exchangeRateSC', 'siaNetworkFees', 'scprimeNetworkFees']),
+		networkFees() {
+			if (this.wallet && this.wallet.currency === 'scp')
+				return this.scprimeNetworkFees;
+
+			return this.siaNetworkFees;
+		},
 		walletBalance() {
 			if (!this.wallet || !this.transaction)
 				return new BigNumber(0);

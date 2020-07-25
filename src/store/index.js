@@ -5,7 +5,7 @@ import { encode as encodeB64 } from '@stablelib/base64';
 import { encode as encodeUTF8 } from '@stablelib/utf8';
 import { saveWallet, loadWallets, deleteWallet } from './db';
 import { scanner } from '@/sync/scanner';
-import { getCoinPrice, getNetworkFees, getFeeAddresses } from '@/api/siacentral';
+import { siaAPI, scprimeAPI } from '@/api/siacentral';
 import Wallet from '@/types/wallet';
 
 Vue.use(Vuex);
@@ -34,10 +34,13 @@ const store = new Vuex.Store({
 		wallets: [],
 		notifications: [],
 		scanQueue: [],
-		networkFees: {},
+		siaNetworkFees: {},
+		scprimeNetworkFees: {},
 		feeAddresses: [],
 		exchangeRateSC: {},
-		exchangeRateSF: {}
+		exchangeRateSF: {},
+		echangeRateSCP: {},
+		exchangeRateSCPF: {}
 	},
 	mutations: {
 		setSetup(state, setup) {
@@ -109,12 +112,15 @@ const store = new Vuex.Store({
 
 			state.wallets.splice(idx, 1);
 		},
-		setExchangeRate(state, { siacoin, siafund }) {
+		setExchangeRate(state, { siacoin, siafund, scprimecoin, scprimefund }) {
 			state.exchangeRateSC = siacoin;
 			state.exchangeRateSF = siafund;
+			state.exchangeRateSCP = scprimecoin;
+			state.exchangeRateSCPF = scprimefund;
 		},
-		setNetworkFees(state, fees) {
-			state.networkFees = fees;
+		setNetworkFees(state, { sia, scprime }) {
+			state.siaNetworkFees = sia;
+			state.scprimeNetworkFees = scprime;
 		},
 		pushNotification(state, notification) {
 			state.notifications.push(notification);
@@ -265,12 +271,20 @@ const store = new Vuex.Store({
 
 async function updateMetadata() {
 	try {
-		const price = await getCoinPrice(),
-			fees = await getNetworkFees(),
-			addresses = await getFeeAddresses();
+		const siaPrice = await siaAPI.getCoinPrice(),
+			scprimePrice = await scprimeAPI.getCoinPrice(),
+			siaFees = await siaAPI.getNetworkFees(),
+			scprimeFees = await scprimeAPI.getNetworkFees(),
+			addresses = await siaAPI.getFeeAddresses();
 
-		store.dispatch('setNetworkFees', fees);
-		store.dispatch('setExchangeRate', price);
+		store.dispatch('setNetworkFees', {
+			sia: siaFees,
+			scprime: scprimeFees
+		});
+		store.dispatch('setExchangeRate', {
+			...siaPrice,
+			...scprimePrice
+		});
 		store.dispatch('setFeeAddresses', addresses);
 	} catch (ex) {
 		console.error('updatingMeta', ex);

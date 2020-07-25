@@ -18,10 +18,11 @@ import { formatPriceString, formatSiafundString } from '@/utils/format';
 
 export default {
 	props: {
+		wallet: Object,
 		transaction: Object
 	},
 	computed: {
-		...mapState(['currency', 'exchangeRateSC']),
+		...mapState(['currency', 'exchangeRateSC', 'exchangeRateSCP']),
 		siacoinAmount() {
 			if (!this.transaction || !this.transaction.siacoin_value)
 				return new BigNumber(0);
@@ -48,7 +49,7 @@ export default {
 			return this.transaction && Array.isArray(this.transaction.siafund_inputs) && this.transaction.siafund_inputs.length > 0;
 		},
 		displaySiacoins() {
-			const format = formatPriceString(this.siacoinAmount, 2);
+			const format = formatPriceString(this.siacoinAmount, 2, this.wallet.currency, 1, this.wallet.precision());
 
 			if (this.transaction.siacoin_value.direction === 'sent' && !new BigNumber(this.transaction.siacoin_value.value).eq(0))
 				return `-${format.value} <span class="currency-display">${this.translate(`currency.${format.label}`)}</span>`;
@@ -64,7 +65,12 @@ export default {
 			return `${format.value} <span class="currency-display">${this.translate(`currency.${format.label}`)}</span>`;
 		},
 		displayCurrency() {
-			const format = formatPriceString(this.siacoinAmount, 2, this.currency, this.exchangeRateSC[this.currency]);
+			let exchangeRate = this.exchangeRateSC;
+
+			if (this.wallet.currency && this.wallet.currency === 'scp')
+				exchangeRate = this.exchangeRateSCP;
+
+			const format = formatPriceString(this.siacoinAmount, 2, this.currency, exchangeRate[this.currency], this.wallet.precision());
 
 			if (this.transaction.siacoin_value.direction === 'sent')
 				return `-${format.value} <span class="currency-display">${this.translate(`currency.${format.label}`)}</span>`;
@@ -72,8 +78,12 @@ export default {
 			return `${format.value} <span class="currency-display">${this.translate(`currency.${format.label}`)}</span>`;
 		},
 		displayType() {
-			if (!this.transaction || !Array.isArray(this.transaction.tags))
+			if (!this.transaction || !Array.isArray(this.transaction.tags)) {
+				if (this.wallet.currency === 'scp')
+					return this.translate('transactionTypes.scprimeTransaction');
+
 				return this.translate('transactionTypes.siacoinTransaction');
+			}
 
 			if (this.transaction.tags.indexOf('contract_revision') !== -1)
 				return this.translate('transactionTypes.contractRevision');
@@ -87,9 +97,12 @@ export default {
 				return this.translate('transactionTypes.contractCompleted');
 			else if (this.transaction.tags.indexOf('block_reward') !== -1)
 				return this.translate('transactionTypes.blockReward');
-			else if (this.transaction.tags.indexOf('siacoin_transaction') !== -1)
+			else if (this.transaction.tags.indexOf('siacoin_transaction') !== -1) {
+				if (this.wallet.currency === 'scp')
+					return this.translate('transactionTypes.scprimeTransaction');
+
 				return this.translate('transactionTypes.siacoinTransaction');
-			else if (this.transaction.tags.indexOf('siafund_transaction') !== -1)
+			} else if (this.transaction.tags.indexOf('siafund_transaction') !== -1)
 				return this.translate('transactionTypes.siafundTransaction');
 			else if (this.transaction.tags.indexOf('siafund_claim') !== -1)
 				return this.translate('transactionTypes.siafundClaim');

@@ -22,6 +22,13 @@ export default class Wallet {
 		this.unconfirmed_siafund_delta = new BigNumber(data.unconfirmed_siafund_delta);
 	}
 
+	precision() {
+		if (this.currency && this.currency === 'scp')
+			return new BigNumber(1e27);
+
+		return new BigNumber(1e24);
+	}
+
 	confirmedSiacoinBalance() {
 		const balance = new BigNumber(this.confirmed_siacoin_balance);
 
