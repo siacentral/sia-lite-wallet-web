@@ -1,5 +1,23 @@
 import BigNumber from 'bignumber.js';
 
+const supportedCrypto = [
+		'btc',
+		'eth',
+		'bch',
+		'xrp',
+		'ltc'
+	],
+	supportedCurrency = [
+		'usd',
+		'jpy',
+		'eur',
+		'gbp',
+		'aus',
+		'cad',
+		'rub',
+		'cny'
+	];
+
 export function formatFriendlyStatus(status) {
 	switch (status.toLowerCase()) {
 	case 'obligationsucceeded':
@@ -170,28 +188,7 @@ function roundNumber(val, dec) {
 	return num;
 }
 
-function formatSiacoinString(val, dec) {
-	if (!isFinite(dec))
-		dec = 2;
-
-	if (!val || val.isEqualTo(0)) {
-		return {
-			value: '0',
-			label: 'sc'
-		};
-	}
-
-	return {
-		value: new Intl.NumberFormat([], {
-			type: 'decimal',
-			minimumFractionDigits: dec,
-			maximumFractionDigits: 20
-		}).format(roundNumber(val.dividedBy(1e24), dec)),
-		label: 'sc'
-	};
-};
-
-function formatCryptoString(val, dec, currency, rate) {
+function formatCryptoString(val, dec, currency = 'sc', rate = 1, precision = new BigNumber(1e24)) {
 	dec = dec || 4;
 
 	if (val.isEqualTo(0) || !rate) {
@@ -206,12 +203,12 @@ function formatCryptoString(val, dec, currency, rate) {
 			type: 'decimal',
 			minimumFractionDigits: dec,
 			maximumFractionDigits: 20
-		}).format(roundNumber(val.dividedBy(1e24).times(rate), dec)),
+		}).format(roundNumber(val.dividedBy(precision).times(rate), dec)),
 		label: currency.toLowerCase()
 	};
 }
 
-function formatCurrencyString(val, currency, rate) {
+function formatCurrencyString(val, currency, rate, precision = new BigNumber(1e24)) {
 	const formatter = new Intl.NumberFormat([], { style: 'currency', currency: currency || 'usd', maximumFractionDigits: 20 });
 
 	if (val.isEqualTo(0) || !rate) {
@@ -222,57 +219,9 @@ function formatCurrencyString(val, currency, rate) {
 	}
 
 	return {
-		value: formatter.format(roundNumber(val.dividedBy(1e24).times(rate), 2)),
+		value: formatter.format(roundNumber(val.dividedBy(precision).times(rate), 2)),
 		label: currency.toLowerCase()
 	};
-};
-
-const supportedCrypto = [
-		'btc',
-		'eth',
-		'bch',
-		'xrp',
-		'ltc'
-	],
-	supportedCurrency = [
-		'usd',
-		'jpy',
-		'eur',
-		'gbp',
-		'aus',
-		'cad',
-		'rub',
-		'cny'
-	];
-
-export function formatDataPriceString(val, dec, unit, currency, rate) {
-	if (!val)
-		val = new BigNumber(0);
-
-	const byteFactor = unit === 'decimal' ? 1e12 : 1099511627776;
-
-	if (supportedCrypto.indexOf(currency) >= 0 && rate)
-		return formatCryptoString(val.times(byteFactor), dec, currency, rate);
-
-	if (supportedCurrency.indexOf(currency) >= 0 && rate)
-		return formatCurrencyString(val.times(byteFactor), currency, rate);
-
-	return formatSiacoinString(val.times(byteFactor), dec);
-};
-
-export function formatMonthlyPriceString(val, dec, unit, currency, rate) {
-	if (!val)
-		val = new BigNumber(0);
-
-	const byteFactor = unit === 'decimal' ? 1e12 : 1099511627776;
-
-	if (supportedCrypto.indexOf(currency) >= 0 && rate)
-		return formatCryptoString(val.times(byteFactor).times(4320), dec, currency, rate);
-
-	if (supportedCurrency.indexOf(currency) >= 0 && rate)
-		return formatCurrencyString(val.times(byteFactor).times(4320), currency, rate);
-
-	return formatSiacoinString(val.times(byteFactor).times(4320), dec, currency, rate);
 };
 
 export function formatSiafundString(val) {
@@ -293,15 +242,33 @@ export function formatSiafundString(val) {
 	};
 };
 
-export function formatPriceString(val, dec, currency, rate) {
+export function formatSCPFundString(val) {
+	if (!val || val.isEqualTo(0)) {
+		return {
+			value: '0',
+			label: 'scpf'
+		};
+	}
+
+	return {
+		value: new Intl.NumberFormat([], {
+			type: 'decimal',
+			minimumFractionDigits: 0,
+			maximumFractionDigits: 0
+		}).format(val),
+		label: 'scpf'
+	};
+}
+
+export function formatPriceString(val, dec, currency, rate, precision = new BigNumber(1e24)) {
 	if (!val)
 		val = new BigNumber(0);
 
 	if (supportedCrypto.indexOf(currency) >= 0 && rate)
-		return formatCryptoString(val, dec, currency, rate);
+		return formatCryptoString(val, dec, currency, rate, precision);
 
 	if (supportedCurrency.indexOf(currency) >= 0 && rate)
-		return formatCurrencyString(val, currency, rate);
+		return formatCurrencyString(val, currency, rate, precision);
 
-	return formatSiacoinString(val, dec);
+	return formatCryptoString(val, dec, currency, 1, precision);
 }
