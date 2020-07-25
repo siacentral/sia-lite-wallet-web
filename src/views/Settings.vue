@@ -45,6 +45,13 @@
 			<template v-if="showAdvanced">
 				<h2>Advanced</h2>
 				<div class="control-grouping">
+					<p class="text-warning">{{ translate('settings.pChangeCurrencyType') }}</p>
+					<div class="control">
+						<input type="checkbox" id="chk-change-seed-type" v-model="newChangeCurrencyType" @change="setChangeCurrencyType(newChangeCurrencyType)" />
+						<label for="chk-change-seed-type">{{ translate('settings.chkCurrency') }}</label>
+					</div>
+				</div>
+				<div class="control-grouping">
 					<p class="text-warning">{{ translate('settings.pChangeSeedType') }}</p>
 					<div class="control">
 						<input type="checkbox" id="chk-change-seed-type" v-model="newChangeSeedType" @change="setChangeSeedType(newChangeSeedType)" />
@@ -87,7 +94,7 @@ export default {
 		MobileNav
 	},
 	computed: {
-		...mapState(['currency', 'autoLock', 'changeSeedType', 'changeServerType', 'addressesPerRound',
+		...mapState(['currency', 'autoLock', 'changeSeedType', 'changeCurrencyType', 'changeServerType', 'addressesPerRound',
 			'minScanRounds', 'displayLanguage']),
 		languages() {
 			return languages;
@@ -98,6 +105,7 @@ export default {
 			showAdvanced: false,
 			newCurrency: 'usd',
 			newAutoLock: 5,
+			newChangeCurrencyType: false,
 			newChangeSeedType: false,
 			newChangeServerType: false,
 			newAddressesPerRound: 1000,
@@ -108,6 +116,7 @@ export default {
 	mounted() {
 		this.newCurrency = this.currency;
 		this.newAutoLock = this.autoLock;
+		this.newChangeCurrencyType = this.changeCurrencyType;
 		this.newChangeSeedType = this.changeSeedType;
 		this.newChangeServerType = this.changeServerType;
 		this.newAddressesPerRound = this.addressesPerRound;
@@ -115,7 +124,7 @@ export default {
 		this.newLanguage = this.displayLanguage;
 	},
 	methods: {
-		...mapActions(['setCurrency', 'setAutoLock', 'setChangeSeedType', 'setChangeServerType', 'setMinFullScanRounds',
+		...mapActions(['setCurrency', 'setAutoLock', 'setChangeSeedType', 'setChangeCurrencyType', 'setChangeServerType', 'setMinFullScanRounds',
 			'setAddressesPerRound', 'setDisplayLanguage']),
 		formatNumber
 	}

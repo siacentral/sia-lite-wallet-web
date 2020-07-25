@@ -11,7 +11,7 @@
 				<option value="walrus">{{ translate('createWalletModal.walrusSeed') }}</option>
 			</select>
 		</div>
-		<div class="control">
+		<div class="control" v-if="changeCurrencyType && createType !== 'ledger'">
 			<label>{{ translate('createWalletModal.lblCurrencyType') }}</label>
 			<select v-model="currencyType">
 				<option value="sc">{{ translate('siacoin') }}</option>
@@ -68,7 +68,7 @@ export default {
 		createType: String
 	},
 	computed: {
-		...mapState(['changeSeedType', 'changeServerType']),
+		...mapState(['changeSeedType', 'changeCurrencyType', 'changeServerType']),
 		walletType() {
 			switch (this.createType) {
 			case 'ledger':
