@@ -119,7 +119,7 @@ export default {
 	props: {
 		wallet: Object,
 		wallets: Array,
-		active: Number
+		active: String
 	},
 	data() {
 		return {

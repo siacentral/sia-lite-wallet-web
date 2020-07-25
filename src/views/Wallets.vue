@@ -36,25 +36,31 @@ export default {
 	computed: {
 		...mapState(['wallets', 'outputs']),
 		currentWallet() {
-			if (!Array.isArray(this.wallets) || this.wallets.length < this.selectedWallet)
+			if (!Array.isArray(this.wallets))
 				return null;
 
-			if (!this.wallets[this.selectedWallet])
+			const selected = this.wallets.filter(w => w.id === this.selectedWallet)[0];
+
+			if (!selected)
 				return this.wallets[0];
 
-			return this.wallets[this.selectedWallet];
+			return selected;
 		}
 	},
 	data() {
 		return {
 			walletModal: null,
-			selectedWallet: 0
+			selectedWallet: null
 		};
 	},
+	mounted() {
+		this.selectedWallet = localStorage.getItem('lastSelectedWallet') || this.wallets[0];
+	},
 	methods: {
-		onWalletSelected(i) {
+		onWalletSelected(id) {
 			try {
-				this.selectedWallet = i;
+				this.selectedWallet = id;
+				localStorage.setItem('lastSelectedWallet', id);
 			} catch (ex) {
 				console.error('onSelectWallet', ex);
 				this.pushNotification({
@@ -65,7 +71,7 @@ export default {
 		},
 		onDeleted() {
 			try {
-				this.selectedWallet = 0;
+				this.selectedWallet = this.wallets[0].id;
 			} catch (ex) {
 				console.error('onDeleted', ex);
 				this.pushNotification({

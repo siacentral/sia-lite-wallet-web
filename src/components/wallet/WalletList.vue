@@ -4,10 +4,10 @@
 			<div class="wallet-group" v-for="group in groups" :key="group">
 				<div class="group-title">{{ groupTitle(group) }}</div>
 				<wallet-item
-				v-for="(wallet, i) in walletGroups[group]" :key="wallet.id"
+				v-for="wallet in walletGroups[group]" :key="wallet.id"
 				:wallet="wallet"
-				:active="active === i"
-				@click.native="$emit('selected', i)" />
+				:active="wallet.id === active"
+				@click.native="$emit('selected', wallet.id)" />
 			</div>
 		</div>
 		<div class="wallet-buttons">
@@ -30,15 +30,12 @@ export default {
 	},
 	props: {
 		wallets: Array,
-		active: Number
+		active: String
 	},
 	data() {
 		return {
 			showModal: false
 		};
-	},
-	mounted() {
-		console.log(this.walletGroups);
 	},
 	computed: {
 		groups() {
