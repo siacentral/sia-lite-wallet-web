@@ -22,7 +22,7 @@
 						<button class="more-btn" @click="showMore = !showMore"><icon icon="ellipsis-v" /></button>
 						<transition name="fade-top" mode="out-in">
 							<div class="dropdown" v-if="showMore">
-								<button class="dropdown-item" @click="onBuySiacoin">
+								<button class="dropdown-item" @click="onBuySiacoin" v-if="wallet.currency !== 'scp'">
 									<icon icon="credit-card" />{{ translate('buySiacoin') }}</button>
 								<button class="dropdown-item" @click="onQueueWallet"
 									:disabled="walletQueued">
