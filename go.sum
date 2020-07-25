@@ -98,8 +98,8 @@ github.com/russross/blackfriday/v2 v2.0.1/go.mod h1:+Rmxgy9KzJVeS9/2gXHxylqXiyQD
 github.com/shopspring/decimal v1.2.0 h1:abSATXmQEYyShuxI4/vyW3tV1MrKAJzCZ/0zLUXYbsQ=
 github.com/shopspring/decimal v1.2.0/go.mod h1:DKyhrW/HYNuLGql+MJL6WCR6knT2jwCFRcu2hWCYk4o=
 github.com/shurcooL/sanitized_anchor_name v1.0.0/go.mod h1:1NzhyTcUVG4SuEtjjoZeVRXNmyL/1OwPU0+IJeTBvfc=
-github.com/siacentral/apisdkgo v0.0.0-20200519014622-e4ad2522209c h1:TU7+V5YDOEQ/JTucbFOwAipFcxZ1ZLE1QOekYtEGogQ=
-github.com/siacentral/apisdkgo v0.0.0-20200519014622-e4ad2522209c/go.mod h1:E40Zwh4GNrYurMpjSEwAJduAl8pxSjx4jPYmU4rc3FM=
+github.com/siacentral/apisdkgo v0.0.0-20200725073657-20beecee33b5 h1:Y0GM10SpdFdrzhETfZM0PlExMphJy6xY5Snkabe++2U=
+github.com/siacentral/apisdkgo v0.0.0-20200725073657-20beecee33b5/go.mod h1:E40Zwh4GNrYurMpjSEwAJduAl8pxSjx4jPYmU4rc3FM=
 github.com/sirupsen/logrus v1.2.0/go.mod h1:LxeOpSwHxABJmUn/MG1IvRgCAasNZTLOkJPxbbu5VWo=
 github.com/soheilhy/cmux v0.1.4/go.mod h1:IM3LyeVVIOuxMH7sFAkER9+bJ4dT7Ms6E4xg4kGIyLM=
 github.com/spaolacci/murmur3 v0.0.0-20180118202830-f09979ecbc72/go.mod h1:JwIasOWyU6f++ZhiEuf87xNszmSA2myDM2Kzu9HwQUA=
