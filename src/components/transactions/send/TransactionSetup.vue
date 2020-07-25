@@ -57,7 +57,7 @@ export default {
 		wallet: Object
 	},
 	computed: {
-		...mapState(['currency', 'exchangeRateSC', 'siaNetworkFees', 'scprimeNetworkFees']),
+		...mapState(['currency', 'exchangeRateSC', 'exchangeRateSCP', 'siaNetworkFees', 'scprimeNetworkFees']),
 		baseCurrencyLabel() {
 			if (this.wallet && this.wallet.currency === 'scp')
 				return this.translate('currency.scp');
@@ -113,7 +113,12 @@ export default {
 			return `${siacoins.value} <span class="currency-display">${this.translate(`currency.${siacoins.label}`)}</span>`;
 		},
 		transactionFeeCurrency() {
-			const currency = formatPriceString(this.fees, 2, this.currency, this.exchangeRateSC[this.currency]);
+			let exchangeRate = this.exchangeRateSC;
+
+			if (this.wallet.currency && this.wallet.currency === 'scp')
+				exchangeRate = this.exchangeRateSCP;
+
+			const currency = formatPriceString(this.fees, 2, this.currency, exchangeRate[this.currency], this.wallet.precision());
 
 			return `${currency.value} <span class="currency-display">${this.translate(`currency.${currency.label}`)}</span>`;
 		},
@@ -132,8 +137,13 @@ export default {
 			return `${siacoins.value} <span class="currency-display">${this.translate(`currency.${siacoins.label}`)}</span>`;
 		},
 		remainingBalanceCurrency() {
+			let exchangeRate = this.exchangeRateSC;
+
+			if (this.wallet.currency && this.wallet.currency === 'scp')
+				exchangeRate = this.exchangeRateSCP;
+
 			const rem = this.walletBalance.minus(this.calculatedAmount).minus(this.fees),
-				currency = formatPriceString(rem, 2, this.currency, this.exchangeRateSC[this.currency]);
+				currency = formatPriceString(rem, 2, this.currency, exchangeRate[this.currency], this.wallet.precision());
 
 			return `${currency.value} <span class="currency-display">${this.translate(`currency.${currency.label}`)}</span>`;
 		},
@@ -277,7 +287,12 @@ export default {
 			return txn;
 		},
 		formatCurrencyString(value) {
-			return formatPriceString(value, 2, this.currency, this.exchangeRateSC[this.currency]).value;
+			let exchangeRate = this.exchangeRateSC;
+
+			if (this.wallet.currency && this.wallet.currency === 'scp')
+				exchangeRate = this.exchangeRateSCP;
+
+			return formatPriceString(value, 2, this.currency, exchangeRate[this.currency], this.wallet.precision()).value;
 		},
 		onSendHalf() {
 			try {
@@ -364,7 +379,7 @@ export default {
 		onChangeSiacoin() {
 			try {
 				const value = this.$refs.txtSiacoin.value,
-					parsed = parseSiacoinString(value);
+					parsed = parseSiacoinString(value, this.wallet.precision());
 
 				this.sendAmount = parsed;
 				this.$refs.txtCurrency.value = this.formatCurrencyString(parsed);
@@ -379,9 +394,14 @@ export default {
 		},
 		onChangeCurrency() {
 			try {
+				let exchangeRate = this.exchangeRateSC;
+
+				if (this.wallet.currency && this.wallet.currency === 'scp')
+					exchangeRate = this.exchangeRateSCP;
+
 				const value = this.$refs.txtCurrency.value,
-					parsed = parseCurrencyString(value, this.exchangeRateSC[this.currency]),
-					siacoins = formatPriceString(parsed, 2);
+					parsed = parseCurrencyString(value, exchangeRate[this.currency], this.wallet.precision()),
+					siacoins = formatPriceString(parsed, 2, this.wallet.currency, 1, this.wallet.precision());
 
 				this.sendAmount = parsed;
 				this.$refs.txtSiacoin.value = siacoins.value;

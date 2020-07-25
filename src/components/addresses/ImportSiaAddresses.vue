@@ -64,7 +64,7 @@ export default {
 		};
 	},
 	computed: {
-		...mapState(['currency', 'exchangeRateSC']),
+		...mapState(['currency', 'exchangeRateSC', 'exchangeRateSCP']),
 		walletType() {
 			return this.wallet && typeof this.wallet.type === 'string' ? this.wallet.type : 'watch';
 		},
@@ -85,12 +85,16 @@ export default {
 			return `${format.value} <span class="currency-display">${this.translate(`currency.${format.label}`)}</span>`;
 		},
 		balanceCurrency() {
-			let balance = new BigNumber(this.siacoinBalance);
+			let balance = new BigNumber(this.siacoinBalance),
+				exchangeRate = this.exchangeRateSC;
+
+			if (this.wallet.currency && this.wallet.currency === 'scp')
+				exchangeRate = this.exchangeRateSCP;
 
 			if (balance.isNaN() || !balance.isFinite())
 				balance = new BigNumber(0);
 
-			const format = formatPriceString(balance, 2, this.currency, this.exchangeRateSC[this.currency]);
+			const format = formatPriceString(balance, 2, this.currency, exchangeRate[this.currency]);
 
 			return `${format.value} <span class="currency-display">${this.translate(`currency.${format.label}`)}</span>`;
 		},

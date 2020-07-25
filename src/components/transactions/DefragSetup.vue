@@ -114,7 +114,12 @@ export default {
 			return `${siacoins.value} <span class="currency-display">${this.translate('currency.sc')}</span>`;
 		},
 		balanceCurrency() {
-			const currency = formatPriceString(this.balance, 2, this.currency, this.exchangeRateSC[this.currency]);
+			let exchangeRate = this.exchangeRateSC;
+
+			if (this.wallet.currency && this.wallet.currency === 'scp')
+				exchangeRate = this.exchangeRateSCP;
+
+			const currency = formatPriceString(this.balance, 2, this.currency, exchangeRate[this.currency]);
 
 			return `${currency.value} <span class="currency-display">${this.translate(`currency.${currency.label}`)}</span>`;
 		},
@@ -124,7 +129,12 @@ export default {
 			return `${siacoins.value} <span class="currency-display">${this.translate('currency.sc')}</span>`;
 		},
 		sendAmountCurrency() {
-			const currency = formatPriceString(this.sendAmount, 2, this.currency, this.exchangeRateSC[this.currency]);
+			let exchangeRate = this.exchangeRateSC;
+
+			if (this.wallet.currency && this.wallet.currency === 'scp')
+				exchangeRate = this.exchangeRateSCP;
+
+			const currency = formatPriceString(this.sendAmount, 2, this.currency, exchangeRate[this.currency], this.wallet.precision());
 
 			return `${currency.value} <span class="currency-display">${this.translate(`currency.${currency.label}`)}</span>`;
 		},
@@ -134,7 +144,12 @@ export default {
 			return `${siacoins.value} <span class="currency-display">${this.translate('currency.sc')}</span>`;
 		},
 		transactionFeeCurrency() {
-			const currency = formatPriceString(this.fees, 2, this.currency, this.exchangeRateSC[this.currency]);
+			let exchangeRate = this.exchangeRateSC;
+
+			if (this.wallet.currency && this.wallet.currency === 'scp')
+				exchangeRate = this.exchangeRateSCP;
+
+			const currency = formatPriceString(this.fees, 2, this.currency, exchangeRate[this.currency], this.wallet.precision());
 
 			return `${currency.value} <span class="currency-display">${this.translate(`currency.${currency.label}`)}</span>`;
 		},
@@ -257,7 +272,12 @@ export default {
 			};
 		},
 		formatCurrencyString(value) {
-			return formatPriceString(value, 2, this.currency, this.exchangeRateSC[this.currency]).value;
+			let exchangeRate = this.exchangeRateSC;
+
+			if (this.wallet.currency && this.wallet.currency === 'scp')
+				exchangeRate = this.exchangeRateSCP;
+
+			return formatPriceString(value, 2, this.currency, exchangeRate[this.currency], this.wallet.precision()).value;
 		},
 		onChangeSendOther() {
 			try {

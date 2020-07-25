@@ -1,16 +1,6 @@
 import { BigNumber } from 'bignumber.js';
 
-function getUnit(str, mul, units, def) {
-	const unit = str.replace(/[^a-z]/gi, '').trim().toLowerCase(),
-		idx = units.map(u => u.toLowerCase()).indexOf(unit);
-
-	if (idx === -1)
-		return Math.pow(mul, def || 1);
-
-	return Math.pow(mul, idx);
-}
-
-export function parseNumberString(str, mul, units, def) {
+export function parseNumberString(str, precision = new BigNumber(1)) {
 	const decimalSep = (1.1).toLocaleString().substring(1, 2),
 		repRegex = new RegExp(`[^0-9${decimalSep}]`, 'g');
 
@@ -19,10 +9,7 @@ export function parseNumberString(str, mul, units, def) {
 	if (num.isNaN() || !num.isFinite())
 		num = new BigNumber(0);
 
-	if (!units || !Array.isArray(units))
-		units = [];
-
-	return num.times(getUnit(str, mul, units, def));
+	return num.times(precision);
 };
 
 export function parseBlockTimeString(str) {
@@ -44,21 +31,13 @@ export function parseBlockTimeString(str) {
 	return Math.floor(num * multipliers[unit]);
 }
 
-export function parseSiacoinString(str) {
-	return parseNumberString(str, 1000, ['pSC', 'nSC', 'uSC', 'mSC', 'SC', 'KSC', 'MSC', 'GSC', 'TSC'], 4).times(1e12);
+export function parseSiacoinString(str, precision = new BigNumber(1e24)) {
+	return parseNumberString(str, precision);
 }
 
-export function parseCurrencyString(str, rate) {
+export function parseCurrencyString(str, rate, precision = new BigNumber(1e24)) {
 	if (rate)
-		return parseNumberString(str, 1).div(rate).times(1e24);
+		return parseNumberString(str, 1).div(rate).times(precision);
 
 	return parseSiacoinString(str);
 }
-
-export function parseByteString(str) {
-	try {
-		return parseNumberString(str, 1000, ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB']);
-	} catch (ex) {}
-
-	return parseNumberString(str, 1024, ['B', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB']);
-};

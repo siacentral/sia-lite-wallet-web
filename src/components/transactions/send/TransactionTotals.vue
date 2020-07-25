@@ -120,7 +120,12 @@ export default {
 			return `${siacoins.value} <span class="currency-display">${this.translate('currency.sc')}</span>`;
 		},
 		getCurrency(value) {
-			const currency = formatPriceString(new BigNumber(value), 2, this.currency, this.exchangeRateSC[this.currency]);
+			let exchangeRate = this.exchangeRateSC;
+
+			if (this.wallet.currency && this.wallet.currency === 'scp')
+				exchangeRate = this.exchangeRateSCP;
+
+			const currency = formatPriceString(new BigNumber(value), 2, this.currency, exchangeRate[this.currency], this.wallet.precision());
 
 			return `${currency.value} <span class="currency-display">${this.translate(`currency.${currency.label}`)}</span>`;
 		}
