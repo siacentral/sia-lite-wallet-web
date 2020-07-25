@@ -11,6 +11,13 @@
 				<option value="walrus">{{ translate('createWalletModal.walrusSeed') }}</option>
 			</select>
 		</div>
+		<div class="control">
+			<label>{{ translate('createWalletModal.lblCurrencyType') }}</label>
+			<select v-model="currencyType">
+				<option value="sc">{{ translate('siacoin') }}</option>
+				<option value="scp">{{ translate('scprimecoin') }}</option>
+			</select>
+		</div>
 		<template v-if="changeServerType">
 			<div class="control">
 				<label>{{ translate('createWalletModal.lblServerType') }}</label>
@@ -97,6 +104,7 @@ export default {
 			importSeed: false,
 			walletName: '',
 			recoverySeed: '',
+			currencyType: 'sc',
 			seedType: 'sia',
 			serverType: 'siacentral',
 			serverURL: null
@@ -142,6 +150,7 @@ export default {
 					wallet = {
 						seed,
 						title: this.walletName,
+						currency: this.currencyType,
 						type: this.walletType,
 						server_type: this.serverType,
 						server_url: this.serverURL

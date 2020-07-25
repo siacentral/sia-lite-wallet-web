@@ -85,8 +85,14 @@ const store = new Vuex.Store({
 			if (!wallet || !wallet.seed)
 				return;
 
-			const id = encodeB64(hash(encodeUTF8(wallet.seed))),
-				idx = state.wallets.findIndex(w => w.id === id);
+			let id = wallet.seed;
+
+			if (wallet.currency && wallet.currency !== 'sc')
+				id += '-' + wallet.currency;
+
+			id = encodeB64(hash(encodeUTF8(id)));
+
+			const idx = state.wallets.findIndex(w => w.id === id);
 
 			if (idx === -1) {
 				state.wallets.push(new Wallet(wallet));

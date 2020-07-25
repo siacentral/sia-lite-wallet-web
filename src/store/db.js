@@ -17,7 +17,12 @@ export async function saveWallet(wallet, password) {
 	if (!wallet || !wallet.seed || wallet.seed.length === 0)
 		throw new Error('wallet requires seed');
 
-	const walletID = encodeB64(hash(encodeUTF8(wallet.seed))),
+	let id = wallet.seed;
+
+	if (wallet.currency && wallet.currency !== 'sc')
+		id += '-' + wallet.currency;
+
+	const walletID = encodeB64(hash(encodeUTF8(id))),
 		key = await pbkdf2(password, wallet.salt);
 
 	let confirmedSiafundBalance = new BigNumber(wallet.confirmed_siafund_balance),

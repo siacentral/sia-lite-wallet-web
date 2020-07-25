@@ -7,6 +7,8 @@ export default {
 	key: 'en',
 	translations: {
 		getStarted: 'Get Started',
+		siacoin: 'Siacoin',
+		scprimecoin: 'SCPrimeCoin',
 		addWallet: 'Add Wallet',
 		buySiacoin: 'Buy Siacoin (PREVIEW)',
 		rescanWallet: 'Rescan Wallet',
@@ -125,6 +127,7 @@ export default {
 			lblSeedType: 'Seed Type',
 			lblServerType: 'Server Type',
 			lblServerURL: 'Server URL',
+			lblCurrencyType: 'Currency',
 			siaSeed: 'Sia Seed',
 			walrusSeed: 'Walrus Seed'
 		},

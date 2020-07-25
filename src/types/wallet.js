@@ -9,6 +9,7 @@ export default class Wallet {
 		this.scanning = data.scanning;
 		this.salt = data.salt;
 		this.server_type = data.server_type || 'siacentral';
+		this.currency = data.currency || 'sc';
 		this.server_url = data.server_url;
 		this.transactions = Array.isArray(data.transactions) ? data.transactions : [];
 		this.unspent_siacoin_outputs = Array.isArray(data.unspent_siacoin_outputs) ? data.unspent_siacoin_outputs : [];
