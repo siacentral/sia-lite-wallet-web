@@ -1,11 +1,14 @@
 <template>
 	<div class="wallets-list">
 		<div class="wallets">
-			<wallet-item
-				v-for="(wallet, i) in wallets" :key="wallet.id"
+			<div class="wallet-group" v-for="group in groups" :key="group">
+				<div class="group-title">{{ groupTitle(group) }}</div>
+				<wallet-item
+				v-for="(wallet, i) in walletGroups[group]" :key="wallet.id"
 				:wallet="wallet"
 				:active="active === i"
 				@click.native="$emit('selected', i)" />
+			</div>
 		</div>
 		<div class="wallet-buttons">
 			<button class="btn wallet-btn" @click="showModal = true"><icon icon="plus" /> {{ translate('addWallet') }}</button>
@@ -33,6 +36,40 @@ export default {
 		return {
 			showModal: false
 		};
+	},
+	mounted() {
+		console.log(this.walletGroups);
+	},
+	computed: {
+		groups() {
+			const groups = Object.keys(this.walletGroups);
+
+			groups.sort();
+
+			return groups;
+		},
+		walletGroups() {
+			return this.wallets.reduce((v, w) => {
+				if (!v[w.currency])
+					v[w.currency] = [];
+
+				v[w.currency].push(w);
+
+				return v;
+			}, {});
+		}
+	},
+	methods: {
+		groupTitle(currency) {
+			switch (currency) {
+			case 'sc':
+				return 'Siacoin (SC)';
+			case 'scp':
+				return 'ScPrimeCoin (SCP)';
+			default:
+				return currency;
+			}
+		}
 	}
 };
 </script>
@@ -49,6 +86,13 @@ export default {
 .wallets {
 	overflow-x: hidden;
 	overflow-y: auto;
+}
+
+.group-title {
+	padding: 8px 15px;
+	color: rgba(255, 255, 255, 0.54);
+	border-top: 1px solid rgba(255, 255, 255, 0.12);
+	border-bottom: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 .wallet-buttons {
