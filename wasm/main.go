@@ -189,36 +189,38 @@ func generateAddresses(this js.Value, args []js.Value) interface{} {
 }
 
 func recoverAddresses(this js.Value, args []js.Value) interface{} {
-	if !checkArgs(args, js.TypeString, js.TypeNumber, js.TypeNumber, js.TypeNumber, js.TypeNumber, js.TypeFunction) {
+	if !checkArgs(args, js.TypeString, js.TypeString, js.TypeNumber, js.TypeNumber, js.TypeNumber, js.TypeNumber, js.TypeFunction) {
 		return false
 	}
 
 	seed := args[0].String()
-	i := uint64(args[1].Int())
-	maxEmptyRounds := uint64(args[2].Int())
-	addressCount := uint64(args[3].Int())
-	lastKnownIdx := uint64(args[4].Int())
-	callback := args[5]
+	currency := args[1].String()
+	i := uint64(args[2].Int())
+	maxEmptyRounds := uint64(args[3].Int())
+	addressCount := uint64(args[4].Int())
+	lastKnownIdx := uint64(args[5].Int())
+	callback := args[6]
 
-	go modules.RecoverAddresses(seed, i, maxEmptyRounds, addressCount, lastKnownIdx, callback)
+	go modules.RecoverAddresses(seed, currency, i, maxEmptyRounds, addressCount, lastKnownIdx, callback)
 
 	return true
 }
 
 func getTransactions(this js.Value, args []js.Value) interface{} {
-	if !checkArgs(args, js.TypeObject, js.TypeFunction) {
+	if !checkArgs(args, js.TypeObject, js.TypeString, js.TypeFunction) {
 		return false
 	}
 
 	count := args[0].Length()
-	callback := args[1]
+	currency := args[1].String()
+	callback := args[2]
 	addresses := make([]string, count)
 
 	for i := 0; i < count; i++ {
 		addresses[i] = args[0].Index(i).String()
 	}
 
-	go modules.GetTransactions(addresses, callback)
+	go modules.GetTransactions(addresses, currency, callback)
 
 	return true
 }
@@ -226,14 +228,15 @@ func getTransactions(this js.Value, args []js.Value) interface{} {
 func exportTransactions(this js.Value, args []js.Value) interface{} {
 	var min, max time.Time
 
-	if !checkArgs(args, js.TypeObject, js.TypeNumber, js.TypeNumber, js.TypeFunction) {
+	if !checkArgs(args, js.TypeObject, js.TypeString, js.TypeNumber, js.TypeNumber, js.TypeFunction) {
 		return false
 	}
 
 	count := args[0].Length()
-	minTimestamp := args[1].Int()
-	maxTimestamp := args[2].Int()
-	callback := args[3]
+	currency := args[1].String()
+	minTimestamp := args[2].Int()
+	maxTimestamp := args[3].Int()
+	callback := args[4]
 	addresses := make([]string, count)
 
 	for i := 0; i < count; i++ {
@@ -248,7 +251,7 @@ func exportTransactions(this js.Value, args []js.Value) interface{} {
 		max = time.Unix(int64(maxTimestamp), 0)
 	}
 
-	go modules.ExportTransactions(addresses, min, max, callback)
+	go modules.ExportTransactions(addresses, currency, min, max, callback)
 
 	return true
 }

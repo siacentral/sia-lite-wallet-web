@@ -5,7 +5,6 @@ import (
 	"sync"
 	"syscall/js"
 
-	apiclient "github.com/siacentral/apisdkgo"
 	"github.com/siacentral/sia-lite-wallet-web/wasm/wallet"
 )
 
@@ -68,7 +67,7 @@ func generateAddress(w *wallet.SeedWallet, i uint64) recoveredAddress {
 	return addr
 }
 
-func recoveryWorker(w *wallet.SeedWallet, work <-chan recoveryWork, results chan<- recoveryResults) {
+func recoveryWorker(w *wallet.SeedWallet, currency string, work <-chan recoveryWork, results chan<- recoveryResults) {
 	for r := range work {
 		var addresses []string
 		recovered := recoveryResults{
@@ -85,6 +84,7 @@ func recoveryWorker(w *wallet.SeedWallet, work <-chan recoveryWork, results chan
 			addresses = append(addresses, addr.Address)
 		}
 
+		apiclient := siacentralAPIClient(currency)
 		used, err := apiclient.FindUsedAddresses(addresses)
 
 		if err != nil {
@@ -117,7 +117,7 @@ func recoveryWorker(w *wallet.SeedWallet, work <-chan recoveryWork, results chan
 //addresses. Considers all addresses found if the scan goes more than minRounds * addressCount
 //addresses without seeing any used. It's possible the ranges will need to be tweaked for older or
 //larger wallets
-func RecoverAddresses(seed string, startIndex, maxEmptyRounds, addressCount, lastKnownIndex uint64, callback js.Value) {
+func RecoverAddresses(seed, currency string, startIndex, maxEmptyRounds, addressCount, lastKnownIndex uint64, callback js.Value) {
 	var wg sync.WaitGroup
 
 	w, err := recoverWallet(seed)
@@ -136,7 +136,7 @@ func RecoverAddresses(seed string, startIndex, maxEmptyRounds, addressCount, las
 
 	for i := 0; i < workers; i++ {
 		go func() {
-			recoveryWorker(w, work, results)
+			recoveryWorker(w, currency, work, results)
 			wg.Done()
 		}()
 	}

@@ -2,6 +2,8 @@ module github.com/siacentral/sia-lite-wallet-web
 
 go 1.13
 
+replace github.com/siacentral/apisdkgo => /Users/n8maninger/Projects/github.com/siacentral/api/sdk/apisdkgo
+
 require (
 	github.com/pkg/errors v0.9.1
 	github.com/shopspring/decimal v1.2.0

@@ -71,11 +71,11 @@ export function signTransactions(seed, unsigned) {
 	return defaultSpawnWorker(['signTransactions', seed, JSON.stringify(unsigned)], 15000);
 }
 
-export function getTransactions(addresses) {
-	return defaultSpawnWorker(['getTransactions', addresses], 30000);
+export function getTransactions(addresses, currency) {
+	return defaultSpawnWorker(['getTransactions', addresses, currency], 30000);
 }
 
-export async function exportTransactions(addresses, min, max, progress) {
+export async function exportTransactions(addresses, currency, min, max, progress) {
 	let worker = new Worker('/sia/sia.worker.js');
 
 	await Promise.resolve(loaded);
@@ -91,7 +91,7 @@ export async function exportTransactions(addresses, min, max, progress) {
 			clearTimeout(workerDeadline);
 
 			if (data === 'ready') {
-				worker.postMessage(['exportTransactions', addresses, min, max]);
+				worker.postMessage(['exportTransactions', addresses, currency, min, max]);
 				return;
 			}
 
@@ -143,7 +143,7 @@ export function encodeUnlockHashes(unencoded) {
 	return defaultSpawnWorker(['encodeUnlockHashes', unencoded.map(u => JSON.stringify(u))], 15000);
 }
 
-export async function recoverAddresses(seed, i, n, count, last, progress) {
+export async function recoverAddresses(seed, currency, i, n, count, last, progress) {
 	let worker = new Worker('/sia/sia.worker.js');
 
 	await Promise.resolve(loaded);
@@ -159,7 +159,7 @@ export async function recoverAddresses(seed, i, n, count, last, progress) {
 			clearTimeout(workerDeadline);
 
 			if (data === 'ready') {
-				worker.postMessage(['recoverAddresses', seed, i, n, count, last]);
+				worker.postMessage(['recoverAddresses', seed, currency, i, n, count, last]);
 				return;
 			}
 

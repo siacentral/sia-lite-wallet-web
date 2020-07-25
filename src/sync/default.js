@@ -18,7 +18,7 @@ export default {
 		if (typeof addressesPerRound !== 'number' || addressesPerRound <= 0 || addressesPerRound > 5000)
 			addressesPerRound = 2500;
 
-		await recoverAddresses(wallet.seed, startIndex, 2, addressesPerRound, lastKnownIndex, async(progress) => {
+		await recoverAddresses(wallet.seed, wallet.currency, startIndex, 2, addressesPerRound, lastKnownIndex, async(progress) => {
 			if (!progress || !Array.isArray(progress.addresses))
 				return;
 
@@ -40,7 +40,7 @@ export default {
 		if (typeof addressesPerRound !== 'number' || addressesPerRound <= 0 || addressesPerRound > 5000)
 			addressesPerRound = 2500;
 
-		await recoverAddresses(wallet.seed, 0, minScanRounds, addressesPerRound, 0, async(progress) => {
+		await recoverAddresses(wallet.seed, wallet.currency, 0, minScanRounds, addressesPerRound, 0, async(progress) => {
 			if (!progress || !Array.isArray(progress.addresses))
 				return;
 
@@ -56,7 +56,7 @@ export default {
 		if (!Array.isArray(addresses) || addresses.length === 0)
 			throw new Error('wallet has no addresses');
 
-		const balance = await getTransactions(addresses.map(a => a.address));
+		const balance = await getTransactions(addresses.map(a => a.address), wallet.currency);
 
 		wallet = new Wallet({
 			...wallet,

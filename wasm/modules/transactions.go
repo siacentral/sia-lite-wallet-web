@@ -8,7 +8,6 @@ import (
 
 	"syscall/js"
 
-	apiclient "github.com/siacentral/apisdkgo"
 	apitypes "github.com/siacentral/apisdkgo/types"
 	siatypes "gitlab.com/NebulousLabs/Sia/types"
 )
@@ -90,7 +89,7 @@ func SignTransactions(transactions []UnsignedTransaction, phrase string, callbac
 }
 
 //GetTransactions gets the last 500 transactions belonging to each address
-func GetTransactions(addresses []string, callback js.Value) {
+func GetTransactions(addresses []string, currency string, callback js.Value) {
 	transactions := make(map[string]apitypes.Transaction)
 	ownedAddresses := make(map[string]bool)
 	count := len(addresses)
@@ -107,6 +106,7 @@ func GetTransactions(addresses []string, callback js.Value) {
 			end = count
 		}
 
+		apiclient := siacentralAPIClient(currency)
 		callResp, err := apiclient.FindAddressBalance(500, 0, addresses[i:end])
 
 		if err != nil {

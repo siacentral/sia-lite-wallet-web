@@ -4,9 +4,25 @@ import (
 	"encoding/json"
 	"strings"
 
+	"github.com/siacentral/apisdkgo"
 	"github.com/siacentral/sia-lite-wallet-web/wasm/wallet"
 	siatypes "gitlab.com/NebulousLabs/Sia/types"
 )
+
+func siacentralAPIClient(currency string) *apisdkgo.APIClient {
+	var baseAddress string
+
+	switch currency {
+	case "scp":
+		baseAddress = "https://api.siacentral.com/v2/scprime"
+	default:
+		baseAddress = "https://api.siacentral.com/v2"
+	}
+
+	return &apisdkgo.APIClient{
+		BaseAddress: baseAddress,
+	}
+}
 
 func interfaceToJSON(obj interface{}) (con map[string]interface{}, err error) {
 	buf, err := json.Marshal(obj)

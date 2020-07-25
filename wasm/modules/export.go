@@ -11,7 +11,6 @@ import (
 	"syscall/js"
 
 	"github.com/shopspring/decimal"
-	apiclient "github.com/siacentral/apisdkgo"
 	"github.com/siacentral/apisdkgo/types"
 	siatypes "gitlab.com/NebulousLabs/Sia/types"
 )
@@ -98,10 +97,12 @@ func siafundString(c siatypes.Currency) string {
 	return c.String()
 }
 
-func addressWorker(ownedAddresses map[string]bool, work <-chan []string, results chan<- apiResults, errors chan<- error) {
+func addressWorker(ownedAddresses map[string]bool, currency string, work <-chan []string, results chan<- apiResults, errors chan<- error) {
 	for addresses := range work {
 		for j := 0; j < 1e4; j++ {
 			var transactions []exportTransaction
+
+			apiclient := siacentralAPIClient(currency)
 
 			balanceResp, err := apiclient.FindAddressBalance(2000, j, addresses)
 			if err != nil {
@@ -175,7 +176,7 @@ func addressWorker(ownedAddresses map[string]bool, work <-chan []string, results
 }
 
 //ExportTransactions gets all transactions belonging to the addresses
-func ExportTransactions(addresses []string, min, max time.Time, callback js.Value) {
+func ExportTransactions(addresses []string, currency string, min, max time.Time, callback js.Value) {
 	var buf []byte
 	var transactions []exportTransaction
 	var matching uint64
@@ -194,7 +195,7 @@ func ExportTransactions(addresses []string, min, max time.Time, callback js.Valu
 	errors := make(chan error, 1)
 
 	for i := 0; i < 5; i++ {
-		go addressWorker(ownedAddresses, work, results, errors)
+		go addressWorker(ownedAddresses, currency, work, results, errors)
 	}
 
 	go func() {
