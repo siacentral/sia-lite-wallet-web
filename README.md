@@ -1,4 +1,4 @@
-The Sia Central Lite Wallet is a secure Siacoin lite wallet implementation for web. This wallet has been tested and works with Chromium based browsers on Desktop, iOS Safari or Chrome, and Chrome on Android. Desktop and mobile apps will be coming soon. Sensitive data, such as wallet seeds, is stored encrypted using a user-set passphrase and never leaves the device.
+The Sia Central Lite Wallet is a secure Siacoin lite wallet implementation for web. This wallet has been tested and works with Chromium based browsers on Desktop, iOS 11, and Chrome on Android. Desktop and mobile apps will be coming soon. Sensitive data, such as wallet seeds, is stored encrypted using a user-set passphrase and never leaves the device.
 
 **[Sia Central Lite Wallet](https://wallet.siacentral.com)** | **[GitHub](https://github.com/siacentral/sia-lite-wallet-web)** | **[Docker](https://hub.docker.com/r/siacentral/sia-lite-wallet-web)**
 
@@ -20,7 +20,7 @@ Regular Sia wallets are created or recovered from a 29 word recovery phrase. The
 #### Ledger Hardware Wallets
 Ledger hardware wallets communicate using Ledger's secure transport. The seed cannot be retrieved from the Ledger device. Addresses are imported from the device to view balance and build transactions. The Ledger device is required to sign and confirm any transactions before being broadcast to the Sia network.
 
-To enable Ledger support you need to be on a recent Chromium based browser (Chrome, Brave, Opera) and enable `Experimental Web Platform Features` from [chrome://flags/#enable-experimental-web-platform-features](chrome://flags/#enable-experimental-web-platform-features)
+To enable Ledger support you need to be on a recent Chromium based desktop browser (Chrome, Brave, Opera, Microsoft Edge) and enable `Experimental Web Platform Features` from [chrome://flags/#enable-experimental-web-platform-features](chrome://flags/#enable-experimental-web-platform-features)
 
 #### Watch-Only Wallets
 Watch-Only wallets cannot send transactions on the Sia network. They are read-only wallets. Addresses to watch are imported manually to view balance.
