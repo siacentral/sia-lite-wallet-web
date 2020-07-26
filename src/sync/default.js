@@ -35,7 +35,7 @@ export default {
 			addressesPerRound = Store.state.addressesPerRound;
 
 		if (typeof minScanRounds !== 'number' || minScanRounds < 0 || minScanRounds > 500)
-			minScanRounds = 25;
+			minScanRounds = 10;
 
 		if (typeof addressesPerRound !== 'number' || addressesPerRound <= 0 || addressesPerRound > 5000)
 			addressesPerRound = 2500;
