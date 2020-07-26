@@ -6,16 +6,16 @@ Sia Central's Lite Wallet is a secure cryptocurrency wallet web app with support
 
 + **Secure** - Keep control of your seeds. All sensitive information is stored and encrypted locally, never leaving your device.
 + **No blockchain download** - Instantly create a new wallet. Recover an existing wallet in under 2 minutes.
-+ **Ledger Nano S** - The first Sia wallet with Ledger Nano S support.
++ **Ledger Nano S** - Easily send and receive transactions with full Ledger Nano S support
 + **Multiple Wallets** - Create any number of separate wallets. Easily track host or renter wallets and top them up from a Ledger wallet.
-+ **Compatible** - Fully compatible with the official Sia wallets. Recover wallets using 29 word Sia seeds.
++ **Compatible** - Generate or recover wallets using 29 word seeds.
 + **Multilingual** - Supports English, Chinese and French. Additional languages can be easily added by the community.
 + **Multiplatform** - Works on modern desktop browsers, iOS and Android
 
 ### Supported Wallet Types
 
-#### 29-word Sia Seeds
-Regular Sia wallets are created or recovered from a 29 word recovery phrase. These wallets are fully compatible with the official Sia wallet. The seed is encrypted and stored locally with a user provided unlock password. The seed never leaves the device, removing any risk of exposure.
+#### Seed Wallets
+Seed wallets are created or recovered from a 29-word recovery phrase. These wallets are fully compatible with the official Sia and ScPrime wallets. The seed is encrypted and stored locally with a user provided unlock password. The seed never leaves the device, removing any risk of exposure.
 
 #### Ledger Hardware Wallets
 Ledger hardware wallets communicate using Ledger's secure transport. The seed cannot be retrieved from the Ledger device. Addresses are imported from the device to view balance and build transactions. The Ledger device is required to sign and confirm any transactions before being broadcast to the Sia network.
@@ -23,7 +23,7 @@ Ledger hardware wallets communicate using Ledger's secure transport. The seed ca
 To enable Ledger support you need to be on a recent Chromium based desktop browser (Chrome, Brave, Opera, Microsoft Edge) and enable `Experimental Web Platform Features` from [chrome://flags/#enable-experimental-web-platform-features](chrome://flags/#enable-experimental-web-platform-features)
 
 #### Watch-Only Wallets
-Watch-Only wallets cannot send transactions on the Sia network. They are read-only wallets. Addresses to watch are imported manually to view balance.
+Watch-Only wallets are read-only wallets used to monitor the balance of a group of addresses. Addresses to watch are imported manually to view balance.
 
 
 ### How It Works
