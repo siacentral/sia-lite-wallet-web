@@ -25,7 +25,6 @@ const store = new Vuex.Store({
 		offline: false,
 		autoLock: getLocalStorageNumeric('autoLock', 15),
 		currency: localStorage.getItem('displayCurrency') || 'usd',
-		changeCurrencyType: localStorage.getItem('changeCurrencyType') === 'true',
 		changeSeedType: localStorage.getItem('changeSeedType') === 'true',
 		changeServerType: localStorage.getItem('changeServerType') === 'true',
 		minScanRounds: getLocalStorageNumeric('minScanRounds', 10),
@@ -69,9 +68,6 @@ const store = new Vuex.Store({
 		},
 		setChangeSeedType(state, enabled) {
 			state.changeSeedType = enabled;
-		},
-		setChangeCurrencyType(state, enabled) {
-			state.changeCurrencyType = enabled;
 		},
 		setChangeServerType(state, enabled) {
 			state.changeServerType = enabled;
@@ -165,10 +161,6 @@ const store = new Vuex.Store({
 		setDisplayLanguage({ commit }, language) {
 			localStorage.setItem('displayLanguage', language);
 			commit('setDisplayLanguage', language);
-		},
-		setChangeCurrencyType({ commit }, enabled) {
-			localStorage.setItem('changeCurrencyType', enabled.toString());
-			commit('setChangeCurrencyType', enabled);
 		},
 		setChangeSeedType({ commit }, enabled) {
 			localStorage.setItem('changeSeedType', enabled.toString());

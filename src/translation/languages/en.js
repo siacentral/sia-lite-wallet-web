@@ -101,7 +101,6 @@ export default {
 			chkWalrusSeeds: 'Enable 12 word seeds',
 			chkChangeWalletServer: 'Enable 3rd-party wallet servers',
 			chkCurrency: 'Enable SCPrime',
-			pChangeCurrencyType: '[EXPERIMENTAL] Allows the creation and recovery of SCPrime wallets. Enabling this setting will show a "Currency" dropdown when adding a new wallet.',
 			pChangeSeedType: '12 word seeds are not compatible with the official Sia wallets. They are commonly used with Walrus wallets. Enabling this setting will show a dropdown when creating a new wallet allowing you to generate either a new Sia seed or a 12 word seed.',
 			pChangeServerType: '[EXPERIMENTAL] Allows the usage of 3rd-party wallet servers, like Walrus. 3rd-party servers help reduce centralization and allow for choice between trusting Sia Central or another party. Some wallet features may be broken or unsupported.',
 			pExplainFullScan: 'During the initial full scan, used addresses are scanned in batches. The wallet will scan until no consecutively used address indices are found on the blockchain for the minimum number of scan rounds.',
