@@ -29,23 +29,23 @@ func main() {
 	<-c
 }
 
-func checkArgs(args []js.Value, argTypes ...js.Type) bool {
+func checkArgs(args []js.Value, argTypes ...js.Type) error {
 	if len(args) != len(argTypes) {
-		return false
+		return fmt.Errorf("not enough arguments")
 	}
 
 	for i, arg := range args {
 		if arg.Type() != argTypes[i] {
-			return false
+			return fmt.Errorf("incorrect argument %d expected %s got %s", i, argTypes[i], arg.Type())
 		}
 	}
 
-	return true
+	return nil
 }
 
 func encodeTransaction(this js.Value, args []js.Value) interface{} {
-	if !checkArgs(args, js.TypeString, js.TypeFunction) {
-		return false
+	if err := checkArgs(args, js.TypeString, js.TypeFunction); err != nil {
+		return err.Error()
 	}
 
 	jsonTxn := args[0].String()
@@ -55,19 +55,19 @@ func encodeTransaction(this js.Value, args []js.Value) interface{} {
 
 	if err := json.Unmarshal([]byte(jsonTxn), &txn); err != nil {
 		callback.Invoke(err.Error(), js.Null())
-		return false
+		return err.Error()
 	}
 
 	go modules.EncodeTransaction(txn, callback)
 
-	return true
+	return nil
 }
 
 func signTransaction(this js.Value, args []js.Value) interface{} {
 	var txn siatypes.Transaction
 
-	if !checkArgs(args, js.TypeString, js.TypeString, js.TypeString, js.TypeObject, js.TypeFunction) {
-		return false
+	if err := checkArgs(args, js.TypeString, js.TypeString, js.TypeString, js.TypeObject, js.TypeFunction); err != nil {
+		return err.Error()
 	}
 
 	phrase := args[0].String()
@@ -79,7 +79,7 @@ func signTransaction(this js.Value, args []js.Value) interface{} {
 
 	if err := json.Unmarshal([]byte(jsonTxn), &txn); err != nil {
 		callback.Invoke(err.Error(), js.Null())
-		return false
+		return err.Error()
 	}
 
 	for i := 0; i < length; i++ {
@@ -88,14 +88,14 @@ func signTransaction(this js.Value, args []js.Value) interface{} {
 
 	go modules.SignTransaction(txn, phrase, currency, requiredSigs, callback)
 
-	return true
+	return nil
 }
 
 func signTransactions(this js.Value, args []js.Value) interface{} {
 	var unsigned []modules.UnsignedTransaction
 
-	if !checkArgs(args, js.TypeString, js.TypeString, js.TypeString, js.TypeFunction) {
-		return false
+	if err := checkArgs(args, js.TypeString, js.TypeString, js.TypeString, js.TypeFunction); err != nil {
+		return err.Error()
 	}
 
 	phrase := args[0].String()
@@ -105,17 +105,17 @@ func signTransactions(this js.Value, args []js.Value) interface{} {
 
 	if err := json.Unmarshal([]byte(jsonTxns), &unsigned); err != nil {
 		callback.Invoke(fmt.Sprintf("error decoding transactions: %s", err), js.Null())
-		return false
+		return err.Error()
 	}
 
 	go modules.SignTransactions(unsigned, phrase, currency, callback)
 
-	return true
+	return nil
 }
 
 func encodeUnlockHash(this js.Value, args []js.Value) interface{} {
-	if !checkArgs(args, js.TypeString, js.TypeFunction) {
-		return false
+	if err := checkArgs(args, js.TypeString, js.TypeFunction); err != nil {
+		return err.Error()
 	}
 
 	jsonUnlockConds := args[0].String()
@@ -132,12 +132,12 @@ func encodeUnlockHash(this js.Value, args []js.Value) interface{} {
 		callback.Invoke(js.Null(), unlockConds.UnlockHash().String())
 	}()
 
-	return true
+	return nil
 }
 
 func encodeUnlockHashes(this js.Value, args []js.Value) interface{} {
-	if !checkArgs(args, js.TypeObject, js.TypeFunction) {
-		return false
+	if err := checkArgs(args, js.TypeObject, js.TypeFunction); err != nil {
+		return err.Error()
 	}
 
 	length := args[0].Length()
@@ -159,12 +159,12 @@ func encodeUnlockHashes(this js.Value, args []js.Value) interface{} {
 		callback.Invoke(js.Null(), addresses)
 	}()
 
-	return true
+	return nil
 }
 
 func generateSeed(this js.Value, args []js.Value) interface{} {
-	if !checkArgs(args, js.TypeString, js.TypeFunction) {
-		return false
+	if err := checkArgs(args, js.TypeString, js.TypeFunction); err != nil {
+		return err.Error()
 	}
 
 	seedType := args[0].String()
@@ -172,12 +172,12 @@ func generateSeed(this js.Value, args []js.Value) interface{} {
 
 	go modules.GenerateSeed(seedType, callback)
 
-	return true
+	return nil
 }
 
 func generateAddresses(this js.Value, args []js.Value) interface{} {
-	if !checkArgs(args, js.TypeString, js.TypeString, js.TypeNumber, js.TypeNumber, js.TypeFunction) {
-		return false
+	if err := checkArgs(args, js.TypeString, js.TypeString, js.TypeNumber, js.TypeNumber, js.TypeFunction); err != nil {
+		return err.Error()
 	}
 
 	phrase := args[0].String()
@@ -188,12 +188,12 @@ func generateAddresses(this js.Value, args []js.Value) interface{} {
 
 	go modules.GetAddresses(phrase, currency, uint64(i), uint64(n), callback)
 
-	return true
+	return nil
 }
 
 func recoverAddresses(this js.Value, args []js.Value) interface{} {
-	if !checkArgs(args, js.TypeString, js.TypeString, js.TypeNumber, js.TypeNumber, js.TypeNumber, js.TypeNumber, js.TypeFunction) {
-		return false
+	if err := checkArgs(args, js.TypeString, js.TypeString, js.TypeNumber, js.TypeNumber, js.TypeNumber, js.TypeNumber, js.TypeFunction); err != nil {
+		return err.Error()
 	}
 
 	seed := args[0].String()
@@ -206,12 +206,12 @@ func recoverAddresses(this js.Value, args []js.Value) interface{} {
 
 	go modules.RecoverAddresses(seed, currency, i, maxEmptyRounds, addressCount, lastKnownIdx, callback)
 
-	return true
+	return nil
 }
 
 func getTransactions(this js.Value, args []js.Value) interface{} {
-	if !checkArgs(args, js.TypeObject, js.TypeString, js.TypeFunction) {
-		return false
+	if err := checkArgs(args, js.TypeObject, js.TypeString, js.TypeFunction); err != nil {
+		return err.Error()
 	}
 
 	count := args[0].Length()
@@ -225,14 +225,14 @@ func getTransactions(this js.Value, args []js.Value) interface{} {
 
 	go modules.GetTransactions(addresses, currency, callback)
 
-	return true
+	return nil
 }
 
 func exportTransactions(this js.Value, args []js.Value) interface{} {
 	var min, max time.Time
 
-	if !checkArgs(args, js.TypeObject, js.TypeString, js.TypeNumber, js.TypeNumber, js.TypeFunction) {
-		return false
+	if err := checkArgs(args, js.TypeObject, js.TypeString, js.TypeNumber, js.TypeNumber, js.TypeFunction); err != nil {
+		return err.Error()
 	}
 
 	count := args[0].Length()
@@ -256,5 +256,5 @@ func exportTransactions(this js.Value, args []js.Value) interface{} {
 
 	go modules.ExportTransactions(addresses, currency, min, max, callback)
 
-	return true
+	return nil
 }
