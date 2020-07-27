@@ -30,7 +30,7 @@ jobs:
 
       - name: Build WASM
         working-directory: ./wasm
-        run: GOARCH=wasm GOOS=js go build -o ../public/sia/sia.wasm main.go
+        run: GOARCH=wasm GOOS=js go build -o ../src/sia/sia.wasm main.go
 
       - name: Lint
         run: npm run lint
