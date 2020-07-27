@@ -200,7 +200,6 @@ func RecoverAddresses(seed, currency string, startIndex, maxEmptyRounds, address
 			"found":     len(res.Addresses),
 			"addresses": res.Addresses,
 			"index":     lastIndex,
-			"done":      false,
 		})
 
 		if err != nil {
@@ -208,7 +207,7 @@ func RecoverAddresses(seed, currency string, startIndex, maxEmptyRounds, address
 			return
 		}
 
-		callback.Invoke(js.Null(), data)
+		callback.Invoke("progress", data)
 	}
 
 	var additional []recoveredAddress
@@ -222,7 +221,6 @@ func RecoverAddresses(seed, currency string, startIndex, maxEmptyRounds, address
 	data, err := interfaceToJSON(map[string]interface{}{
 		"addresses": additional,
 		"index":     lastIndex,
-		"done":      true,
 	})
 
 	if err != nil {
