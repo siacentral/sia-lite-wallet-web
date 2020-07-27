@@ -35,6 +35,7 @@
     "@vue/cli-plugin-pwa": "^4.4.6",
     "@vue/cli-service": "^4.4.6",
     "@vue/eslint-config-standard": "^5.1.2",
+    "arraybuffer-loader": "^1.0.8",
     "babel-eslint": "^10.1.0",
     "eslint": "^6.7.2",
     "eslint-plugin-import": "^2.20.2",
@@ -48,7 +49,8 @@
     "stylus-loader": "^3.0.2",
     "svg-loader": "0.0.2",
     "vue-svg-loader": "^0.12.0",
-    "vue-template-compiler": "^2.6.10"
+    "vue-template-compiler": "^2.6.10",
+    "worker-plugin": "^4.0.3"
   },
   "gitHooks": {
     "pre-commit": "lint-staged"

@@ -35,7 +35,7 @@
 
 <script>
 import { getWalletAddresses } from '@/store/db';
-import { exportTransactions } from '@/utils/sia';
+import { exportTransactions } from '@/sia';
 import { formatNumber } from '@/utils/format';
 
 import Modal from './Modal';

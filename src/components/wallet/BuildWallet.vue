@@ -52,7 +52,7 @@
 
 <script>
 import { mapState } from 'vuex';
-import { generateSeed, generateAddresses } from '@/utils/sia';
+import { generateSeed, generateAddresses } from '@/sia';
 import { hexID } from '@/utils/crypto';
 import { randomBytes } from 'tweetnacl';
 import { encode } from '@stablelib/base64';

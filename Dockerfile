@@ -20,6 +20,7 @@ COPY package*.json ./
 RUN npm install
 
 COPY . .
+COPY --from=buildgo /app/sia.wasm /app/src/sia/sia.wasm
 
 RUN npm run build
 

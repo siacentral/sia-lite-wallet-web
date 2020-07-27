@@ -34,7 +34,7 @@
 import { mapState } from 'vuex';
 import BigNumber from 'bignumber.js';
 import { verifyAddress } from '@/utils';
-import { generateAddresses as generateSiaAddresses, encodeUnlockHash } from '@/utils/sia';
+import { generateAddresses as generateSiaAddresses, encodeUnlockHash } from '@/sia';
 import { formatPriceString, formatNumber } from '@/utils/format';
 import { getVersion, getPublicKey as generateLedgerPubKey } from '@/ledger';
 import WalrusClient from '@/api/walrus';

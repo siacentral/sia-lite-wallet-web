@@ -44,7 +44,7 @@
 
 <script>
 import { mapState, mapActions } from 'vuex';
-import { generateAddresses } from '@/utils/sia';
+import { generateAddresses } from '@/sia';
 import { saveAddresses } from '@/store/db';
 import { ledgerSupported } from '@/ledger';
 

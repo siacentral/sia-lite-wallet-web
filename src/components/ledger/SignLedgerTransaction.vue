@@ -23,7 +23,7 @@
 </template>
 
 <script>
-import { encodeTransaction } from '@/utils/sia';
+import { encodeTransaction } from '@/sia';
 import { getVersion, signTransaction } from '@/ledger';
 import { formatNumber } from '@/utils/format';
 

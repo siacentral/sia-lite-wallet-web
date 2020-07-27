@@ -1,4 +1,5 @@
-const path = require('path');
+const path = require('path'),
+	WorkerPlugin = require('worker-plugin');
 
 module.exports = {
 	parallel: false,
@@ -14,6 +15,20 @@ module.exports = {
 			background_color: '#1d1e21'
 		}
 	},
+	configureWebpack: {
+		plugins: [
+			new WorkerPlugin()
+		],
+		module: {
+			rules: [
+				{
+					test: /\.wasm$/,
+					type: 'javascript/auto',
+					loaders: ['arraybuffer-loader']
+				}
+			]
+		}
+	},
 	chainWebpack: config => {
 		config.output.publicPath = `${process.cwd()}/dist/`;
 
@@ -27,11 +42,6 @@ module.exports = {
 			.options({
 				svgo: false
 			});
-
-		config.module.rule('worker')
-			.test(/\.worker\.js$/i)
-			.use('worker-loader')
-			.loader('worker-loader');
 
 		types.forEach(type => addStyleResource(config.module.rule('stylus').oneOf(type)));
 	}

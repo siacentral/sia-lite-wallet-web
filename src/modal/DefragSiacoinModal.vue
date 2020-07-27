@@ -11,7 +11,7 @@
 <script>
 import Modal from './Modal';
 import DefragSetup from '@/components/transactions/DefragSetup';
-import { signTransactions } from '@/utils/sia';
+import { signTransactions } from '@/sia';
 import { scanTransactions } from '@/sync/scanner';
 import { siaAPI, scprimeAPI } from '@/api/siacentral';
 import WalrusClient from '@/api/walrus';

@@ -1,2 +1,4 @@
 public
 wasm
+wasm_exec.js
+sia.worker.js

@@ -40,7 +40,7 @@
 import BigNumber from 'bignumber.js';
 import { formatPriceString } from '@/utils/format';
 import { mapState } from 'vuex';
-import { signTransaction } from '@/utils/sia';
+import { signTransaction } from '@/sia';
 import { scanTransactions } from '@/sync/scanner';
 import { siaAPI, scprimeAPI } from '@/api/siacentral';
 import WalrusClient from '@/api/walrus';

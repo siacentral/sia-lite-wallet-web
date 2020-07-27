@@ -1,4 +1,4 @@
-import { recoverAddresses, getTransactions } from '@/utils/sia';
+import { recoverAddresses, getTransactions } from '@/sia';
 import { saveAddresses, getWalletAddresses } from '@/store/db';
 import Store from '@/store';
 import Wallet from '@/types/wallet';
