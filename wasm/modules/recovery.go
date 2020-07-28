@@ -124,7 +124,7 @@ func RecoverAddresses(seed, currency string, startIndex, maxEmptyRounds, address
 		return
 	}
 
-	workers := 5
+	workers := 2
 	work := make(chan recoveryWork, workers)
 	results := make(chan recoveryResults)
 	done := make(chan bool)

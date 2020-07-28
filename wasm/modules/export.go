@@ -111,7 +111,7 @@ func siafundString(c siatypes.Currency) string {
 	return c.String()
 }
 
-func addressWorker(ownedAddresses map[string]bool, currency string, work <-chan []string, results chan<- apiResults, errors chan<- error) {
+func exportAddressWorker(ownedAddresses map[string]bool, currency string, work <-chan []string, results chan<- apiResults, errors chan<- error) {
 	for addresses := range work {
 		for j := 0; j < 1e4; j++ {
 			var transactions []exportTransaction
@@ -214,12 +214,13 @@ func ExportTransactions(addresses []string, currency string, min, max time.Time,
 
 	rounds := int(math.Ceil(float64(len(addresses)) / 1000))
 
-	work := make(chan []string, 5)
+	workers := 2
+	work := make(chan []string, workers)
 	results := make(chan apiResults)
 	errors := make(chan error, 1)
 
-	for i := 0; i < 5; i++ {
-		go addressWorker(ownedAddresses, currency, work, results, errors)
+	for i := 0; i < workers; i++ {
+		go exportAddressWorker(ownedAddresses, currency, work, results, errors)
 	}
 
 	go func() {
