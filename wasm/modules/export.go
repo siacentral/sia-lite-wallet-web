@@ -213,8 +213,6 @@ func ExportTransactions(addresses []string, currency string, min, max time.Time,
 	}
 
 	rounds := int(math.Ceil(float64(len(addresses)) / 1000))
-
-	workers := 2
 	work := make(chan []string, workers)
 	results := make(chan apiResults)
 	errors := make(chan error, 1)

@@ -9,6 +9,10 @@ import (
 	siatypes "gitlab.com/NebulousLabs/Sia/types"
 )
 
+const (
+	workers = 5
+)
+
 func siacentralAPIClient(currency string) *apisdkgo.APIClient {
 	var baseAddress string
 
