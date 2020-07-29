@@ -75,6 +75,8 @@ export default {
 				}
 
 				this.downloadSeed(seed);
+				this.$emit('exported');
+				this.$emit('close');
 			} catch (ex) {
 				console.error('onExportSeed', ex);
 				this.pushNotification({

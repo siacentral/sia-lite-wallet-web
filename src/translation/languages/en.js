@@ -129,6 +129,7 @@ export default {
 			lblServerType: 'Server Type',
 			lblServerURL: 'Server URL',
 			lblCurrencyType: 'Currency',
+			seedExported: 'My recovery seed is saved in a secure location',
 			siaSeed: 'Sia Seed',
 			walrusSeed: 'Walrus Seed'
 		},

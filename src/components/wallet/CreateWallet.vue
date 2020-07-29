@@ -31,13 +31,25 @@
 			<p v-else-if="walletType === 'watch'">{{ translate('createWalletModal.pReviewWatch') }}</p>
 			<p v-else-if="createType === 'recover'">{{ translate('createWalletModal.pReviewRecover') }}</p>
 			<p v-else>{{ translate('createWalletModal.pReviewNew') }}</p>
-			<div class="control" v-if="walletType === 'default'">
-				<label>{{ translate('createWalletModal.lblRecoverySeed') }}</label>
-				<textarea v-model="wallet.seed" readonly/>
-			</div>
+				<template v-if="walletType === 'default'">
+					<div class="buttons text-right">
+					<button class="btn btn-inline" @click="exportSeed = true">{{ translate('export') }}</button>
+				</div>
+				<div class="control">
+					<label>{{ translate('createWalletModal.lblRecoverySeed') }}</label>
+					<textarea v-model="wallet.seed" readonly/>
+				</div>
+				<div class="control">
+					<input type="checkbox" id="chkSeedExported" v-model="exported" />
+					<label for="chkSeedExported">{{ translate('createWalletModal.seedExported') }}</label>
+				</div>
+			</template>
 			<div class="controls">
-				<button class="btn btn-success btn-inline" @click="onComplete" :disabled="saving">{{ translate('done') }}</button>
+				<button class="btn btn-success btn-inline" @click="onComplete" :disabled="doneDisabled">{{ translate('done') }}</button>
 			</div>
+			<transition name="fade" mode="out-in" appear>
+				<export-seed-modal v-if="exportSeed" :wallet="wallet" @close="exportSeed = false" />
+			</transition>
 		</div>
 	</transition>
 </template>
@@ -49,12 +61,14 @@ import { saveAddresses } from '@/store/db';
 import { ledgerSupported } from '@/ledger';
 
 import BuildWallet from '@/components/wallet/BuildWallet';
+import ExportSeedModal from '@/modal/ExportSeedModal';
 import ImportSiaAddresses from '@/components/addresses/ImportSiaAddresses';
 import ImportWalrusAddresses from '@/components/addresses/ImportWalrusAddresses';
 
 export default {
 	components: {
 		BuildWallet,
+		ExportSeedModal,
 		ImportSiaAddresses,
 		ImportWalrusAddresses
 	},
@@ -62,6 +76,10 @@ export default {
 		...mapState(['password', 'changeSeedType']),
 		walletType() {
 			return this.wallet && typeof this.wallet.type === 'string' ? this.wallet.type : 'watch';
+		},
+		doneDisabled() {
+			// disable the done button if the wallet is being saved, or has not been exported
+			return this.saving || (!this.exported && this.walletType === 'default');
 		},
 		hardwareBtnClasses() {
 			return {
@@ -77,6 +95,8 @@ export default {
 		return {
 			step: '',
 			createType: '',
+			exportSeed: false,
+			exported: false,
 			saving: false,
 			ledgerSupported: false,
 			wallet: null,
