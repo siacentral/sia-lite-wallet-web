@@ -98,12 +98,39 @@ export default {
 					a.push(o);
 
 					return a;
-				}, []);
+				}, []),
+				txnCount = Math.ceil(unspent.length / this.outputsPerTxn),
+				ordered = [];
 
 			if (!Array.isArray(unspent) || unspent.length === 0)
 				return [];
 
-			return unspent;
+			unspent.sort((a, b) => {
+				const aV = new BigNumber(a.value),
+					bV = new BigNumber(b.value);
+
+				if (aV.gt(bV))
+					return -1;
+
+				if (aV.lt(bV))
+					return 1;
+
+				return 0;
+			});
+
+			// take one output from the top for each transaction so each will transaction will have one of the largest outputs
+			for (let i = 0; i < txnCount; i++)
+				ordered.push([]);
+
+			// fill the other outputs from the bottom so the largest output should be paired with the smallest outputs
+			for (let i = unspent.length - 1, j = 0; i >= 0; i--) {
+				ordered[j].push(unspent[i]);
+
+				if (ordered[j].length >= this.outputsPerTxn)
+					j++;
+			}
+
+			return ordered.reduce((v, o) => v.concat(o), []);
 		},
 		balance() {
 			return this.unspent.reduce((v, u) => v.plus(u.value), new BigNumber(0));
@@ -289,23 +316,45 @@ export default {
 				console.error('DefragSetup.onChangeSendOther', ex);
 			}
 		},
-		async defrag() {
-			const txns = [];
-			let totalSent = new BigNumber(0),
-				totalFees = new BigNumber(0);
+		defrag() {
+			try {
+				const txns = [];
+				let totalSent = new BigNumber(0),
+					totalFees = new BigNumber(0),
+					showWarning = false;
 
-			for (let i = 0; i < this.transactionCount; i++) {
-				const { txn, sent, fees } = this.buildTransaction(i * this.outputsPerTxn, (i + 1) * this.outputsPerTxn);
+				for (let i = 0; i < this.transactionCount; i++) {
+					try {
+						const { txn, sent, fees } = this.buildTransaction(i * this.outputsPerTxn, (i + 1) * this.outputsPerTxn);
 
-				totalSent = totalSent.plus(sent);
-				totalFees = totalFees.plus(fees);
+						totalSent = totalSent.plus(sent);
+						totalFees = totalFees.plus(fees);
 
-				txns.push(txn);
+						txns.push(txn);
+					} catch (ex) {
+						console.error('DefragSetup.defrag', ex);
+						showWarning = true;
+					}
+				}
+
+				if (showWarning) {
+					this.pushNotification({
+						severity: 'warning',
+						message: 'Defragmenting only partially complete, too many dust outputs.'
+					});
+				}
+
+				this.transactions = txns;
+				this.sendAmount = totalSent;
+				this.fees = totalFees;
+			} catch (ex) {
+				console.error('DefragSetup.defrag', ex);
+				this.pushNotification({
+					severity: 'danger',
+					message: 'Unable to defragment wallet'
+				});
+				this.sending = true;
 			}
-
-			this.transactions = txns;
-			this.sendAmount = totalSent;
-			this.fees = totalFees;
 		},
 		onDefrag() {
 			if (this.sending)
