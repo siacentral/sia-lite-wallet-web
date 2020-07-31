@@ -120,7 +120,7 @@ export default {
 
 			// take one output from the top for each transaction so each will transaction will have one of the largest outputs
 			for (let i = 0; i < txnCount; i++)
-				ordered.push([]);
+				ordered.push([unspent.shift()]);
 
 			// fill the other outputs from the bottom so the largest output should be paired with the smallest outputs
 			for (let i = unspent.length - 1, j = 0; i >= 0; i--) {
