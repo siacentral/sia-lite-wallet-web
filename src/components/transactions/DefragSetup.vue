@@ -190,7 +190,7 @@ export default {
 			if (this.balance.lte(0))
 				return this.translate('sendSiacoinsModal.errorGreaterThan0');
 
-			if (this.sendAmount.lt(0))
+			if (this.sendAmount.lte(0))
 				return this.translate('sendSiacoinsModal.errorNotEnough');
 
 			if (!verifyAddress(this.recipientAddress))
