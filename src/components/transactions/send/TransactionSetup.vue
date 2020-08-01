@@ -254,7 +254,7 @@ export default {
 				change = added.minus(this.fees).minus(this.sendAmount);
 
 			if (added.lt(this.sendAmount.plus(this.fees)))
-				throw new Error('not enough funds to create transaction');
+				throw new Error('not enough confirmed funds to create transaction');
 
 			txn.siacoin_outputs.push({
 				unlock_hash: this.recipientAddress,
