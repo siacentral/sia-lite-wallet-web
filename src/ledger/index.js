@@ -137,6 +137,14 @@ export async function getPublicKey(i) {
 	return `ed25519:${resp.slice(0, 32).reduce((v, b) => v + ('0' + b.toString(16)).slice(-2), '')}`;
 }
 
+export async function close() {
+	if (!transport)
+		return;
+
+	await transport.close();
+	transport = null;
+}
+
 export async function signTransaction(encodedTxn, sig, key) {
 	if (!transport)
 		await connect();

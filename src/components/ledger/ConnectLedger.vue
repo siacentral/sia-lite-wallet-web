@@ -10,7 +10,7 @@
 </template>
 
 <script>
-import { getVersion } from '@/ledger';
+import { getVersion, close } from '@/ledger';
 
 export default {
 	props: {
@@ -20,6 +20,9 @@ export default {
 		return {
 			error: null
 		};
+	},
+	beforeDestroy() {
+		close();
 	},
 	methods: {
 		async onConnect() {
