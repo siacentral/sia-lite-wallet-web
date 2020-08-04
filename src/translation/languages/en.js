@@ -61,7 +61,7 @@ export default {
 			queued: 'Scan Queued...'
 		},
 		deleteWalletModal: {
-			pDeleteConfirm: 'Are you sure you want to delete the wallet named "{{0}}"? This will remove all data associated with this wallet from your device. Please make sure you have the recovery seed backed up.',
+			pDeleteConfirm: 'Are you sure you want to delete the wallet named "{{0}}"? This will remove all data associated with this wallet from your device. Make sure you have the recovery seed backed up.',
 			deleteHeader: 'Delete "{{0}}"?'
 		},
 		exportSeedModal: {
@@ -117,8 +117,8 @@ export default {
 			pWatchWalletExplain: 'Creates a new watch-only wallet. Addresses must be added manually and transactions cannot be sent.',
 			pReviewLedger: 'Your Ledger wallet has been imported. Balance and transactions can now be viewed without the Ledger device. To send transactions you will need to plugin and unlock the device.',
 			pReviewWatch: 'A new watch-only wallet has been created. This wallet cannot send transactions. Balance and transactions will be shown for all imported addresses.',
-			pReviewNew: 'A new wallet has been created. Please backup your recovery seed to a safe location, without your seed your funds cannot be recovered.',
-			pReviewRecover: 'Your wallet has been successfully recovered. The blockchain is now being scanned for balance and transactions. Please backup your recovery seed to a safe location, without your seed your funds cannot be recovered.',
+			pReviewNew: 'A new wallet has been created. Backup your recovery seed to a safe location, without your seed your funds cannot be recovered.',
+			pReviewRecover: 'Your wallet has been successfully recovered. The blockchain is now being scanned for balance and transactions. Backup your recovery seed to a safe location, without your seed your funds cannot be recovered.',
 			lblWalletName: 'Wallet Name',
 			lblRecoverySeed: 'Recovery Seed',
 			lblSeedType: 'Seed Type',
