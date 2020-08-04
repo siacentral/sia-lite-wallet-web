@@ -54,7 +54,7 @@ export default {
 		};
 	},
 	mounted() {
-		this.selectedWallet = localStorage.getItem('lastSelectedWallet') || this.wallets[0];
+		this.selectedWallet = localStorage.getItem('lastSelectedWallet') || this.wallets[0].id;
 	},
 	methods: {
 		onWalletSelected(id) {
