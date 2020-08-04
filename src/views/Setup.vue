@@ -1,50 +1,35 @@
 <template>
 	<div class="page page-setup">
 		<transition name="fade-top" mode="out-in" appear>
-			<div class="setup-step" v-if="step === 0" key="start">
+			<div class="setup-step" v-if="step === 0" key="password">
 				<div class="setup-icon">
 					<sia-central />
 				</div>
-				<h2>{{ translate('setup.welcomeHeader') }}</h2>
+				<h2>{{ translate('setup.header') }}</h2>
 				<div class="setup-content">
-					<p>{{ translate('setup.welcome1') }}</p>
-					<p>{{ translate('setup.welcome2') }}</p>
-					<p>{{ translate('setup.welcome3') }}</p>
-					<p>{{ translate('setup.welcome4') }}</p>
+					<p>{{ translate('setup.password1') }}</p>
+					<div class="control">
+						<label>{{ translate('unlockPassword') }}</label>
+						<input type="password" v-model="unlockPassword" autocomplete="new-password" />
+					</div>
 					<div class="control">
 						<label>{{ translate('settings.lblDisplayLanguage') }}</label>
 						<select v-model="newLanguage" @change="setDisplayLanguage(newLanguage)">
 							<option v-for="language in languages" :key="language" :value="language">{{ translate(`language.${language}`) }}</option>
 						</select>
 					</div>
-					<div class="buttons">
-						<button class="btn btn-success btn-inline" @click="step = 1">{{ translate('getStarted') }}</button>
-					</div>
-				</div>
-			</div>
-			<div class="setup-step" v-else-if="step === 1" key="password">
-				<div class="setup-icon">
-					<sia-central />
-				</div>
-				<h2>{{ translate('setup.passwordHeader') }}</h2>
-				<div class="setup-content">
-					<p>{{ translate('setup.password1') }}</p>
-					<p>{{ translate('setup.password2') }}</p>
-					<div class="control">
-						<label>{{ translate('unlockPassword') }}</label>
-						<input type="password" v-model="unlockPassword" autocomplete="new-password" />
-					</div>
+					<p class="text-warning text-small">{{ translate('setup.caution1') }}</p>
+					<p class="text-warning text-small">{{ translate('setup.caution2') }}</p>
 					<div class="buttons">
 						<button class="btn btn-success btn-inline" @click="onSetPassword" :disabled="unlockPassword.length === 0">{{ translate('next') }}</button>
 					</div>
 				</div>
 			</div>
-			<create-wallet class="setup-step" v-else-if="step === 2" key="create" @created="onWalletCreated" />
+			<create-wallet class="setup-step" v-else-if="step === 1" key="create" @created="onWalletCreated" />
 		</transition>
 		<div class="extra-links">
 			<a href="https://github.com/siacentral/sia-lite-wallet-web"><icon :icon="['fab', 'github']" /></a>
 			<a href="https://siacentral.com"><sia-central /></a>
-			<a href="https://sia.tech"><built-with-sia /></a>
 		</div>
 	</div>
 </template>
@@ -55,12 +40,10 @@ import { mapActions } from 'vuex';
 
 import CreateWallet from '@/components/wallet/CreateWallet';
 import SiaCentral from '@/assets/siacentral.svg';
-import BuiltWithSia from '@/assets/built-with-sia.svg';
 
 export default {
 	components: {
 		CreateWallet,
-		BuiltWithSia,
 		SiaCentral
 	},
 	computed: {
@@ -94,7 +77,7 @@ export default {
 					return;
 
 				this.setPassword(this.unlockPassword);
-				this.step = 2;
+				this.step = 1;
 			} catch (ex) {
 				console.error('onSetPassword', ex);
 				this.pushNotification({
