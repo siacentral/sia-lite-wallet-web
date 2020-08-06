@@ -203,8 +203,8 @@ export default {
 			if (deltaSF.isNaN())
 				deltaSF = new BigNumber(0);
 
-			this.siacoinBalance = new BigNumber(balance.confirmed_siacoin_balance).minus(deltaSC);
-			this.siafundBalance = new BigNumber(balance.confirmed_siafund_balance).minus(deltaSF);
+			this.siacoinBalance = new BigNumber(balance.confirmed_siacoin_balance).plus(deltaSC);
+			this.siafundBalance = new BigNumber(balance.confirmed_siafund_balance).plus(deltaSF);
 		},
 		async onConnected(connected) {
 			try {
