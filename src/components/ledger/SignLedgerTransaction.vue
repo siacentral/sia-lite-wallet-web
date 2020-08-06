@@ -41,9 +41,13 @@ export default {
 		return {
 			connected: false,
 			signing: false,
+			signed: null,
 			version: '',
 			signatures: 0
 		};
+	},
+	beforeMount() {
+		this.signed = { ...this.transaction };
 	},
 	methods: {
 		formatNumber,
@@ -68,23 +72,21 @@ export default {
 				return;
 
 			this.signing = true;
-			this.signed = JSON.parse(JSON.stringify(this.transaction));
 
 			try {
-				if (!this.transaction)
+				if (!this.signed)
 					throw new Error('no transaction to sign');
 
-				const signed = { ...this.transaction },
-					encoded = await encodeTransaction(signed);
+				const encoded = await encodeTransaction(this.signed);
 
 				for (; this.signatures < this.requiredSignatures.length; this.signatures++) {
 					const sig = await signTransaction(encoded, this.signatures,
 						this.requiredSignatures[this.signatures]);
 
-					signed.transactionsignatures[this.signatures].signature = sig;
+					this.signed.transactionsignatures[this.signatures].signature = sig;
 				}
 
-				this.$emit('signed', signed);
+				this.$emit('signed', this.signed);
 			} catch (ex) {
 				console.error('onSignTransaction', ex);
 				this.pushNotification({
