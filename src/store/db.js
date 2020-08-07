@@ -76,7 +76,7 @@ export async function saveWallet(wallet, password) {
 }
 
 export function loadWallets(password) {
-	return db.loadWallets(password);
+	return db.getWallets(password);
 }
 
 export function walletCount() {

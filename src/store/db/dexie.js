@@ -4,13 +4,12 @@ import { unlockWallet } from './common';
 export default class DexieStore {
 	async init() {
 		this._db = new Dexie('sia-lite', { autoOpen: false });
-
-		await this._db.open();
-
 		this._db.version(1).stores({
 			wallets: 'id',
 			addresses: '[address+wallet_id],wallet_id,index'
 		});
+
+		await this._db.open();
 	}
 
 	saveWallet(wallet) {
