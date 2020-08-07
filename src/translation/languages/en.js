@@ -80,6 +80,8 @@ export default {
 		},
 		setup: {
 			header: 'Get Started',
+			warning: 'Warning!',
+			continue: 'Continue Anyway',
 			caution1: 'Use caution when sending or receiving cryptocurrencies to prevent coin loss. Cryptocurrency transactions are permanent and non-reversable. Sia Central is not responsible for any damages incurred while using this wallet.',
 			caution2: 'Report any bugs or submit feedback on GitHub.',
 			password1: 'Set a secure password to encrypt your wallets with. This password will be required to unlock and use your wallets. All wallet seeds are encrypted, stored locally and never leave the device.'

@@ -1,7 +1,22 @@
 <template>
 	<div class="page page-setup">
 		<transition name="fade-top" mode="out-in" appear>
-			<div class="setup-step" v-if="step === 0" key="password">
+			<div class="setup-step" v-if="dbType === 'memory' && !accepted">
+				<div class="setup-icon">
+					<sia-central />
+				</div>
+				<h2 class="text-warning">{{ translate('setup.warning') }}</h2>
+				<div class="setup-content">
+					<p>Your browser does not support local data storage, all data will be lost when you close this tab. To prevent loss when adding wallets export the seed outside of your browser tab.</p>
+					<p>Browsers disable local data storage when in "Private Browsing" mode or when "Never Remember History" is enabled. The recommended browser for using this lite wallet is <a href="https://brave.com/sia608">Brave</a></p>
+					<p class="text-warning text-small">{{ translate('setup.caution1') }}</p>
+					<p class="text-warning text-small">{{ translate('setup.caution2') }}</p>
+					<div class="buttons">
+						<button class="btn btn-inline" @click="accepted = true">{{ translate('setup.continue') }}</button>
+					</div>
+				</div>
+			</div>
+			<div class="setup-step" v-else-if="step === 0" key="password">
 				<div class="setup-icon">
 					<sia-central />
 				</div>
@@ -36,7 +51,7 @@
 
 <script>
 import { languages, languageSupported } from '@/translation';
-import { mapActions } from 'vuex';
+import { mapActions, mapState } from 'vuex';
 
 import CreateWallet from '@/components/wallet/CreateWallet';
 import SiaCentral from '@/assets/siacentral.svg';
@@ -47,6 +62,7 @@ export default {
 		SiaCentral
 	},
 	computed: {
+		...mapState(['dbType']),
 		languages() {
 			return languages;
 		}
@@ -55,7 +71,8 @@ export default {
 		return {
 			step: null,
 			unlockPassword: '',
-			newLanguage: null
+			newLanguage: null,
+			accepted: false
 		};
 	},
 	beforeMount() {
