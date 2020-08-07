@@ -1,17 +1,34 @@
-import Dexie from 'dexie';
+import DexieStore from './db/dexie';
+import MemoryStore from './db/memory';
 
 import { hash } from 'tweetnacl';
-import { encrypt, decrypt, pbkdf2 } from '@/utils/crypto';
+import { encrypt, pbkdf2 } from '@/utils/crypto';
 import { encode as encodeB64 } from '@stablelib/base64';
 import { encode as encodeUTF8 } from '@stablelib/utf8';
 import BigNumber from 'bignumber.js';
 
-const db = new Dexie('sia-lite');
+let db;
 
-db.version(1).stores({
-	wallets: 'id',
-	addresses: '[address+wallet_id],wallet_id,index'
-});
+export async function connect() {
+	try {
+		const dexie = new DexieStore();
+
+		await dexie.init();
+
+		db = dexie;
+		return 'dexie';
+	} catch (ex) {
+		console.error('dexie', ex);
+	}
+
+	const mem = new MemoryStore();
+
+	await mem.init();
+
+	db = mem;
+
+	return 'memory';
+}
 
 export async function saveWallet(wallet, password) {
 	if (!wallet || !wallet.seed || wallet.seed.length === 0)
@@ -42,7 +59,7 @@ export async function saveWallet(wallet, password) {
 	if (unconfirmedSiacoinDelta.isNaN() || !unconfirmedSiacoinDelta.isFinite())
 		unconfirmedSiacoinDelta = new BigNumber(0);
 
-	await db.wallets.put({
+	await db.saveWallet({
 		...wallet,
 		id: walletID,
 		salt: key.salt,
@@ -58,94 +75,38 @@ export async function saveWallet(wallet, password) {
 	return walletID;
 }
 
-async function unlockWallet(wallet, password) {
-	const key = await pbkdf2(password, wallet.salt);
-
-	return {
-		...wallet,
-		seed: decrypt(wallet.seed, key.hash)
-	};
-}
-
-// temporary function to migrate wallet seeds encrypted with p to encrypted with h(p)
-export async function migrateWallets(password) {
-	const promises = [];
-	let wallets;
-
-	try {
-		wallets = await loadWallets(encodeUTF8(password));
-	} catch (ex) {
-		// error indicates the seed is not encrypted with p
-		return;
-	}
-
-	console.debug('migrating seed encryption');
-
-	// renecrypt each wallet with h(p)
-	for (let i = 0; i < wallets.length; i++)
-		promises.push(saveWallet(wallets[i], hash(encodeUTF8(password))));
-
-	await Promise.all(promises);
-
-	console.debug(`${promises.length} seeds migrated`);
-}
-
-export async function loadWallets(password) {
-	const wallets = await db.wallets.toArray(),
-		promises = [];
-
-	for (let i = 0; i < wallets.length; i++)
-		promises.push(unlockWallet(wallets[i], password));
-
-	return Promise.all(promises);
+export function loadWallets(password) {
+	return db.loadWallets(password);
 }
 
 export function walletCount() {
-	return db.wallets.count();
+	return db.walletCount();
 }
 
 export function saveAddresses(addresses) {
-	if (!Array.isArray(addresses))
-		return;
-
-	return db.addresses.bulkPut(addresses);
+	return db.saveAddresses(addresses);
 }
 
 export function getWalletAddresses(walletID) {
-	return db.addresses.filter(a => a.wallet_id === walletID)
-		.sortBy('index');
+	return db.getWalletAddresses(walletID);
 }
 
 export function getWalletUnlockHashes(walletID) {
-	return db.addresses.filter(a => a.wallet_id === walletID).keys();
+	return db.getWalletUnlockHashes(walletID);
 }
 
 export function getAddresses(walletID, addresses) {
-	if (!Array.isArray(addresses))
-		addresses = [addresses];
-
-	return db.addresses.filter(a => a.wallet_id === walletID && addresses.indexOf(a.address) !== -1).toArray();
+	return db.getAddresses(walletID, addresses);
 }
 
 export async function getWalletChangeAddress(walletID) {
-	let addr = await db.addresses.orderBy('index').filter(a => a.wallet_id === walletID && a.usage_type !== 'sent').first();
-
-	if (!addr)
-		addr = await db.addresses.orderBy('index').filter(a => a.wallet_id === walletID).last();
-
-	return addr;
+	return db.getWalletChangeAddress(walletID);
 }
 
 export function getLastWalletAddresses(walletID, limit, offset) {
-	offset = offset || 0;
-	limit = limit || 20;
-
-	return db.addresses.orderBy('index').reverse().filter(a => a.wallet_id === walletID).offset(offset).limit(limit).toArray();
+	return db.getLastWalletAddresses(walletID, limit, offset);
 }
 
 export async function deleteWallet(walletID) {
-	return Promise.all([
-		db.addresses.filter(a => a.wallet_id === walletID).delete(),
-		db.wallets.filter(w => w.id === walletID).delete()
-	]);
+	return db.deleteWallet(walletID);
 }

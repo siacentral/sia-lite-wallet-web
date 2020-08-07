@@ -21,6 +21,7 @@ function getLocalStorageNumeric(key, def) {
 
 const store = new Vuex.Store({
 	state: {
+		dbType: 'memory',
 		setup: false,
 		offline: false,
 		autoLock: getLocalStorageNumeric('autoLock', 15),
@@ -43,6 +44,9 @@ const store = new Vuex.Store({
 		exchangeRateSCPF: {}
 	},
 	mutations: {
+		setDBType(state, type) {
+			state.dbType = type;
+		},
 		setSetup(state, setup) {
 			state.setup = setup;
 		},
@@ -147,6 +151,9 @@ const store = new Vuex.Store({
 		}
 	},
 	actions: {
+		setDBType({ commit }, dbType) {
+			commit('setDBType', dbType);
+		},
 		setSetup({ commit }, setup) {
 			commit('setSetup', setup);
 		},

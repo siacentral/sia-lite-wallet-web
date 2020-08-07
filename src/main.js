@@ -4,7 +4,7 @@ import Vue from 'vue';
 import App from './App.vue';
 import router from './router';
 import store from './store';
-import { walletCount } from './store/db';
+import { connect, walletCount } from './store/db';
 import { translate, languageSupported } from '@/translation';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { faCreditCard, faSitemap, faFile, faFileExport, faUnlock, faLock, faEllipsisV, faChevronLeft, faChevronRight, faChevronDown, faEye, faPencilAlt, faTrash, faPaperPlane, faWallet, faAddressBook, faCogs, faPlus, faTimes, faRedo } from '@fortawesome/free-solid-svg-icons';
@@ -43,6 +43,9 @@ Vue.mixin({
 });
 
 async function load() {
+	const dbType = await connect();
+
+	store.dispatch('setDBType', dbType);
 	store.dispatch('setSetup', (await walletCount()) !== 0);
 
 	new Vue({
