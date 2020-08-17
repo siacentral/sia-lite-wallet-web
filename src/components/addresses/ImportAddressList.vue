@@ -4,7 +4,7 @@
 			<tbody>
 				<tr v-for="(address, i) in value" :key="i">
 					<td class="text-right fit-text">{{ formatNumber(value[i].index) }}</td>
-					<td v-if="publickey"><input v-model="value[i].pubkey" :placeholder="translate('importAddresses.addressPlaceholder')" readonly /></td>
+					<td v-if="publickey"><input :value="`ed25519:${value[i].pubkey}`" :placeholder="translate('importAddresses.addressPlaceholder')" readonly /></td>
 					<td v-else><input v-model="value[i].address" :placeholder="translate('importAddresses.addressPlaceholder')" @input="$emit('change', value)" :readonly="readonly" />
 					<td class="fit-text" v-if="value.length > 1 && walletType === 'watch'">
 						<button class="delete-btn" @click="$emit('delete', i)">
