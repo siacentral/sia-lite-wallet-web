@@ -145,7 +145,7 @@ export default {
 			errorHighFee: 'Le montant à envoyer est inférieur aux frais de transaction',
 			errorBadRecipient: 'Adresse de destination invalide',
 			statusSigning: 'Signature de la transaction...',
-			statusBroadcasting: 'Diffusion de la transaction...'
+			statusBroadcasting: 'Diffusion de la transaction... {{0}}/{{1}}'
 		},
 		transactionTypes: {
 			contractRevision: 'Révision de contrat',

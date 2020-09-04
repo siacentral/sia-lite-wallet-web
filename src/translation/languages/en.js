@@ -158,7 +158,7 @@ export default {
 			errorBadRecipient: 'Invalid recipient address',
 			errorTooManyInputs: 'Transaction has too many inputs. Wallet needs to be defragmented before sending.',
 			statusSigning: 'Signing transaction...',
-			statusBroadcasting: 'Broadcasting transaction...'
+			statusBroadcasting: 'Broadcasting transaction... {{0}}/{{1}}'
 		},
 		defragModal: {
 			outputCount: '# of Outputs (Before)',

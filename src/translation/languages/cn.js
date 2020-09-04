@@ -139,7 +139,7 @@ export default {
 			errorHighFee: '发送的金额少于交易费',
 			errorBadRecipient: '无效的接收地址',
 			statusSigning: '正在签署交易...',
-			statusBroadcasting: '正在广播交易...'
+			statusBroadcasting: '正在广播交易... {{0}}/{{1}}'
 		},
 		transactionTypes: {
 			contractRevision: '合同修订',

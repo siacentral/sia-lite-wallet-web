@@ -73,9 +73,21 @@ export default {
 					throw new Error('unsupported wallet type');
 				}
 
-				this.status = this.translate('sendSiacoinsModal.statusBroadcasting');
+				try {
+					for (let i = 0; i < signed.length; i++) {
+						this.status = this.translate('sendSiacoinsModal.statusBroadcasting', i + 1, signed.length);
+						await this.broadcastTxnset([signed[i]]);
+					}
+				} catch (ex) {
+					console.error('onTransactionBuilt', ex);
+					this.pushNotification({
+						severity: 'warning',
+						message: ex.message
+					});
+				}
 
-				await this.broadcastTxnset(signed);
+				this.status = 'Transactions sent! Updating balance...';
+
 				await scanTransactions(this.wallet);
 
 				this.$emit('close');
