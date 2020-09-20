@@ -46,7 +46,7 @@ export default {
 		full: 'Full',
 		walletStatus: {
 			scanning: '扫描中...',
-			queued: '列队扫描...'
+			queued: '等待扫描...'
 		},
 		deleteWalletModal: {
 			pDeleteConfirm: '您确定要删除名为“{{0}}”的钱包吗？ 这将从您的设备中删除与此钱包相关的所有数据。 请确保您已备份恢复种子。',
@@ -120,8 +120,8 @@ export default {
 			addressPlaceholder: '查看的Sia地址...',
 			publicKey: '导入公钥',
 			addAddress: '增加地址',
-			displayPublicKey: 'Show Public Key',
-			displayAddress: 'Show Address'
+			displayPublicKey: '显示公钥',
+			displayAddress: '显示地址'
 		},
 		ledger: {
 			connected: '已连接',
