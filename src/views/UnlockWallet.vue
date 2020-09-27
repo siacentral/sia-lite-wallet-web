@@ -13,6 +13,7 @@
 					<button class="btn btn-success btn-inline" :disabled="unlocking">{{ translate('unlock') }}</button>
 				</div>
 			</form>
+			<p class="text-small text-secondary text-center">Version {{ version }}</p>
 		</div>
 	</div>
 </template>
@@ -26,6 +27,11 @@ export default {
 			password: '',
 			unlocking: false
 		};
+	},
+	computed: {
+		version() {
+			return process.env.VUE_APP_VERSION || 'devel';
+		}
 	},
 	methods: {
 		...mapActions(['unlockWallets']),
@@ -87,5 +93,9 @@ h2, p {
 	align-content: safe center;
 	overflow-x: hidden;
 	overflow-y: auto;
+}
+
+.text-secondary {
+	color: rgba(255, 255, 255, 0.24);
 }
 </style>

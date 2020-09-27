@@ -22,6 +22,9 @@ RUN npm install
 COPY . .
 COPY --from=buildgo /app/sia.wasm /app/src/sia/sia.wasm
 
+ENV NODE_ENV=production
+
+RUN echo "\nVUE_APP_VERSION=$(git rev-parse --short HEAD)" >> .env
 RUN npm run build
 
 # production
