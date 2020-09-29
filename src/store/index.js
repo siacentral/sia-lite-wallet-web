@@ -278,8 +278,7 @@ const store = new Vuex.Store({
 
 async function updateMetadata() {
 	try {
-		const siaPrice = await siaAPI.getCoinPrice(),
-			scprimePrice = await scprimeAPI.getCoinPrice(),
+		const price = await siaAPI.getCoinPrice(),
 			siaFees = await siaAPI.getNetworkFees(),
 			scprimeFees = await scprimeAPI.getNetworkFees(),
 			addresses = await siaAPI.getFeeAddresses();
@@ -288,10 +287,7 @@ async function updateMetadata() {
 			sia: siaFees,
 			scprime: scprimeFees
 		});
-		store.dispatch('setExchangeRate', {
-			...siaPrice,
-			...scprimePrice
-		});
+		store.dispatch('setExchangeRate', price);
 		store.dispatch('setFeeAddresses', addresses);
 	} catch (ex) {
 		console.error('updatingMeta', ex);

@@ -22,14 +22,21 @@ export class SiaCentralAPI {
 	}
 
 	async getCoinPrice() {
-		const resp = await sendJSONRequest(`${this._baseURL}/market/exchange-rate`, {
+		const resp = await sendJSONRequest(`${this._baseURL}/market/exchange-rate?currencies=sc,sf,scp`, {
 			method: 'GET'
 		});
 
 		if (resp.body.type !== 'success')
 			throw new Error(resp.body.message);
 
-		return resp.body;
+		if (!resp.body || !resp.body.rates)
+			throw new Error('unrecognized response');
+
+		return {
+			siacoin: resp.body.rates.sc,
+			scprimecoin: resp.body.rates.scp,
+			siafund: resp.body.rates.sf
+		};
 	}
 
 	async getNetworkFees() {
