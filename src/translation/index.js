@@ -1,6 +1,6 @@
-import en from './languages/en.js';
-import cn from './languages/cn.js';
-import fr from './languages/fr.js';
+import en from './languages/en.json';
+import cn from './languages/cn.json';
+import fr from './languages/fr.json';
 
 const supportedLanguages = [
 		en, cn, fr
