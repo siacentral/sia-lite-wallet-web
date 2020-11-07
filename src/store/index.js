@@ -19,6 +19,20 @@ function getLocalStorageNumeric(key, def) {
 	return parseInt(v, 10);
 }
 
+function migrateRoundsToLookahead() {
+	const rounds = getLocalStorageNumeric('minScanRounds', -1),
+		addrs = getLocalStorageNumeric('addressesPerRound', -1),
+		lookahead = getLocalStorageNumeric('addressLookahead', -1);
+
+	console.log(rounds, addrs, lookahead);
+
+	if (lookahead === -1 && rounds !== -1 && addrs !== -1) {
+		console.log('migrating to lookahead', rounds * addrs);
+		localStorage.setItem('addressLookahead', rounds * addrs);
+	}
+}
+migrateRoundsToLookahead();
+
 const store = new Vuex.Store({
 	state: {
 		dbType: 'memory',
@@ -28,8 +42,7 @@ const store = new Vuex.Store({
 		currency: localStorage.getItem('displayCurrency') || 'usd',
 		changeSeedType: localStorage.getItem('changeSeedType') === 'true',
 		changeServerType: localStorage.getItem('changeServerType') === 'true',
-		minScanRounds: getLocalStorageNumeric('minScanRounds', 25),
-		addressesPerRound: getLocalStorageNumeric('addressesPerRound', 2500),
+		addressLookahead: getLocalStorageNumeric('addressLookahead', 25000),
 		displayLanguage: localStorage.getItem('displayLanguage') || 'detect',
 		password: null,
 		wallets: [],
@@ -76,11 +89,8 @@ const store = new Vuex.Store({
 		setChangeServerType(state, enabled) {
 			state.changeServerType = enabled;
 		},
-		setMinFullScanRounds(state, rounds) {
-			state.minScanRounds = rounds;
-		},
-		setAddressesPerRound(state, addressesPerRound) {
-			state.addressesPerRound = addressesPerRound;
+		setAddressLookahead(state, n) {
+			state.addressLookahead = n;
 		},
 		setCurrency(state, currency) {
 			state.currency = currency;
@@ -177,16 +187,9 @@ const store = new Vuex.Store({
 			localStorage.setItem('changeServerType', enabled.toString());
 			commit('setChangeServerType', enabled);
 		},
-		setMinFullScanRounds({ commit }, rounds) {
-			localStorage.setItem('minScanRounds', rounds);
-			commit('setMinFullScanRounds', rounds);
-		},
-		setAddressesPerRound({ commit }, addressesPerRound) {
-			if (addressesPerRound > 5e3)
-				addressesPerRound = 5e3;
-
-			localStorage.setItem('addressesPerRound', addressesPerRound);
-			commit('setAddressesPerRound', addressesPerRound);
+		setAddressLookahead({ commit }, n) {
+			localStorage.setItem('addressLookahead', n);
+			commit('setAddressLookahead', n);
 		},
 		setCurrency({ commit }, currency) {
 			localStorage.setItem('displayCurrency', currency);

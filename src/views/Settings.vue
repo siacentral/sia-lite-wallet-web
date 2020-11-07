@@ -37,6 +37,13 @@
 				<label>{{ translate('settings.lblAutomaticLock') }}</label>
 				<input type="number" v-model.number="newAutoLock" min="1" max="30" @change="setAutoLock(newAutoLock)" />
 			</div>
+			<div class="control-grouping">
+				<p class="text-warning">{{ translate('settings.pExplainLookahead') }}</p>
+				<div class="control">
+					<label>{{ translate('settings.lblAddressLookaHead') }}</label>
+					<input type="number" min="100" max="5000000" v-model.number="newMinLookahead" @change="setMinLookahead(newMinLookahead)" />
+				</div>
+			</div>
 			<div class="divider" />
 			<div class="control">
 				<input type="checkbox" id="chk-show-advanced" v-model="showAdvanced" />
@@ -58,18 +65,6 @@
 						<label for="chk-change-server-type">{{ translate('settings.chkChangeWalletServer') }}</label>
 					</div>
 				</div>
-				<div class="control-grouping">
-					<p class="text-warning">{{ translate('settings.pExplainFullScan') }}</p>
-					<p class="text-warning">{{ translate('settings.pExplainRounds', formatNumber(newMinFullScanRounds * newAddressesPerRound)) }}</p>
-					<div class="control">
-						<label>{{ translate('settings.lblMinimumRounds') }}</label>
-						<input type="number" min="10" max="1000" v-model.number="newMinFullScanRounds" @change="setMinFullScanRounds(newMinFullScanRounds)" />
-					</div>
-					<div class="control">
-						<label>{{ translate('settings.lblAddressesPerRound') }}</label>
-						<input type="number" min="10" max="5000" v-model.number="newAddressesPerRound" @change="setAddressesPerRound(newAddressesPerRound)" />
-					</div>
-				</div>
 			</template>
 		</div>
 	</div>
@@ -87,8 +82,8 @@ export default {
 		MobileNav
 	},
 	computed: {
-		...mapState(['currency', 'autoLock', 'changeSeedType', 'changeServerType', 'addressesPerRound',
-			'minScanRounds', 'displayLanguage']),
+		...mapState(['currency', 'autoLock', 'changeSeedType', 'changeServerType',
+			'addressLookahead', 'displayLanguage']),
 		languages() {
 			return languages;
 		}
@@ -100,8 +95,7 @@ export default {
 			newAutoLock: 5,
 			newChangeSeedType: false,
 			newChangeServerType: false,
-			newAddressesPerRound: 1000,
-			newMinFullScanRounds: 100,
+			newMinLookahead: 1000,
 			newLanguage: 'detect'
 		};
 	},
@@ -110,13 +104,12 @@ export default {
 		this.newAutoLock = this.autoLock;
 		this.newChangeSeedType = this.changeSeedType;
 		this.newChangeServerType = this.changeServerType;
-		this.newAddressesPerRound = this.addressesPerRound;
-		this.newMinFullScanRounds = this.minScanRounds;
+		this.newMinLookahead = this.addressLookahead;
 		this.newLanguage = this.displayLanguage;
 	},
 	methods: {
-		...mapActions(['setCurrency', 'setAutoLock', 'setChangeSeedType', 'setChangeServerType', 'setMinFullScanRounds',
-			'setAddressesPerRound', 'setDisplayLanguage']),
+		...mapActions(['setCurrency', 'setAutoLock', 'setChangeSeedType', 'setChangeServerType',
+			'setAddressLookahead', 'setDisplayLanguage']),
 		formatNumber
 	}
 };

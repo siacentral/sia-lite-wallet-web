@@ -88,16 +88,14 @@
 			"lblDisplayCurrency": "显示币种",
 			"lblDisplayLanguage": "语言",
 			"lblAutomaticLock": "锁定时间（分钟)",
-			"lblMinimumRounds": "最小的连续次数",
-			"lblAddressesPerRound": "每次地址数",
+			"lblAddressLookaHead": "Address Lookahead",
 			"chkShowAdvanced": "高级选项",
 			"chkWalrusSeeds": "生成12字种子",
 			"chkChangeWalletServer": "Enable 3rd-party wallet servers",
 			"chkCurrency": "Enable SCPrime",
 			"pChangeSeedType": "12字种子与官方Sia钱包不兼容。它们通常与Walrus钱包一起使用。启用此设置将在创建新钱包时显示一个下拉列表，允许您生成新的Sia种子或12字种子。",
 			"pChangeServerType": "[EXPERIMENTAL] Allows the usage of 3rd-party wallet servers, like Walrus. 3rd-party servers help reduce centralization and allow for choice between trusting Sia Central or another party. Some wallet features may be broken or unsupported.",
-			"pExplainFullScan": "在开始完整扫描余额和输出地址期间，会分批扫描地址。直到在区块链上找不到最小扫描次数的地址为止。",
-			"pExplainRounds": "减少次数或地址数可以提高性能，但会增加找不到地址或余额的机会。使用当前设置，在完成之前至少使用{{0}}个连续地址索引。"
+			"pExplainLookahead": "Wallets are composed of multiple addresses, the lookahead window is the maximum gap between two unused addresses before the wallet expects no more used addresses. Sia hosts and renters generate a lot of unused addresses, so some wallets may need to increase this value to find all of their funds."
 		},
 		"unlockWalletModal": {
 			"pWalletsLocked": "您的钱包目前已加密并锁定，输入密码解锁您的钱包并查看您的资金。"

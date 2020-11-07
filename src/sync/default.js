@@ -5,20 +5,21 @@ import Wallet from '@/types/wallet';
 
 export default {
 	quickScan: async function(wallet) {
-		let startIndex = 0, lastKnownIndex, addressesPerRound = Store.state.addressesPerRound;
+		let startIndex = 0, lastKnownIndex,
+			maxLookahead = Store.state.addressLookahead;
 		const addresses = await getWalletAddresses(wallet.id);
+
+		if (typeof maxLookahead !== 'number' || maxLookahead < 0 || maxLookahead > 500000)
+			maxLookahead = 25000;
 
 		if (Array.isArray(addresses) && addresses.length !== 0) {
 			lastKnownIndex = addresses[addresses.length - 1].index;
 
-			if (lastKnownIndex > 5e4)
-				startIndex = lastKnownIndex - 5e4;
+			if (lastKnownIndex > maxLookahead)
+				startIndex = lastKnownIndex - maxLookahead;
 		}
 
-		if (typeof addressesPerRound !== 'number' || addressesPerRound <= 0 || addressesPerRound > 5000)
-			addressesPerRound = 2500;
-
-		await recoverAddresses(wallet.seed, wallet.currency, startIndex, 2, addressesPerRound, lastKnownIndex, async(progress) => {
+		await recoverAddresses(wallet.seed, wallet.currency, startIndex, Math.ceil(maxLookahead / 1000), 1000, lastKnownIndex, async(progress) => {
 			if (!progress || !Array.isArray(progress.addresses))
 				return;
 
@@ -31,16 +32,12 @@ export default {
 		});
 	},
 	fullScan: async function(wallet) {
-		let minScanRounds = Store.state.minScanRounds,
-			addressesPerRound = Store.state.addressesPerRound;
+		let maxLookahead = Store.state.addressLookahead;
 
-		if (typeof minScanRounds !== 'number' || minScanRounds < 0 || minScanRounds > 500)
-			minScanRounds = 10;
+		if (typeof maxLookahead !== 'number' || maxLookahead < 0 || maxLookahead > 500000)
+			maxLookahead = 25000;
 
-		if (typeof addressesPerRound !== 'number' || addressesPerRound <= 0 || addressesPerRound > 5000)
-			addressesPerRound = 2500;
-
-		await recoverAddresses(wallet.seed, wallet.currency, 0, minScanRounds, addressesPerRound, 0, async(progress) => {
+		await recoverAddresses(wallet.seed, wallet.currency, 0, Math.ceil(maxLookahead / 1000), 1000, 0, async(progress) => {
 			if (!progress || !Array.isArray(progress.addresses))
 				return;
 

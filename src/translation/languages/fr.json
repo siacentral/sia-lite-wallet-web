@@ -88,16 +88,14 @@
 			"lblDisplayCurrency": "Devise",
 			"lblDisplayLanguage": "Langue",
 			"lblAutomaticLock": "Délai de verrouillage automatique (en minutes)",
-			"lblMinimumRounds": "Nombre de rounds consécutifs minimum",
-			"lblAddressesPerRound": "Adresses par round",
+			"lblAddressLookaHead": "Address Lookahead",
 			"chkShowAdvanced": "Afficher les paramètres avancés",
 			"chkWalrusSeeds": "Autoriser les seeds à 12 mots",
 			"chkChangeWalletServer": "Autoriser les serveurs de portefeuilles tierces",
 			"chkCurrency": "Activer SCPrime",
 			"pChangeSeedType": "Les seeds à 12 mots sont incompatibles avec les portefeuilles Sia officiels. Elles sont généralement utilisées par les portefeuilles Walrus. Activer cette fonctionnalité fera apparaître une liste déroulante lors de la création d'un nouveau portefeuille, permettant d'utiliser au choix les seeds Sia ou les seeds à 12 mots.",
 			"pChangeServerType": "[EXPERIMENTAL] Permet l'utilisation de serveurs de portefeuilles tierces, comme Walrus. Les serveurs de portefeuilles tierces permettent de réduire la centralisation et permettent de choisir entre Sia Central ou toute autre partie. Certaines fonctionnalités peuvent ne pas être supportées ou fonctionner de manière hasardeuse.",
-			"pExplainFullScan": "Pendant le scan initial, les adresses utilisées sont scannées par groupes. Le portefeuille va scanner jusqu'à ce qu'aucun ensemble de deux numéros d'adresses ne soient trouvés, autant de fois que le nombre minimum de rounds soit atteint.",
-			"pExplainRounds": "Réduire le nombre minimum de rounds ou le nombre d'adresses par round peut permettre d'améliorer les performances, mais peut aussi augmenter les chances que des adresses ou des soldes ne soient pas trouvés. Avec les paramètres actuels, un minimum de {{0}} numéros d'adresses consécutives doivent ne pas être utilisées pour valider le processus."
+			"pExplainLookahead": "Wallets are composed of multiple addresses, the lookahead window is the maximum gap between two unused addresses before the wallet expects no more used addresses. Sia hosts and renters generate a lot of unused addresses, so some wallets may need to increase this value to find all of their funds."
 		},
 		"unlockWalletModal": {
 			"pWalletsLocked": "Vos portefeuilles sont encryptés et verrouillés. Entrez votre mot de passe pour débloquer vos portefeuilles et accéder à vos fonds."
