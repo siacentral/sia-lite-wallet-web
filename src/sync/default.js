@@ -19,7 +19,7 @@ export default {
 				startIndex = lastKnownIndex - maxLookahead;
 		}
 
-		await recoverAddresses(wallet.seed, wallet.currency, startIndex, Math.ceil(maxLookahead / 1000), 1000, lastKnownIndex, async(progress) => {
+		await recoverAddresses(wallet.seed, wallet.currency, startIndex, Math.ceil(maxLookahead / 500), 500, lastKnownIndex, async(progress) => {
 			if (!progress || !Array.isArray(progress.addresses))
 				return;
 
@@ -37,7 +37,7 @@ export default {
 		if (typeof maxLookahead !== 'number' || maxLookahead < 0 || maxLookahead > 500000)
 			maxLookahead = 25000;
 
-		await recoverAddresses(wallet.seed, wallet.currency, 0, Math.ceil(maxLookahead / 1000), 1000, 0, async(progress) => {
+		await recoverAddresses(wallet.seed, wallet.currency, 0, Math.ceil(maxLookahead / 500), 500, 0, async(progress) => {
 			if (!progress || !Array.isArray(progress.addresses))
 				return;
 
