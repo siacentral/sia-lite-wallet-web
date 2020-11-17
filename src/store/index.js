@@ -24,8 +24,6 @@ function migrateRoundsToLookahead() {
 		addrs = getLocalStorageNumeric('addressesPerRound', -1),
 		lookahead = getLocalStorageNumeric('addressLookahead', -1);
 
-	console.log(rounds, addrs, lookahead);
-
 	if (lookahead === -1 && rounds !== -1 && addrs !== -1) {
 		console.log('migrating to lookahead', rounds * addrs);
 		localStorage.setItem('addressLookahead', rounds * addrs);

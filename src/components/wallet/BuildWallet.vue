@@ -159,10 +159,7 @@ export default {
 					wallet.server_type = 'walrus';
 
 					// automatically generate a new narwal url
-					console.log(this.createType);
 					switch (this.createType) {
-					case 'recover':
-						break;
 					default:
 						wallet.server_url = `https://narwal.lukechampine.com/wallet/${hashString(seed)}`;
 						break;
