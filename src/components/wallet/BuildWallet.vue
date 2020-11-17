@@ -53,9 +53,9 @@
 <script>
 import { mapState } from 'vuex';
 import { generateSeed, generateAddresses } from '@/sia';
-import { hexID } from '@/utils/crypto';
 import { randomBytes } from 'tweetnacl';
 import { encode } from '@stablelib/base64';
+import { hashString } from '@/utils/crypto';
 import WalrusClient from '@/api/walrus';
 
 import ImportSeedModal from '@/modal/ImportSeedModal';
@@ -90,9 +90,7 @@ export default {
 			}
 		},
 		showServerURL() {
-			if ((this.createType === 'recover' && this.serverType !== 'siacentral') ||
-				(this.createType === 'watch' && this.serverType !== 'siacentral') ||
-				this.serverType === 'walrus')
+			if (this.serverType === 'walrus')
 				return true;
 
 			return false;
@@ -161,8 +159,14 @@ export default {
 					wallet.server_type = 'walrus';
 
 					// automatically generate a new narwal url
-					if (this.createType === 'create')
-						wallet.server_url = `https://narwal.lukechampine.com/wallet/${hexID(8)}`;
+					console.log(this.createType);
+					switch (this.createType) {
+					case 'recover':
+						break;
+					default:
+						wallet.server_url = `https://narwal.lukechampine.com/wallet/${hashString(seed)}`;
+						break;
+					}
 				}
 
 				// check the server connection

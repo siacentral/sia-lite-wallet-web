@@ -1,4 +1,4 @@
-import { randomBytes, secretbox } from 'tweetnacl';
+import { randomBytes, secretbox, hash } from 'tweetnacl';
 import { encode as encodeB64, decode as decodeB64 } from '@stablelib/base64';
 import { encode as encodeUTF8, decode as decodeUTF8 } from '@stablelib/utf8';
 
@@ -43,4 +43,15 @@ export function decrypt(encrypted, key) {
 		throw new Error('failed to decrypt');
 
 	return decodeUTF8(decrypted);
+}
+
+/**
+ * Returns the hex encoded SHA-256 hash of the string
+ * @param {String} str the string to hash
+ */
+export function hashString(str) {
+	const buf = encodeUTF8(str),
+		data = hash(buf);
+
+	return Array.from(data, (byte) => ('0' + (byte & 0xFF).toString(16)).slice(-2)).join('');
 }

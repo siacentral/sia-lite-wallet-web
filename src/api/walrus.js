@@ -156,20 +156,14 @@ export default class {
 					siafund_outputs: [],
 					timestamp: new Date(txn.timestamp)
 				},
-				inflow = new BigNumber(txn.inflow),
-				outflow = new BigNumber(txn.outflow);
+				inflow = new BigNumber(txn.credit),
+				outflow = new BigNumber(txn.debit),
+				dir = inflow.gt(outflow) ? 'received' : 'sent';
 
-			if (outflow.eq(0)) {
-				processed.siacoin_value = {
-					direction: 'received',
-					value: inflow.toString(10)
-				};
-			} else {
-				processed.siacoin_value = {
-					direction: 'sent',
-					value: outflow.toString(10)
-				};
-			}
+			processed.siacoin_value = {
+				direction: dir,
+				value: inflow.minus(outflow).abs()
+			};
 
 			if (Array.isArray(txn.transaction.siacoinOutputs)) {
 				processed.siacoin_outputs = txn.transaction.siacoinOutputs.map(o => ({
