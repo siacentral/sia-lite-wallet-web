@@ -124,8 +124,10 @@ export default {
 		transactionClass() {
 			const classes = {};
 
-			if (this.transaction && this.transaction.confirmations < 3)
+			if (this.transaction && this.transaction.confirmations === 0)
 				classes['transaction-unconfirmed'] = true;
+			else if (this.transaction && this.transaction.confirmations < 3)
+				classes['transaction-partial-confirmed'] = true;
 
 			return classes;
 		},
@@ -166,6 +168,14 @@ export default {
 
 .transaction-unconfirmed {
 	opacity: 0.45;
+
+	.transaction-confirms span {
+		display: inline-block;
+	}
+}
+
+.transaction-partial-confirmed {
+	opacity: 0.7;
 
 	.transaction-confirms span {
 		display: inline-block;
