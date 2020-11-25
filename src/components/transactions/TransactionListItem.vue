@@ -112,7 +112,7 @@ export default {
 			return this.transaction.tags[0];
 		},
 		displayConfirmations() {
-			if (this.transaction && this.transaction.confirmations === 0)
+			if (this.transaction && this.transaction.confirmations < 2)
 				return this.translate('unconfirmed');
 
 			return '';
@@ -120,7 +120,7 @@ export default {
 		transactionClass() {
 			const classes = {};
 
-			if (this.transaction && this.transaction.confirmations === 0)
+			if (this.transaction && this.transaction.confirmations < 2)
 				classes['transaction-unconfirmed'] = true;
 
 			return classes;
