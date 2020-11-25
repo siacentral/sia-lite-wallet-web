@@ -112,8 +112,12 @@ export default {
 			return this.transaction.tags[0];
 		},
 		displayConfirmations() {
-			if (this.transaction && this.transaction.confirmations < 2)
-				return this.translate('unconfirmed');
+			if (this.transaction) {
+				if (this.transaction.confirmations === 0)
+					return this.translate('unconfirmed');
+				else if (this.transaction.confirmations < 3)
+					return this.translate('confirmations', this.transaction.confirmations, 3);
+			}
 
 			return '';
 		},

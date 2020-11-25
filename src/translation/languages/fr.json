@@ -46,6 +46,7 @@
 		"status": "Status",
 		"wallet": "Portefeuille",
 		"unconfirmed": "Non confirmé",
+		"confirmations": "{{0}}/{{1}} Confirmations",
 		"half": "Moitié",
 		"full": "Totalité",
 		"siacentral": "Sia Central",

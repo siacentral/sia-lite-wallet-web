@@ -46,6 +46,7 @@
 		"status": "Status",
 		"wallet": "Wallet",
 		"unconfirmed": "Unconfirmed",
+		"confirmations": "{{0}}/{{1}} Confirmations",
 		"half": "Half",
 		"full": "Full",
 		"siacentral": "Sia Central",

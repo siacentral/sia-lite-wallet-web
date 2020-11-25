@@ -46,6 +46,7 @@
 		"status": "状态",
 		"wallet": "钱包",
 		"unconfirmed": "未确认",
+		"confirmations": "{{0}}/{{1}} Confirmations",
 		"half": "Half",
 		"full": "Full",
 		"siacentral": "Sia Central",
