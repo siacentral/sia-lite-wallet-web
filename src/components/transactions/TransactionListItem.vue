@@ -124,7 +124,7 @@ export default {
 		transactionClass() {
 			const classes = {};
 
-			if (this.transaction && this.transaction.confirmations < 2)
+			if (this.transaction && this.transaction.confirmations < 3)
 				classes['transaction-unconfirmed'] = true;
 
 			return classes;
