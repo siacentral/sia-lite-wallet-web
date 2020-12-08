@@ -41,7 +41,7 @@
 				<p class="text-warning">{{ translate('settings.pExplainLookahead') }}</p>
 				<div class="control">
 					<label>{{ translate('settings.lblAddressLookaHead') }}</label>
-					<input type="number" min="100" max="5000000" v-model.number="newMinLookahead" @change="setMinLookahead(newMinLookahead)" />
+					<input type="number" min="100" max="5000000" v-model.number="newMinLookahead" @change="setAddressLookahead(newMinLookahead)" />
 				</div>
 			</div>
 			<div class="divider" />
