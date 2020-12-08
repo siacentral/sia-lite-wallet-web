@@ -52,6 +52,7 @@
 		"siacentral": "Sia Central",
 		"walrus": "Walrus",
 		"narwal": "Narwal",
+		"ledgerSCPWarning": "The Sia Ledger Nano S App will not work with ScPrime, in order to send funds you need to side-load the ScPrime App from ",
 		"walletStatus": {
 			"scanning": "Rafraîchissement...",
 			"queued": "Rafraîchissement en attente..."
