@@ -11,13 +11,16 @@
 				<option value="walrus">{{ translate('createWalletModal.walrusSeed') }}</option>
 			</select>
 		</div>
-		<div class="control" v-if="createType !== 'ledger'">
+		<div class="control">
 			<label>{{ translate('createWalletModal.lblCurrencyType') }}</label>
 			<select v-model="currencyType">
 				<option value="sc">{{ translate('siacoin') }}</option>
 				<option value="scp">{{ translate('scprimecoin') }}</option>
 			</select>
 		</div>
+		<transition name="fade" appear>
+			<p v-if="createType === 'ledger' && currencyType === 'scp'" class="text-small text-warning">{{ translate('ledgerSCPWarning') }} <a href="https://gitlab.com/n8maninger/nanos-app-scprime" target="_blank">https://gitlab.com/n8maninger/nanos-app-scprime</a></p>
+		</transition>
 		<template v-if="changeServerType">
 			<div class="control">
 				<label>{{ translate('createWalletModal.lblServerType') }}</label>
