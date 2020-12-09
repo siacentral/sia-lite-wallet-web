@@ -43,6 +43,7 @@ npm install
 ### Compiles and hot-reloads for development
 ```
 GOARCH=wasm GOOS=js go build -o src/sia/sia.wasm wasm/main.go
+mkdir public/sia && cp "$(go env GOROOT)/misc/wasm/wasm_exec.js" public/sia/wasm_exec.js
 npm run serve
 ```
 
