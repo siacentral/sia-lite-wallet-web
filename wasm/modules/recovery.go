@@ -170,7 +170,13 @@ func RecoverAddresses(seed, currency string, startIndex, maxEmptyRounds, address
 
 	for res := range results {
 		if res.Error != nil {
-			close(done)
+			//close the done channel to signal completion if it isn't already closed
+			select {
+			case <-done:
+				break
+			default:
+				close(done)
+			}
 			continue
 		}
 
