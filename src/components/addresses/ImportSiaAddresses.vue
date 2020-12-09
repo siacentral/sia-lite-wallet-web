@@ -4,9 +4,7 @@
 		<div class="app-status">
 			<template v-if="walletType === 'ledger'">
 				<div>{{ translate('status') }}</div>
-				<div />
-				<div />
-				<div class="text-right">{{ connected ? translate('ledger.connected') : translate('ledger.disconnected') }} <template v-if="ledgerVersion">{{ ledgerVersion }}</template></div>
+				<div class="text-right address-count">{{ connected ? translate('ledger.connected') : translate('ledger.disconnected') }} <template v-if="ledgerVersion">{{ ledgerVersion }}</template></div>
 			</template>
 			<div>{{ translate('importAddresses.importedHeader') }}</div>
 			<div class="text-right address-count">{{ formatNumber(this.addresses.length) }}</div>
