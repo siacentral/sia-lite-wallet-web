@@ -99,8 +99,8 @@ func GetTransactions(addresses []string, currency string, callback js.Value) {
 		ownedAddresses[addr] = true
 	}
 
-	for i := 0; i < count; i += 5e3 {
-		end := i + 5e3
+	for i := 0; i < count; i += 1e3 {
+		end := i + 1e3
 
 		if end > count {
 			end = count
