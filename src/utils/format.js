@@ -224,11 +224,13 @@ function formatCurrencyString(val, currency, rate, precision = new BigNumber(1e2
 	};
 };
 
-export function formatSiafundString(val) {
+export function formatSiafundString(val, currency = 'sc') {
+	const label = currency === 'scp' ? 'spf' : 'sf';
+
 	if (!val || val.isEqualTo(0)) {
 		return {
 			value: '0',
-			label: 'sf'
+			label
 		};
 	}
 
@@ -238,27 +240,9 @@ export function formatSiafundString(val) {
 			minimumFractionDigits: 0,
 			maximumFractionDigits: 0
 		}).format(val),
-		label: 'sf'
+		label
 	};
 };
-
-export function formatSCPFundString(val) {
-	if (!val || val.isEqualTo(0)) {
-		return {
-			value: '0',
-			label: 'scpf'
-		};
-	}
-
-	return {
-		value: new Intl.NumberFormat([], {
-			type: 'decimal',
-			minimumFractionDigits: 0,
-			maximumFractionDigits: 0
-		}).format(val),
-		label: 'scpf'
-	};
-}
 
 export function formatPriceString(val, dec, currency, rate, precision = new BigNumber(1e24)) {
 	if (!val)

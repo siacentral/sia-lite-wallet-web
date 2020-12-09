@@ -40,9 +40,9 @@ export default {
 			return `${siacoins.value} <span class="currency-display">${this.translate(`currency.${siacoins.label}`)}</span>`;
 		},
 		displaySiafunds() {
-			const siacoins = formatSiafundString(new BigNumber(this.walletSiafundBalance), 2);
+			const { value, label } = formatSiafundString(new BigNumber(this.walletSiafundBalance), this.wallet.currency);
 
-			return `${siacoins.value} <span class="currency-display">${this.translate(`currency.${siacoins.label}`)}</span>`;
+			return `${value} <span class="currency-display">${this.translate(`currency.${label}`)}</span>`;
 		},
 		displayCurrency() {
 			let exchangeRate = this.exchangeRateSC;

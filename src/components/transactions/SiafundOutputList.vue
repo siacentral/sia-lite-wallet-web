@@ -29,6 +29,7 @@ export default {
 	},
 	props: {
 		title: String,
+		walletCurrency: String,
 		outputs: Array
 	},
 	computed: {
@@ -36,12 +37,18 @@ export default {
 	},
 	methods: {
 		getOutputSF(output) {
-			const siafunds = formatSiafundString(new BigNumber(output.value), 2);
+			const siafunds = formatSiafundString(new BigNumber(output.value), this.walletCurrency);
 
 			return `${siafunds.value} <span class="currency-display">${this.translate(`currency.${siafunds.label}`)}</span>`;
 		},
 		getOutputCurrency(output) {
-			const currency = formatPriceString(new BigNumber(output.value).times(1e24), 2, this.currency, this.exchangeRateSF[this.currency]);
+			let rates = this.exchangeRateSF;
+			if (this.walletCurrency === 'scp') {
+				rates = {};
+				rates[this.currency] = '0';
+			}
+
+			const currency = formatPriceString(new BigNumber(output.value), 2, this.currency, rates[this.currency]);
 
 			return `${currency.value} <span class="currency-display">${this.translate(`currency.${currency.label}`)}</span>`;
 		}

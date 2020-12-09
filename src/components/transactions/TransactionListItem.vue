@@ -57,7 +57,7 @@ export default {
 			return `${format.value} <span class="currency-display">${this.translate(`currency.${format.label}`)}</span>`;
 		},
 		displaySiafunds() {
-			const format = formatSiafundString(this.siafundAmount);
+			const format = formatSiafundString(this.siafundAmount, this.wallet.currency);
 
 			if (this.transaction.siafund_value.direction === 'sent' && !new BigNumber(this.transaction.siafund_value.value).eq(0))
 				return `-${format.value} <span class="currency-display">${this.translate(`currency.${format.label}`)}</span>`;

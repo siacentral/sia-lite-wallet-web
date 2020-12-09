@@ -20,6 +20,7 @@
 				<transition name="fade-top" mode="out-in">
 					<transaction-siafund-outputs
 						:transaction="transaction"
+						:wallet="wallet"
 						key="siafundOutputs"
 						v-if="mode === 'siafundOutputs'" />
 					<transaction-outputs
@@ -41,11 +42,13 @@
 					<div class="transaction-data" v-html="siacoinDisplay(fees)" />
 					<div class="transaction-data" v-html="currencyDisplay(fees)" />
 				</template>
-				<div class="transaction-data-label">{{ translate('siacoinTotal') }}</div>
+				<div v-if="wallet.currency==='scp'" class="transaction-data-label">{{ translate('scpTotal') }}</div>
+				<div v-else class="transaction-data-label">{{ translate('siacoinTotal') }}</div>
 				<div class="transaction-data" v-html="siacoinDisplay(transaction.siacoin_value.value)" />
 				<div class="transaction-data" v-html="currencyDisplay(transaction.siacoin_value.value)" />
 				<template v-if="showSiafunds">
-					<div class="transaction-data-label">{{ translate('siafundTotal') }}</div>
+					<div v-if="wallet.currency === 'scp'" class="transaction-data-label">{{ translate('spfTotal') }}</div>
+					<div v-else class="transaction-data-label">{{ translate('siafundTotal') }}</div>
 					<div class="transaction-data" v-html="siafundDisplay(transaction.siafund_value.value)" />
 					<div class="transaction-data" v-html="siafundCurrencyDisplay(transaction.siafund_value.value)" />
 				</template>
@@ -120,15 +123,15 @@ export default {
 
 			return `${siacoins.value} <span class="currency-display">${this.translate('currency.sc')}</span>`;
 		},
-		siafundDisplay(value) {
-			const siafunds = formatSiafundString(new BigNumber(value), 2);
+		siafundDisplay(amt) {
+			const { value, label } = formatSiafundString(new BigNumber(amt), this.wallet.currency);
 
-			return `${siafunds.value} <span class="currency-display">${this.translate('currency.sf')}</span>`;
+			return `${value} <span class="currency-display">${this.translate(`currency.${label}`)}</span>`;
 		},
 		currencyDisplay(value) {
 			let exchangeRate = this.exchangeRateSC;
 
-			if (this.wallet.currency && this.wallet.currency === 'scp')
+			if (this.wallet?.currency === 'scp')
 				exchangeRate = this.exchangeRateSCP;
 
 			const currency = formatPriceString(new BigNumber(value), 2, this.currency, exchangeRate[this.currency], this.wallet.precision());
@@ -136,7 +139,14 @@ export default {
 			return `${currency.value} <span class="currency-display">${this.translate(`currency.${currency.label}`)}</span>`;
 		},
 		siafundCurrencyDisplay(value) {
-			const currency = formatPriceString(new BigNumber(value).times(1e24), 2, this.currency, this.exchangeRateSF[this.currency]);
+			let exchangeRate = this.exchangeRateSF;
+
+			if (this.wallet?.currency === 'scp') {
+				exchangeRate = {};
+				exchangeRate[this.currency] = '0';
+			}
+
+			const currency = formatPriceString(new BigNumber(value).times(1e24), 2, this.currency, exchangeRate[this.currency]);
 
 			return `${currency.value} <span class="currency-display">${this.translate(`currency.${currency.label}`)}</span>`;
 		},

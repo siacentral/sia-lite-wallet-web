@@ -357,7 +357,7 @@ export default {
 			return `${format.value} <span class="currency-display">${this.translate(`currency.${format.label}`)}</span>`;
 		},
 		formatSiafundString(val) {
-			const format = formatSiafundString(val);
+			const format = formatSiafundString(val, this.wallet.currency);
 
 			return `${format.value} <span class="currency-display">${this.translate(`currency.${format.label}`)}</span>`;
 		},

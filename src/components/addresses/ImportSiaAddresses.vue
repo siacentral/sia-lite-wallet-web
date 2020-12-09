@@ -9,11 +9,8 @@
 				<div class="text-right">{{ connected ? translate('ledger.connected') : translate('ledger.disconnected') }} <template v-if="ledgerVersion">{{ ledgerVersion }}</template></div>
 			</template>
 			<div>{{ translate('importAddresses.importedHeader') }}</div>
-			<div />
-			<div />
-			<div class="text-right">{{ formatNumber(this.addresses.length) }}</div>
+			<div class="text-right address-count">{{ formatNumber(this.addresses.length) }}</div>
 			<div>{{ translate('importAddresses.balance') }}</div>
-			<div />
 			<div class="text-right" v-html="balanceSC" />
 			<div class="text-right" v-html="balanceCurrency" />
 			<!--<div class="text-right" v-if="siafundBalance.gt(0)" v-html="balanceSF" />-->
@@ -86,15 +83,18 @@ export default {
 		},
 		balanceCurrency() {
 			let balance = new BigNumber(this.siacoinBalance),
-				exchangeRate = this.exchangeRateSC;
+				exchangeRate = this.exchangeRateSC,
+				precision = new BigNumber('1e24');
 
-			if (this.wallet.currency && this.wallet.currency === 'scp')
+			if (this.wallet.currency && this.wallet.currency === 'scp') {
 				exchangeRate = this.exchangeRateSCP;
+				precision = new BigNumber('1e27');
+			}
 
 			if (balance.isNaN() || !balance.isFinite())
 				balance = new BigNumber(0);
 
-			const format = formatPriceString(balance, 2, this.currency, exchangeRate[this.currency]);
+			const format = formatPriceString(balance, 2, this.currency, exchangeRate[this.currency], precision);
 
 			return `${format.value} <span class="currency-display">${this.translate(`currency.${format.label}`)}</span>`;
 		},
@@ -104,7 +104,7 @@ export default {
 			if (balance.isNaN() || !balance.isFinite())
 				balance = new BigNumber(0);
 
-			const format = formatSiafundString(balance);
+			const format = formatSiafundString(balance, this.wallet.currency);
 
 			return `${format.value} <span class="currency-display">${this.translate(`currency.${format.label}`)}</span>`;
 		},
@@ -302,10 +302,14 @@ export default {
 
 .app-status {
 	display: grid;
-	grid-template-columns: minmax(0, 1fr) repeat(3, auto);
+	grid-template-columns: minmax(0, 1fr) repeat(2, auto);
 	grid-gap: 15px;
 	padding: 15px 0;
 	border-top: 1px solid dark-gray;
 	border-bottom: 1px solid dark-gray;
+}
+
+.address-count {
+	grid-column: span 2;
 }
 </style>
