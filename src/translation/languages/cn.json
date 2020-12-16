@@ -83,7 +83,7 @@
 			"header": "Get Started",
 			"warning": "Warning!",
 			"continue": "Continue Anyway",
-			"caution1": "Use caution when sending or receiving cryptocurrencies to prevent coin loss. Cryptocurrency transactions are permanent and non-reversable. Sia Central is not responsible for any damages incurred while using this wallet.",
+			"caution1": "Use caution when sending or receiving cryptocurrencies to prevent coin loss. Cryptocurrency transactions are permanent and non-reversible. Sia Central is not responsible for any damages incurred while using this wallet.",
 			"caution2": "Report any bugs or submit feedback on GitHub.",
 			"password1": "请设置一个安全密码来加密您的钱包。 用以解锁和使用您的钱包。"
 		},
