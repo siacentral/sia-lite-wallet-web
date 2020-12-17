@@ -6,7 +6,7 @@ module.exports = {
 	crossorigin: 'anonymous',
 	integrity: true,
 	pwa: {
-		name: 'Sia Lite Wallet',
+		name: 'SCPrime Lite Wallet',
 		themeColor: '#1d1e21',
 		msTileColor: '#1d1e21',
 		appleMobileWebAppCapable: 'yes',
