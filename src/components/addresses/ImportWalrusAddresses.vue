@@ -74,12 +74,16 @@ export default {
 			return this.displayPublicKey ? this.translate('importAddresses.displayAddress') : this.translate('importAddresses.displayPublicKey');
 		},
 		balanceSC() {
-			let balance = new BigNumber(this.siacoinBalance);
+			let balance = new BigNumber(this.siacoinBalance),
+				precision = new BigNumber('1e24');
+
+			if (this.wallet.currency && this.wallet.currency === 'scp')
+				precision = new BigNumber('1e27');
 
 			if (balance.isNaN() || !balance.isFinite())
 				balance = new BigNumber(0);
 
-			const format = formatPriceString(balance, 2, this.wallet.currency);
+			const format = formatPriceString(balance, 2, this.wallet.currency, 1, precision);
 
 			return `${format.value} <span class="currency-display">${this.translate(`currency.${format.label}`)}</span>`;
 		},
