@@ -2,7 +2,7 @@
 	<div class="wallets-list">
 		<div class="wallets">
 			<div class="wallet-group" v-for="group in groups" :key="group">
-				<div class="group-title">{{ groupTitle(group) }}</div>
+				<div class="group-title" v-if="groups.length > 1">{{ groupTitle(group) }}</div>
 				<wallet-item
 				v-for="wallet in walletGroups[group]" :key="wallet.id"
 				:wallet="wallet"

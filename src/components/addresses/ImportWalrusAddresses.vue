@@ -79,7 +79,7 @@ export default {
 			if (balance.isNaN() || !balance.isFinite())
 				balance = new BigNumber(0);
 
-			const format = formatPriceString(balance, 2);
+			const format = formatPriceString(balance, 2, this.wallet.currency);
 
 			return `${format.value} <span class="currency-display">${this.translate(`currency.${format.label}`)}</span>`;
 		},
