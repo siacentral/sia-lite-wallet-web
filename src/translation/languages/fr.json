@@ -99,7 +99,7 @@
 			"chkWalrusSeeds": "Autoriser les seeds à 12 mots",
 			"chkChangeWalletServer": "Autoriser les serveurs de portefeuilles tierces",
 			"chkCurrency": "Activer SCPrime",
-			"pChangeSeedType": "Les seeds à 12 mots sont incompatibles avec les portefeuilles Sia officiels. Elles sont généralement utilisées par les portefeuilles Walrus. Activer cette fonctionnalité fera apparaître une liste déroulante lors de la création d'un nouveau portefeuille, permettant d'utiliser au choix les seeds Sia ou les seeds à 12 mots.",
+			"pChangeSeedType": "Les seeds à 12 mots sont incompatibles avec les portefeuilles SCPrime officiels. Elles sont généralement utilisées par les portefeuilles Walrus. Activer cette fonctionnalité fera apparaître une liste déroulante lors de la création d'un nouveau portefeuille, permettant d'utiliser au choix les seeds Sia ou les seeds à 12 mots.",
 			"pChangeServerType": "[EXPERIMENTAL] Permet l'utilisation de serveurs de portefeuilles tierces, comme Walrus. Les serveurs de portefeuilles tierces permettent de réduire la centralisation et permettent de choisir entre Sia Central ou toute autre partie. Certaines fonctionnalités peuvent ne pas être supportées ou fonctionner de manière hasardeuse.",
 			"pExplainLookahead": "Wallets are composed of multiple addresses, the lookahead window is the maximum gap between two unused addresses before the wallet expects no more used addresses. Sia hosts and renters generate a lot of unused addresses, so some wallets may need to increase this value to find all of their funds."
 		},
