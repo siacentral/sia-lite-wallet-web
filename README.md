@@ -32,7 +32,7 @@ This wallet uses a Sia wrapper that allows parts of Sia to be run directly in th
 
 ## Docker
 ```
-docker run -p 80:80 -d siacentral/sia-central-lite-wallet
+docker run -p 80:80 -d siacentral/sia-lite-wallet-web
 ```
 
 ## Project setup
