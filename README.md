@@ -30,29 +30,34 @@ Watch-Only wallets are read-only wallets used to monitor the balance of a group 
 
 This wallet uses a Sia wrapper that allows parts of Sia to be run directly in the browser. This lets the wallet generate, recover seeds, addresses, and sign transactions without using an external server or daemon. The wallet uses the Sia Central Explorer API to retrieve balance and transaction data without downloading the full blockchain.  All transaction generation and signing happens locally, the signed transaction is then broadcast to the network.
 
-## Docker
+## Run Docker
 ```
 docker run -p 80:80 -d siacentral/sia-lite-wallet-web
 ```
 
-## Project setup
-```
-npm install
-```
+## Build Locally
+
+### Prerequisites
++ Node v12.10.X
++ NPM 6.14.X
++ Go 1.15.X
 
 ### Compiles and hot-reloads for development
 ```
-GOARCH=wasm GOOS=js go build -o src/sia/sia.wasm wasm/main.go
-mkdir public/sia && cp "$(go env GOROOT)/misc/wasm/wasm_exec.js" public/sia/wasm_exec.js
-npm run serve
+make run
 ```
 
 ### Compiles and minifies for production
 ```
-npm run build
+make build
 ```
 
-### Lints and fixes files
+### Build Docker Image
 ```
-npm run lint
+make docker
+```
+
+### Lint and fixes files
+```
+make lint
 ```
