@@ -24,4 +24,4 @@ build: clean build-dependencies
 	npm run build
 
 docker: clean
-	docker build -t siacentral/sia-lite-wallet-web:$(GIT_REVISION) .
+	docker build -t siacentral/sia-lite-wallet-web:sia -t siacentral/sia-lite-wallet-web:$(GIT_REVISION) .
