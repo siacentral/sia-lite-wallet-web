@@ -7,11 +7,12 @@ import store from './store';
 import { connect, walletCount } from './store/db';
 import { translate, languageSupported } from '@/translation';
 import { library } from '@fortawesome/fontawesome-svg-core';
-import { faCreditCard, faSitemap, faFile, faFileExport, faUnlock, faLock, faEllipsisV, faChevronLeft, faChevronRight, faChevronDown, faEye, faPencilAlt, faTrash, faPaperPlane, faWallet, faAddressBook, faCogs, faPlus, faTimes, faRedo } from '@fortawesome/free-solid-svg-icons';
+import { faExclamationTriangle, faCreditCard, faSitemap, faFile, faFileExport, faUnlock, faLock, faEllipsisV, faChevronLeft, faChevronRight, faChevronDown, faEye, faPencilAlt, faTrash, faPaperPlane, faWallet, faAddressBook, faCogs, faPlus, faTimes, faRedo } from '@fortawesome/free-solid-svg-icons';
 import { faUsb, faGithub } from '@fortawesome/free-brands-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import { siaAPI } from '@/api/siacentral';
 
-library.add(faCreditCard, faSitemap, faFile, faFileExport, faUnlock, faLock, faEllipsisV, faChevronLeft, faChevronRight, faChevronDown, faEye, faUsb, faGithub, faPencilAlt, faTrash, faPaperPlane, faWallet, faAddressBook, faCogs, faPlus, faTimes, faRedo);
+library.add(faExclamationTriangle, faCreditCard, faSitemap, faFile, faFileExport, faUnlock, faLock, faEllipsisV, faChevronLeft, faChevronRight, faChevronDown, faEye, faUsb, faGithub, faPencilAlt, faTrash, faPaperPlane, faWallet, faAddressBook, faCogs, faPlus, faTimes, faRedo);
 
 Vue.component('icon', FontAwesomeIcon);
 
@@ -47,6 +48,13 @@ async function load() {
 
 	store.dispatch('setDBType', dbType);
 	store.dispatch('setSetup', (await walletCount()) !== 0);
+
+	try {
+		await siaAPI.checkAvailability();
+	} catch (ex) {
+		console.error(ex.message);
+		store.dispatch('setUnavailable', ex.message);
+	}
 
 	new Vue({
 		router,

@@ -5,8 +5,17 @@ export class SiaCentralAPI {
 		this._baseURL = baseURL;
 	}
 
+	async checkAvailability() {
+		const resp = await sendJSONRequest(`${this._baseURL}/wallet/check`, {
+			method: 'GET'
+		});
+
+		if (resp.statusCode !== 200 && typeof resp?.body?.message === 'string')
+			throw new Error(resp.body.message);
+	}
+
 	async getBlock(height) {
-		let url = `${this._baseURL}/v2/explorer/blocks`;
+		let url = `${this._baseURL}/explorer/blocks`;
 
 		if (height)
 			url += `?height=${height}`;

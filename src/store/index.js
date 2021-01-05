@@ -36,6 +36,7 @@ const store = new Vuex.Store({
 		dbType: 'memory',
 		setup: false,
 		offline: false,
+		unavailable: null,
 		autoLock: getLocalStorageNumeric('autoLock', 15),
 		currency: localStorage.getItem('displayCurrency') || 'usd',
 		changeSeedType: localStorage.getItem('changeSeedType') === 'true',
@@ -55,6 +56,9 @@ const store = new Vuex.Store({
 		exchangeRateSCPF: {}
 	},
 	mutations: {
+		setUnavailable(state, unavailable) {
+			state.unavailable = unavailable;
+		},
 		setDBType(state, type) {
 			state.dbType = type;
 		},
@@ -159,6 +163,9 @@ const store = new Vuex.Store({
 		}
 	},
 	actions: {
+		setUnavailable({ commit }, unavailable) {
+			commit('setUnavailable', unavailable);
+		},
 		setDBType({ commit }, dbType) {
 			commit('setDBType', dbType);
 		},

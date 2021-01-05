@@ -5,6 +5,7 @@
 		<div class="page-wrapper">
 			<transition name="fade" mode="out-in" appear>
 				<setup v-if="!setup" />
+				<unavailable v-else-if="typeof unavailable === 'string'" />
 				<unlock-wallet v-else-if="!unlocked" />
 				<router-view v-else />
 			</transition>
@@ -17,18 +18,20 @@
 import { mapState, mapActions } from 'vuex';
 import NotificationQueue from '@/components/NotificationQueue';
 import PrimaryNav from '@/components/PrimaryNav';
-import UnlockWallet from '@/views/UnlockWallet';
 import Setup from '@/views/Setup';
+import Unavailable from '@/views/Unavailable.vue';
+import UnlockWallet from '@/views/UnlockWallet';
 
 export default {
 	components: {
 		NotificationQueue,
 		PrimaryNav,
 		Setup,
+		Unavailable,
 		UnlockWallet
 	},
 	computed: {
-		...mapState(['setup', 'wallets', 'autoLock']),
+		...mapState(['setup', 'wallets', 'autoLock', 'unavailable']),
 		unlocked() {
 			return Array.isArray(this.wallets) && this.wallets.length !== 0;
 		}

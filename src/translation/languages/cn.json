@@ -30,6 +30,7 @@
 		"outputs": "输出",
 		"siafundOutputs": "Siafund Outputs",
 		"add": "增加",
+		"confirm": "Confirm",
 		"connect": "连接",
 		"send": "发送",
 		"receive": "接收",
@@ -226,6 +227,11 @@
 			"transactionBroadcast": "广播交易成功。",
 			"addressesAdded": "已增加地址，钱包扫描已排队。",
 			"walletsLocked": "因不活动钱包已自动锁定。"
+		},
+		"ofac": {
+			"blockedHeader": "Wallet Access Limited",
+			"blockedExplain": "Due to a recent settlement between the United States of America and BitGo, Inc, Sia Central has decided to block access to our non-custodial lite wallet following guidelines set by the United States of America's Office of Foreign Assets Control. We did not make this change lightly, and we wish we did not have to. If you believe you have received this message in error, please feel free to reach out via email, Github, or in the official Sia Discord.",
+			"blockedPrivacy": "We are committed to user privacy. Sia Central does not store any account data; wallet data is managed and stored locally on your device. Transactions, however, are broadcast through Sia Central's server to the Sia blockchain. It is now our understanding that we are required by U.S. law to prevent transactions originating in certain countries the U.S. government has sanctioned from being sent through our broadcast node. It is our intention to comply, to the best of our ability, with any applicable regulations for non-custodial wallets that facilitate crypto transactions operating in the United States of America."
 		}
 	}
 }
