@@ -26,3 +26,6 @@ build: clean build-dependencies
 
 docker: clean
 	docker build ${DOCKER_TAG} -t siacentral/sia-lite-wallet-web:sia -t siacentral/sia-lite-wallet-web:$(GIT_REVISION) .
+
+docker-publish: docker
+	docker push ${DOCKER_TAG} -t siacentral/sia-lite-wallet-web:sia -t siacentral/sia-lite-wallet-web:$(GIT_REVISION) .
