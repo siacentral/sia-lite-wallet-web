@@ -14,7 +14,7 @@
 					</ul>
 					<h4>Contact:</h4>
 					<ul>
-						<li><a href="https://discord.gg/sia" target="_blank">{{ translate('ofac.discordLabel') }}</a></li>
+						<li><a href="https://discord.gg/7wrSKswj7Y" target="_blank">{{ translate('ofac.discordLabel') }}</a></li>
 						<li><a href="https://github.com/siacentral/sia-lite-wallet-web/issues" target="_blank">{{ translate('ofac.githubLabel') }}</a></li>
 						<li><a href="mailto:hi@siacentral.com?subject=OFAC Blocked" target="_blank">hi@siacentral.com</a></li>
 					</ul>
