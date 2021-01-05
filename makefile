@@ -1,5 +1,6 @@
 ifeq "$(shell git status --porcelain=v1 2>/dev/null)" "" 
 GIT_REVISION=$(shell git rev-parse --short HEAD)
+DOCKER_TAG=-t siacentral/sia-lite-wallet-web:latest
 else
 GIT_REVISION="$(shell git rev-parse --short HEAD)-devel"
 endif
@@ -24,4 +25,4 @@ build: clean build-dependencies
 	npm run build
 
 docker: clean
-	docker build -t siacentral/sia-lite-wallet-web:sia -t siacentral/sia-lite-wallet-web:$(GIT_REVISION) .
+	docker build ${DOCKER_TAG} -t siacentral/sia-lite-wallet-web:sia -t siacentral/sia-lite-wallet-web:$(GIT_REVISION) .
