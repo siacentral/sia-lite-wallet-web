@@ -31,4 +31,4 @@ RUN npm run build
 FROM n8maninger/vue-router
 
 COPY --from=buildnode /app/dist /usr/share/nginx/html
-COPY --from=buildgo /app/wasm_exec.js /usr/share/nginx/html/sia
+COPY --from=buildgo /app/wasm_exec.js /usr/share/nginx/html/sia/wasm_exec.js
