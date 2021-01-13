@@ -3,7 +3,7 @@
 		<transition name="fade-top" mode="out-in" appear>
 			<div class="setup-step" v-if="dbType === 'memory' && !accepted">
 				<div class="setup-icon">
-					<sia-central />
+					<scprime />
 				</div>
 				<h2 class="text-warning">{{ translate('setup.warning') }}</h2>
 				<div class="setup-content">
@@ -18,7 +18,7 @@
 			</div>
 			<div class="setup-step" v-else-if="step === 0" key="password">
 				<div class="setup-icon">
-					<sia-central />
+					<scprime />
 				</div>
 				<h2>{{ translate('setup.header') }}</h2>
 				<div class="setup-content">
@@ -43,8 +43,9 @@
 			<create-wallet class="setup-step" v-else-if="step === 1" key="create" @created="onWalletCreated" />
 		</transition>
 		<div class="extra-links">
-			<a href="https://github.com/siacentral/sia-lite-wallet-web"><icon :icon="['fab', 'github']" /></a>
-			<a href="https://siacentral.com"><sia-central /></a>
+			<a href="https://github.com/siacentral/sia-lite-wallet-web" target="_blank"><icon :icon="['fab', 'github']" /></a>
+			<a href="https://siacentral.com" target="_blank"><sia-central /></a>
+			<a href="https://scpri.me" target="_blank"><scprime /></a>
 		</div>
 	</div>
 </template>
@@ -55,11 +56,13 @@ import { mapActions, mapState } from 'vuex';
 
 import CreateWallet from '@/components/wallet/CreateWallet';
 import SiaCentral from '@/assets/siacentral.svg';
+import scprime from '@/assets/scprime.svg';
 
 export default {
 	components: {
 		CreateWallet,
-		SiaCentral
+		SiaCentral,
+		scprime
 	},
 	computed: {
 		...mapState(['dbType']),
@@ -153,6 +156,7 @@ p {
 	width: 64px;
 	height: auto;
 	margin: auto;
+	color: primary;
 }
 
 .setup-content {
