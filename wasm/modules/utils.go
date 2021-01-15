@@ -41,7 +41,7 @@ func interfaceToJSON(obj interface{}) (con map[string]interface{}, err error) {
 }
 
 func recoverWallet(seed, currency string) (*wallet.SeedWallet, error) {
-	if len(strings.Split(seed, " ")) < 20 {
+	if len(strings.Fields(seed)) < 20 {
 		return wallet.RecoverBIP39Seed(seed, currency)
 	}
 
