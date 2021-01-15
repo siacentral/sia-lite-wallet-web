@@ -56,7 +56,7 @@ async function load() {
 
 	console.log(sia.build.revision);
 
-	store.dispatch('setWalletRevision', sia?.build?.revision);
+	store.dispatch('setWalletRevision', sia?.build?.revision || 'unknown');
 	store.dispatch('setDBType', dbType);
 	store.dispatch('setSetup', (await walletCount()) !== 0);
 
