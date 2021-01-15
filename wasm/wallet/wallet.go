@@ -2,7 +2,9 @@ package wallet
 
 import (
 	"errors"
+	"fmt"
 
+	"github.com/siacentral/apisdkgo"
 	siacrypto "gitlab.com/NebulousLabs/Sia/crypto"
 	"gitlab.com/NebulousLabs/Sia/types"
 )
@@ -39,11 +41,33 @@ func (wallet *SeedWallet) GetAddresses(idx uint64, keys []SpendableKey) {
 	}
 }
 
+func apiClient(currency string) *apisdkgo.APIClient {
+	var baseAddress string
+
+	switch currency {
+	case "scp":
+		baseAddress = "https://api.siacentral.com/v2/scprime"
+	default:
+		baseAddress = "https://api.siacentral.com/v2"
+	}
+
+	return &apisdkgo.APIClient{
+		BaseAddress: baseAddress,
+	}
+}
+
+func (wallet *SeedWallet) currentHeight() (types.BlockHeight, error) {
+	block, err := apiClient(wallet.Currency).GetLatestBlock()
+	if err != nil {
+		return 0, err
+	}
+
+	return types.BlockHeight(block.Height), nil
+}
+
 //SignTransaction signs a transaction, for simplicity only supports standard 1 signature keys
 //and siacoin inputs
 func (wallet *SeedWallet) SignTransaction(txn *types.Transaction, requiredSigIndices []uint64) error {
-	var asicHardForkHeight types.BlockHeight
-
 	unlockHashMap := make(map[string]SpendableKey)
 
 	for _, index := range requiredSigIndices {
@@ -60,10 +84,9 @@ func (wallet *SeedWallet) SignTransaction(txn *types.Transaction, requiredSigInd
 		return errors.New("missing signature key indexes")
 	}
 
-	if wallet.Currency == "scp" {
-		asicHardForkHeight = scprimeASICHardForkHeight
-	} else {
-		asicHardForkHeight = siaASICHardForkHeight
+	height, err := wallet.currentHeight()
+	if err != nil {
+		return fmt.Errorf("unable to get current block height: %w", err)
 	}
 
 	for i, input := range txn.SiacoinInputs {
@@ -73,7 +96,7 @@ func (wallet *SeedWallet) SignTransaction(txn *types.Transaction, requiredSigInd
 			return errors.New("unknown unlock conditions")
 		}
 
-		sigHash := txn.SigHash(i, asicHardForkHeight)
+		sigHash := txn.SigHash(i, height)
 		encodedSig := siacrypto.SignHash(sigHash, key.SecretKeys[0])
 
 		txn.TransactionSignatures[i].Signature = encodedSig[:]

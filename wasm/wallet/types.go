@@ -15,9 +15,7 @@ const (
 )
 
 var (
-	siaASICHardForkHeight     = types.BlockHeight(179001)
-	scprimeASICHardForkHeight = types.BlockHeight(0)
-	fullCoveredFields         = types.CoveredFields{WholeTransaction: true}
+	fullCoveredFields = types.CoveredFields{WholeTransaction: true}
 )
 
 type (
