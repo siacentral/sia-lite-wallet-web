@@ -122,8 +122,8 @@ github.com/xordataexchange/crypt v0.0.3-0.20170626215501-b2862e3d0a77/go.mod h1:
 github.com/xtaci/smux v1.3.3/go.mod h1:f+nYm6SpuHMy/SH0zpbvAFHT1QoMcgLOsWcFip5KfPw=
 gitlab.com/NebulousLabs/Sia v1.4.2-0.20191220232351-91e83488aaa4 h1:Ci+R+nM1t3mTnUNp2i6GljnYZrUGBxIvYs95yOYBF3A=
 gitlab.com/NebulousLabs/Sia v1.4.2-0.20191220232351-91e83488aaa4/go.mod h1:NTdDyhc2NYxjUr2k/QH3HSVFKzlGW2135jl9KYWtncI=
-gitlab.com/NebulousLabs/Sia v1.5.3 h1:K6X40R+iYPi/Y1eQn8BAN53buU0MMSO/e2X17yFTmpA=
-gitlab.com/NebulousLabs/Sia v1.5.3/go.mod h1:NN77/QIB1opjhFQ9ZxPKg4HqRPUQLiu6YXBHRIyRR1g=
+gitlab.com/NebulousLabs/Sia v1.5.4 h1:7+j8Z5BZLPn/LGF0dCODwr1Nq+AYD5cOjopK2PhYTew=
+gitlab.com/NebulousLabs/Sia v1.5.4/go.mod h1:NN77/QIB1opjhFQ9ZxPKg4HqRPUQLiu6YXBHRIyRR1g=
 gitlab.com/NebulousLabs/bolt v1.4.0/go.mod h1:72gB2R0hTcUU2Ih7mBpHF0jJlIldSyPzG1cuwz1uYJY=
 gitlab.com/NebulousLabs/bolt v1.4.4/go.mod h1:ZL02cwhpLNif6aruxvUMqu/Bdy0/lFY21jMFfNAA+O8=
 gitlab.com/NebulousLabs/demotemutex v0.0.0-20151003192217-235395f71c40/go.mod h1:HfnnxM8isYA7FUlqS5h34XTeiBhPtcuCquVujKsn9aw=
