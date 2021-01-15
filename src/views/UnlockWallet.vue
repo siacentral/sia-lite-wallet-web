@@ -13,7 +13,7 @@
 					<button class="btn btn-success btn-inline" :disabled="unlocking">{{ translate('unlock') }}</button>
 				</div>
 			</form>
-			<p class="text-small text-secondary text-center">UI Version: {{ uiRevision }} Wallet Version: {{ walletRevision }}</p>
+			<p class="text-small text-secondary text-center">Version: {{ walletRevision }}</p>
 		</div>
 	</div>
 </template>
