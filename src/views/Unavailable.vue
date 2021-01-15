@@ -34,17 +34,8 @@
 import { mapActions, mapState } from 'vuex';
 
 export default {
-	data() {
-		return {
-			password: '',
-			unlocking: false
-		};
-	},
 	computed: {
-		...mapState(['unavailable']),
-		version() {
-			return process.env.VUE_APP_VERSION || 'devel';
-		}
+		...mapState(['unavailable'])
 	},
 	methods: {
 		...mapActions(['setUnavailable'])

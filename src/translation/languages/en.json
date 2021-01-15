@@ -31,6 +31,7 @@
 		"siafundOutputs": "Siafund Outputs",
 		"add": "Add",
 		"confirm": "Confirm",
+		"continue": "Continue",
 		"connect": "Connect",
 		"send": "Send",
 		"receive": "Receive",
@@ -234,6 +235,12 @@
 			"blockedExplain2": "We did not make this change lightly and are still researching compliance requirements in an ever changing regulatory climate. If you believe you have received this message in error, please reach out via email, Github, or in the official Sia Discord.",
 			"discordLabel": "Sia Discord",
 			"githubLabel": "GitHub"
+		},
+		"version": {
+			"header": "Outdated Wallet Detected",
+			"explain": "An old version of the wallet has been detected. This can be caused by your browser's cache. Try refreshing your browser. Continuing may cause issues.",
+			"uiLabel": "UI Version",
+			"walletLabel": "Wallet Version"
 		},
 		"language": {
 			"automatic": "Automatic",

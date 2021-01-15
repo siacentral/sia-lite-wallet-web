@@ -13,13 +13,13 @@
 					<button class="btn btn-success btn-inline" :disabled="unlocking">{{ translate('unlock') }}</button>
 				</div>
 			</form>
-			<p class="text-small text-secondary text-center">Version {{ version }}</p>
+			<p class="text-small text-secondary text-center">UI Version: {{ uiRevision }} Wallet Version: {{ walletRevision }}</p>
 		</div>
 	</div>
 </template>
 
 <script>
-import { mapActions } from 'vuex';
+import { mapActions, mapState } from 'vuex';
 
 export default {
 	data() {
@@ -29,9 +29,7 @@ export default {
 		};
 	},
 	computed: {
-		version() {
-			return process.env.VUE_APP_VERSION || 'devel';
-		}
+		...mapState(['walletRevision'])
 	},
 	methods: {
 		...mapActions(['unlockWallets']),

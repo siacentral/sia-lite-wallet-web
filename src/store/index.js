@@ -33,6 +33,8 @@ migrateRoundsToLookahead();
 
 const store = new Vuex.Store({
 	state: {
+		walletRevision: null,
+		ignoreVersionWarning: false,
 		dbType: 'memory',
 		setup: false,
 		offline: false,
@@ -47,6 +49,8 @@ const store = new Vuex.Store({
 		wallets: [],
 		notifications: [],
 		scanQueue: [],
+		siaBlockHeight: 0,
+		scprimeBlockHeight: 0,
 		siaNetworkFees: {},
 		scprimeNetworkFees: {},
 		feeAddresses: [],
@@ -56,6 +60,12 @@ const store = new Vuex.Store({
 		exchangeRateSCPF: {}
 	},
 	mutations: {
+		setWalletRevision(state, rev) {
+			state.walletRevision = rev;
+		},
+		setIgnoreVersionWarning(state, val) {
+			state.ignoreVersionWarning = val;
+		},
 		setUnavailable(state, unavailable) {
 			state.unavailable = unavailable;
 		},
@@ -134,6 +144,10 @@ const store = new Vuex.Store({
 			state.exchangeRateSCP = scprimecoin;
 			state.exchangeRateSCPF = scprimefund;
 		},
+		setConsensusHeight(state, { sia, scprime }) {
+			state.siaBlockHeight = sia;
+			state.scprimeBlockHeight = scprime;
+		},
 		setNetworkFees(state, { sia, scprime }) {
 			state.siaNetworkFees = sia;
 			state.scprimeNetworkFees = scprime;
@@ -163,6 +177,12 @@ const store = new Vuex.Store({
 		}
 	},
 	actions: {
+		setWalletRevision({ commit }, rev) {
+			commit('setWalletRevision', rev);
+		},
+		setIgnoreVersionWarning({ commit }, val) {
+			commit('setIgnoreVersionWarning', val);
+		},
 		setUnavailable({ commit }, unavailable) {
 			commit('setUnavailable', unavailable);
 		},
@@ -187,6 +207,10 @@ const store = new Vuex.Store({
 		setChangeSeedType({ commit }, enabled) {
 			localStorage.setItem('changeSeedType', enabled.toString());
 			commit('setChangeSeedType', enabled);
+		},
+		setConsensusHeight({ commit }, consensus) {
+			localStorage.setItem('consensusHeight', JSON.stringify(consensus));
+			commit('setConsensusHeight', consensus);
 		},
 		setChangeServerType({ commit }, enabled) {
 			localStorage.setItem('changeServerType', enabled.toString());
@@ -289,11 +313,17 @@ async function updateMetadata() {
 		const price = await siaAPI.getCoinPrice(),
 			siaFees = await siaAPI.getNetworkFees(),
 			scprimeFees = await scprimeAPI.getNetworkFees(),
-			addresses = await siaAPI.getFeeAddresses();
+			addresses = await siaAPI.getFeeAddresses(),
+			siaBlock = await siaAPI.getBlock(),
+			scprimeBlock = await scprimeAPI.getBlock();
 
 		store.dispatch('setNetworkFees', {
 			sia: siaFees,
 			scprime: scprimeFees
+		});
+		store.dispatch('setConsensusHeight', {
+			sia: siaBlock.height,
+			scprime: scprimeBlock.height
 		});
 		store.dispatch('setExchangeRate', price);
 		store.dispatch('setFeeAddresses', addresses);

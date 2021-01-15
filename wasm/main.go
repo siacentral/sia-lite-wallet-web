@@ -6,12 +6,17 @@ import (
 	"syscall/js"
 	"time"
 
+	"github.com/siacentral/sia-lite-wallet-web/wasm/build"
 	"github.com/siacentral/sia-lite-wallet-web/wasm/modules"
 	siatypes "gitlab.com/NebulousLabs/Sia/types"
 )
 
 func main() {
 	js.Global().Set("sia", map[string]interface{}{
+		"build": map[string]interface{}{
+			"revision":  build.Revision(),
+			"timestamp": build.Time().Format(time.UnixDate),
+		},
 		"generateSeed":       js.FuncOf(generateSeed),
 		"generateAddresses":  js.FuncOf(generateAddresses),
 		"recoverAddresses":   js.FuncOf(recoverAddresses),
