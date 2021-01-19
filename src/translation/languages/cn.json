@@ -142,7 +142,8 @@
 		"ledger": {
 			"connected": "已连接",
 			"disconnected": "已断开",
-			"instructions": "当前余额"
+			"instructions": "当前余额",
+			"outdated": "Sia Ledger app out of date, close the browser and update in Ledger Live"
 		},
 		"sendSiacoinsModal": {
 			"spendableBalance": "可用余额",
@@ -239,7 +240,6 @@
 		"version": {
 			"header": "Outdated Wallet Detected",
 			"explain": "An old version of the wallet has been detected. This can be caused by your browser's cache. Try refreshing your browser. Continuing may cause issues.",
-			"uiLabel": "UI Version",
 			"walletLabel": "Wallet Version"
 		}
 	}

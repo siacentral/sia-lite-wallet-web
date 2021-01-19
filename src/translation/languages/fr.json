@@ -142,7 +142,8 @@
 		"ledger": {
 			"connected": "Connecté",
 			"disconnected": "Déconnecté",
-			"instructions": "Débloquez votre Ledger Nano et ouvrez l'application Sia."
+			"instructions": "Débloquez votre Ledger Nano et ouvrez l'application Sia.",
+			"outdated": "Sia Ledger app out of date, close the browser and update in Ledger Live"
 		},
 		"sendSiacoinsModal": {
 			"spendableBalance": "Solde disponible",
@@ -239,7 +240,6 @@
 		"version": {
 			"header": "Outdated Wallet Detected",
 			"explain": "An old version of the wallet has been detected. This can be caused by your browser's cache. Try refreshing your browser. Continuing may cause issues.",
-			"uiLabel": "UI Version",
 			"walletLabel": "Wallet Version"
 		}
 	}

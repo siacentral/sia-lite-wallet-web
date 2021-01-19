@@ -4,10 +4,7 @@
 			<div class="page-icon"><icon icon="exclamation-triangle" /></div>
 			<h2 class="text-center text-warning">{{ translate('version.header') }}</h2>
 			<p>{{ translate('version.explain') }}</p>
-			<ul>
-				<li>{{ translate('version.uiLabel') }}: {{ uiRevision }}</li>
-				<li>{{ translate('version.walletLabel') }}: {{ walletRevision }}</li>
-			</ul>
+			<p class="text-warning text-center">{{ translate('version.walletLabel') }}: {{ walletRevision }}</p>
 			<div>
 				<h4>Contact:</h4>
 				<ul>

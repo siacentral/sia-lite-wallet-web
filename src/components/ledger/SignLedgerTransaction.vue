@@ -8,6 +8,10 @@
 				{{ connected ? 'Connected' : 'Not Connected' }}
 				<template v-if="version">{{ version }}</template>
 			</div>
+			<template v-if="outdated">
+				<div /><div />
+				<div class="text-right text-error">{{ translate('ledger.outdated') }}</div>
+			</template>
 			<div>{{ translate('requiredSignatures') }}</div>
 			<div />
 			<div class="text-right">
@@ -23,6 +27,8 @@
 </template>
 
 <script>
+import { mapState } from 'vuex';
+
 import { encodeTransaction } from '@/sia';
 import { getVersion, signTransaction } from '@/ledger';
 import { formatNumber } from '@/utils/format';
@@ -34,6 +40,7 @@ export default {
 		ConnectLedger
 	},
 	props: {
+		currency: String,
 		transaction: Object,
 		requiredSignatures: Array
 	},
@@ -46,11 +53,53 @@ export default {
 			signatures: 0
 		};
 	},
+	computed: {
+		...mapState(['siaBlockHeight']),
+		outdated() {
+			if (this.currency === 'scp' || this.siaBlockHeight === 0 || !this.connected)
+				return false;
+
+			// Sia Foundation hard fork
+			if (this.siaBlockHeight >= 298000 && this.versionCmp(this.version, '0.4.2') !== 1)
+				return true;
+
+			return false;
+		}
+	},
 	beforeMount() {
 		this.signed = { ...this.transaction };
 	},
 	methods: {
 		formatNumber,
+		versionCmp(a, b) {
+			const reg = /[^0-9.]/gi,
+				aPieces = a.replace(reg, '').split('.'),
+				bPieces = b.replace(reg, '').split('.'),
+				len = Math.max(aPieces.length, bPieces.length);
+
+			for (let i = 0; i < len; i++) {
+				let as = 0, bs = 0;
+
+				if (i < aPieces.length)
+					as = parseInt(aPieces[i], 10);
+
+				if (i < bPieces.length)
+					bs = parseInt(bPieces[i], 10);
+
+				if (isNaN(as))
+					as = 0;
+
+				if (isNaN(bs))
+					bs = 0;
+
+				if (as < bs)
+					return -1;
+				else if (as > bs)
+					return 1;
+			}
+
+			return 0;
+		},
 		async onConnected(connected) {
 			try {
 				this.connected = connected;
