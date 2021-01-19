@@ -57,6 +57,10 @@ func apiClient(currency string) *apisdkgo.APIClient {
 }
 
 func (wallet *SeedWallet) currentHeight() (types.BlockHeight, error) {
+	if wallet.Currency == "scp" {
+		return 0, nil
+	}
+
 	block, err := apiClient(wallet.Currency).GetLatestBlock()
 	if err != nil {
 		return 0, err
