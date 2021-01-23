@@ -346,6 +346,10 @@ func GetTransactions(addresses []string, currency string, callback js.Value) {
 			processed.Tags = append(processed.Tags, "storage_proof")
 		}
 
+		if len(txn.StorageContracts) != 0 && len(txn.ContractRevisions) != 0 {
+			processed.Tags = append(processed.Tags, "contract_renewal")
+		}
+
 		if len(txn.StorageContracts) != 0 {
 			processed.Tags = append(processed.Tags, "contract_formation")
 		}

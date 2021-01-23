@@ -85,7 +85,9 @@ export default {
 				return this.translate('transactionTypes.siacoinTransaction');
 			}
 
-			if (this.transaction.tags.indexOf('contract_revision') !== -1)
+			if (this.transaction.tags.indexOf('contract_renewal') !== -1)
+				return this.translate('transactionTypes.contractRenewal');
+			else if (this.transaction.tags.indexOf('contract_revision') !== -1)
 				return this.translate('transactionTypes.contractRevision');
 			else if (this.transaction.tags.indexOf('contract_formation') !== -1)
 				return this.translate('transactionTypes.contractFormation');

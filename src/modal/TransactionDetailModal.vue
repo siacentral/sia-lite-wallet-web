@@ -1,60 +1,99 @@
 <template>
-	<modal @close="$emit('close')">
-		<div class="transaction-detail">
-			<div class="transaction-extras">
-				<template v-if="transaction.transaction_id.indexOf('nontxn-') === -1">
-					<div class="transaction-data-label">Transaction ID</div>
-					<div />
-					<div class="transaction-data">{{ transaction.transaction_id }}</div>
-				</template>
-				<div class="transaction-data-label">Source</div>
-				<div />
-				<div class="transaction-data">{{ friendlyType(transaction) }}</div>
-			</div>
-			<div class="summary-type">
-				<button v-if="showSummary" @click="mode = 'summary'" :class="summaryClasses('summary')">{{ translate('summary') }}</button>
-				<button @click="mode = 'outputs'" :class="summaryClasses('outputs')">{{ translate('outputs') }}</button>
-				<button v-if="showSiafunds" @click="mode = 'siafundOutputs'" :class="summaryClasses('siafundOutputs')">{{ translate('siafundOutputs') }}</button>
-			</div>
-			<div class="transaction-mode">
-				<transition name="fade-top" mode="out-in">
-					<transaction-siafund-outputs
-						:transaction="transaction"
-						:wallet="wallet"
-						key="siafundOutputs"
-						v-if="mode === 'siafundOutputs'" />
-					<transaction-outputs
-						:transaction="transaction"
-						:wallet="wallet"
-						key="outputs"
-						v-else-if="mode === 'outputs'" />
-					<transaction-summary
-						:transaction="transaction"
-						:wallet="wallet"
-						key="summary"
-						v-else />
-				</transition>
-			</div>
-			<div class="transaction-extras">
-				<div class="divider" />
-				<template v-if="fees.gt(0) && transaction.direction === 'sent'">
-					<div class="transaction-data-label">{{ translate('transactionFee') }}</div>
-					<div class="transaction-data" v-html="siacoinDisplay(fees)" />
-					<div class="transaction-data" v-html="currencyDisplay(fees)" />
-				</template>
-				<div v-if="wallet.currency==='scp'" class="transaction-data-label">{{ translate('scpTotal') }}</div>
-				<div v-else class="transaction-data-label">{{ translate('siacoinTotal') }}</div>
-				<div class="transaction-data" v-html="siacoinDisplay(transaction.siacoin_value.value)" />
-				<div class="transaction-data" v-html="currencyDisplay(transaction.siacoin_value.value)" />
-				<template v-if="showSiafunds">
-					<div v-if="wallet.currency === 'scp'" class="transaction-data-label">{{ translate('spfTotal') }}</div>
-					<div v-else class="transaction-data-label">{{ translate('siafundTotal') }}</div>
-					<div class="transaction-data" v-html="siafundDisplay(transaction.siafund_value.value)" />
-					<div class="transaction-data" v-html="siafundCurrencyDisplay(transaction.siafund_value.value)" />
-				</template>
-			</div>
-		</div>
-	</modal>
+  <modal @close="$emit('close')">
+    <div class="transaction-detail">
+      <div class="transaction-extras">
+        <template v-if="transaction.transaction_id.indexOf('nontxn-') === -1">
+          <div class="transaction-data-label">Transaction ID</div>
+          <div />
+          <div class="transaction-data">{{ transaction.transaction_id }}</div>
+        </template>
+        <div class="transaction-data-label">Source</div>
+        <div />
+        <div class="transaction-data">{{ friendlyType(transaction) }}</div>
+      </div>
+      <div class="summary-type">
+        <button
+          v-if="showSummary"
+          @click="mode = 'summary'"
+          :class="summaryClasses('summary')"
+        >
+          {{ translate("summary") }}
+        </button>
+        <button @click="mode = 'outputs'" :class="summaryClasses('outputs')">
+          {{ translate("outputs") }}
+        </button>
+        <button
+          v-if="showSiafunds"
+          @click="mode = 'siafundOutputs'"
+          :class="summaryClasses('siafundOutputs')"
+        >
+          {{ translate("siafundOutputs") }}
+        </button>
+      </div>
+      <div class="transaction-mode">
+        <transition name="fade-top" mode="out-in">
+          <transaction-siafund-outputs
+            :transaction="transaction"
+            :wallet="wallet"
+            key="siafundOutputs"
+            v-if="mode === 'siafundOutputs'"
+          />
+          <transaction-outputs
+            :transaction="transaction"
+            :wallet="wallet"
+            key="outputs"
+            v-else-if="mode === 'outputs'"
+          />
+          <transaction-summary
+            :transaction="transaction"
+            :wallet="wallet"
+            key="summary"
+            v-else
+          />
+        </transition>
+      </div>
+      <div class="transaction-extras">
+        <div class="divider" />
+        <template v-if="fees.gt(0) && transaction.direction === 'sent'">
+          <div class="transaction-data-label">
+            {{ translate("transactionFee") }}
+          </div>
+          <div class="transaction-data" v-html="siacoinDisplay(fees)" />
+          <div class="transaction-data" v-html="currencyDisplay(fees)" />
+        </template>
+        <div v-if="wallet.currency === 'scp'" class="transaction-data-label">
+          {{ translate("scpTotal") }}
+        </div>
+        <div v-else class="transaction-data-label">
+          {{ translate("siacoinTotal") }}
+        </div>
+        <div
+          class="transaction-data"
+          v-html="siacoinDisplay(transaction.siacoin_value.value)"
+        />
+        <div
+          class="transaction-data"
+          v-html="currencyDisplay(transaction.siacoin_value.value)"
+        />
+        <template v-if="showSiafunds">
+          <div v-if="wallet.currency === 'scp'" class="transaction-data-label">
+            {{ translate("spfTotal") }}
+          </div>
+          <div v-else class="transaction-data-label">
+            {{ translate("siafundTotal") }}
+          </div>
+          <div
+            class="transaction-data"
+            v-html="siafundDisplay(transaction.siafund_value.value)"
+          />
+          <div
+            class="transaction-data"
+            v-html="siafundCurrencyDisplay(transaction.siafund_value.value)"
+          />
+        </template>
+      </div>
+    </div>
+  </modal>
 </template>
 
 <script>
@@ -79,31 +118,52 @@ export default {
 		transaction: Object
 	},
 	computed: {
-		...mapState(['currency', 'exchangeRateSC', 'exchangeRateSCP', 'exchangeRateSF', 'feeAddresses']),
+		...mapState([
+			'currency',
+			'exchangeRateSC',
+			'exchangeRateSCP',
+			'exchangeRateSF',
+			'feeAddresses'
+		]),
 		apiFees() {
 			if (!this.transaction || !Array.isArray(this.transaction.siacoin_outputs))
 				return new BigNumber(0);
 
-			return this.transaction.siacoin_outputs.reduce((v, o) =>
-				this.feeAddresses.indexOf(o.unlock_hash) ? v : v.plus(o.value), new BigNumber(0));
+			return this.transaction.siacoin_outputs.reduce(
+				(v, o) =>
+					this.feeAddresses.indexOf(o.unlock_hash) ? v : v.plus(o.value),
+				new BigNumber(0)
+			);
 		},
 		fees() {
 			return new BigNumber(this.transaction.fees).plus(this.apiFees);
 		},
 		showSiafunds() {
-			return this.transaction && Array.isArray(this.transaction.siafund_inputs) && this.transaction.siafund_inputs.length > 0;
+			return (
+				this.transaction &&
+        Array.isArray(this.transaction.siafund_inputs) &&
+        this.transaction.siafund_inputs.length > 0
+			);
 		},
 		showSummary() {
-			return Array.isArray(this.transaction.siacoin_outputs) && this.transaction.siacoin_outputs.length !== 0;
+			return (
+				Array.isArray(this.transaction.siacoin_outputs) &&
+        this.transaction.siacoin_outputs.length !== 0
+			);
 		},
 		defaultMode() {
-			if (!this.transaction)
-				return 'summary';
+			if (!this.transaction) return 'summary';
 
-			if (Array.isArray(this.transaction.siafund_outputs) && this.transaction.siafund_outputs.length !== 0)
+			if (
+				Array.isArray(this.transaction.siafund_outputs) &&
+        this.transaction.siafund_outputs.length !== 0
+			)
 				return 'siafundOutputs';
 
-			if (!Array.isArray(this.transaction.siacoin_outputs) || this.transaction.siacoin_outputs.length === 0)
+			if (
+				!Array.isArray(this.transaction.siacoin_outputs) ||
+        this.transaction.siacoin_outputs.length === 0
+			)
 				return 'outputs';
 
 			return 'summary';
@@ -119,24 +179,44 @@ export default {
 	},
 	methods: {
 		siacoinDisplay(value) {
-			const siacoins = formatPriceString(new BigNumber(value), 2, this.wallet.currency, 1, this.wallet.precision());
+			const siacoins = formatPriceString(
+				new BigNumber(value),
+				2,
+				this.wallet.currency,
+				1,
+				this.wallet.precision()
+			);
 
-			return `${siacoins.value} <span class="currency-display">${this.translate('currency.sc')}</span>`;
+			return `${siacoins.value} <span class="currency-display">${this.translate(
+				'currency.sc'
+			)}</span>`;
 		},
 		siafundDisplay(amt) {
-			const { value, label } = formatSiafundString(new BigNumber(amt), this.wallet.currency);
+			const { value, label } = formatSiafundString(
+				new BigNumber(amt),
+				this.wallet.currency
+			);
 
-			return `${value} <span class="currency-display">${this.translate(`currency.${label}`)}</span>`;
+			return `${value} <span class="currency-display">${this.translate(
+				`currency.${label}`
+			)}</span>`;
 		},
 		currencyDisplay(value) {
 			let exchangeRate = this.exchangeRateSC;
 
-			if (this.wallet?.currency === 'scp')
-				exchangeRate = this.exchangeRateSCP;
+			if (this.wallet?.currency === 'scp') exchangeRate = this.exchangeRateSCP;
 
-			const currency = formatPriceString(new BigNumber(value), 2, this.currency, exchangeRate[this.currency], this.wallet.precision());
+			const currency = formatPriceString(
+				new BigNumber(value),
+				2,
+				this.currency,
+				exchangeRate[this.currency],
+				this.wallet.precision()
+			);
 
-			return `${currency.value} <span class="currency-display">${this.translate(`currency.${currency.label}`)}</span>`;
+			return `${currency.value} <span class="currency-display">${this.translate(
+				`currency.${currency.label}`
+			)}</span>`;
 		},
 		siafundCurrencyDisplay(value) {
 			let exchangeRate = this.exchangeRateSF;
@@ -146,9 +226,16 @@ export default {
 				exchangeRate[this.currency] = '0';
 			}
 
-			const currency = formatPriceString(new BigNumber(value).times(1e24), 2, this.currency, exchangeRate[this.currency]);
+			const currency = formatPriceString(
+				new BigNumber(value).times(1e24),
+				2,
+				this.currency,
+				exchangeRate[this.currency]
+			);
 
-			return `${currency.value} <span class="currency-display">${this.translate(`currency.${currency.label}`)}</span>`;
+			return `${currency.value} <span class="currency-display">${this.translate(
+				`currency.${currency.label}`
+			)}</span>`;
 		},
 		summaryClasses(mode) {
 			return {
@@ -157,7 +244,7 @@ export default {
 				'btn-enabled': mode === this.mode
 			};
 		},
-		friendlyType(txn) {
+		friendlyType() {
 			if (!this.transaction || !Array.isArray(this.transaction.tags)) {
 				if (this.wallet.currency === 'scp')
 					return this.translate('transactionTypes.scprimeTransaction');
@@ -165,7 +252,9 @@ export default {
 				return this.translate('transactionTypes.siacoinTransaction');
 			}
 
-			if (this.transaction.tags.indexOf('contract_revision') !== -1)
+			if (this.transaction.tags.indexOf('contract_renewal') !== -1)
+				return this.translate('transactionTypes.contractRenewal');
+			else if (this.transaction.tags.indexOf('contract_revision') !== -1)
 				return this.translate('transactionTypes.contractRevision');
 			else if (this.transaction.tags.indexOf('contract_formation') !== -1)
 				return this.translate('transactionTypes.contractFormation');
@@ -173,7 +262,10 @@ export default {
 				return this.translate('transactionTypes.storageProof');
 			else if (this.transaction.tags.indexOf('host_announcement') !== -1)
 				return this.translate('transactionTypes.hostAnnouncement');
-			else if (this.transaction.tags.indexOf('contract_valid_output') !== -1 || this.transaction.tags.indexOf('contract_missed_output') !== -1)
+			else if (
+				this.transaction.tags.indexOf('contract_valid_output') !== -1 ||
+        this.transaction.tags.indexOf('contract_missed_output') !== -1
+			)
 				return this.translate('transactionTypes.contractCompleted');
 			else if (this.transaction.tags.indexOf('block_reward') !== -1)
 				return this.translate('transactionTypes.blockReward');
@@ -197,54 +289,54 @@ export default {
 
 <style lang="stylus" scoped>
 .transaction-detail {
-	display: grid;
-	width: 100%;
-	height: 100%;
-	grid-gap: 15px;
-	align-content: safe center;
-	overflow: hidden;
+  display: grid;
+  width: 100%;
+  height: 100%;
+  grid-gap: 15px;
+  align-content: safe center;
+  overflow: hidden;
 }
 
 .transaction-mode {
-	background: bg-dark;
-	border-radius: 4px;
-	overflow-x: hidden;
-	overflow-y: auto;
+  background: bg-dark;
+  border-radius: 4px;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .transaction-extras {
-	display: grid;
-	grid-template-columns: minmax(0, 1fr) repeat(2, auto);
-	width: 100%;
-	height: 100%;
-	grid-gap: 15px;
-	align-content: safe center;
-	overflow: hidden;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) repeat(2, auto);
+  width: 100%;
+  height: 100%;
+  grid-gap: 15px;
+  align-content: safe center;
+  overflow: hidden;
 
-	.divider {
-		height: 1px;
-		background: dark-gray;
-		grid-column: 1 / -1;
-	}
+  .divider {
+    height: 1px;
+    background: dark-gray;
+    grid-column: 1 / -1;
+  }
 
-	.transaction-data-label, .transaction-data {
-		white-space: nowrap;
-	}
+  .transaction-data-label, .transaction-data {
+    white-space: nowrap;
+  }
 
-	.transaction-data {
-		text-align: right;
-		text-overflow: ellipsis;
-		overflow: hidden;
-	}
+  .transaction-data {
+    text-align: right;
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
 }
 
 .summary-type {
-	.btn {
-		opacity: 0.6;
+  .btn {
+    opacity: 0.6;
 
-		&.btn-enabled {
-			opacity: 1;
-		}
-	}
+    &.btn-enabled {
+      opacity: 1;
+    }
+  }
 }
 </style>

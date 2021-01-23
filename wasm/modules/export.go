@@ -62,6 +62,10 @@ func transactionType(txn types.Transaction, currency string) string {
 		return "Storage Proof"
 	}
 
+	if len(txn.StorageContracts) != 0 && len(txn.ContractRevisions) != 0 {
+		return "Contract Renewal"
+	}
+
 	if len(txn.StorageContracts) != 0 {
 		return "Contract Formation"
 	}

@@ -181,6 +181,7 @@
 			"exportMessage": "Exportation de {{0}}/{{1}} transactions depuis {{2}} adresses"
 		},
 		"transactionTypes": {
+			"contractRenewal": "Contract Renewal",
 			"contractRevision": "Révision de contrat",
 			"contractFormation": "Formation de contrat",
 			"storageProof": "Preuve de détention",

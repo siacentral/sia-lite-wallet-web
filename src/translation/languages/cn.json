@@ -181,6 +181,7 @@
 			"exportMessage": "Exporting {{0}}/{{1}} transactions from {{2}} addresses"
 		},
 		"transactionTypes": {
+			"contractRenewal": "Contract Renewal",
 			"contractRevision": "合同修订",
 			"contractFormation": "合同形成",
 			"storageProof": "储存证明",
