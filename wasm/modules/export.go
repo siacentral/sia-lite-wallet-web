@@ -55,7 +55,6 @@ func transactionType(txn types.Transaction, currency string) string {
 		default:
 			return txn.SiacoinOutputs[0].Source
 		}
-		return txn.SiacoinOutputs[0].Source
 	}
 
 	if len(txn.StorageProofs) != 0 {

@@ -16,10 +16,8 @@ func GenerateSeed(seedType string, callback js.Value) {
 	switch strings.ToLower(seedType) {
 	case "walrus":
 		phrase, err = wallet.NewBIP39RecoveryPhrase()
-		break
 	default:
 		phrase, err = wallet.NewSiaRecoveryPhrase()
-		break
 	}
 
 	if err != nil {
