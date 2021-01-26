@@ -84,6 +84,6 @@ export function encodeUnlockHashes(unencoded) {
 	return spawnWorker(['encodeUnlockHashes', unencoded.map(u => JSON.stringify(u))], 15000);
 }
 
-export async function recoverAddresses(seed, currency, i = 0, n = 10, count = 2500, last = 0, progress) {
-	return spawnWorker(['recoverAddresses', seed, currency, i, n, count, last], 30000, progress);
+export async function recoverAddresses(seed, currency, i = 0, lookahead = 25000, last = 0, progress) {
+	return spawnWorker(['recoverAddresses', seed, currency, i, lookahead, last], 30000, progress);
 }

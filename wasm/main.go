@@ -197,19 +197,18 @@ func generateAddresses(this js.Value, args []js.Value) interface{} {
 }
 
 func recoverAddresses(this js.Value, args []js.Value) interface{} {
-	if err := checkArgs(args, js.TypeString, js.TypeString, js.TypeNumber, js.TypeNumber, js.TypeNumber, js.TypeNumber, js.TypeFunction); err != nil {
+	if err := checkArgs(args, js.TypeString, js.TypeString, js.TypeNumber, js.TypeNumber, js.TypeNumber, js.TypeFunction); err != nil {
 		return err.Error()
 	}
 
 	seed := args[0].String()
 	currency := args[1].String()
 	i := uint64(args[2].Int())
-	maxEmptyRounds := uint64(args[3].Int())
-	addressCount := uint64(args[4].Int())
-	lastKnownIdx := uint64(args[5].Int())
-	callback := args[6]
+	lookahead := uint64(args[3].Int())
+	lastKnownIdx := uint64(args[4].Int())
+	callback := args[5]
 
-	go modules.RecoverAddresses(seed, currency, i, maxEmptyRounds, addressCount, lastKnownIdx, callback)
+	go modules.RecoverAddresses(seed, currency, i, lookahead, lastKnownIdx, callback)
 
 	return nil
 }

@@ -2,6 +2,7 @@ package modules
 
 import (
 	"fmt"
+	"log"
 	"sync"
 	"syscall/js"
 
@@ -27,31 +28,6 @@ type (
 		Error                            error
 	}
 )
-
-func consecutiveEmptyRounds(rounds []uint64) uint64 {
-	var lastRound uint64
-	roundMap := make(map[uint64]bool)
-
-	for _, r := range rounds {
-		roundMap[r] = true
-
-		if lastRound < r {
-			lastRound = r
-		}
-	}
-
-	i := lastRound
-
-	for {
-		if exists := roundMap[i]; !exists {
-			break
-		}
-
-		i--
-	}
-
-	return lastRound - i
-}
 
 func generateAddress(w *wallet.SeedWallet, i uint64) recoveredAddress {
 	key := w.GetAddress(i)
@@ -114,7 +90,7 @@ func recoveryWorker(w *wallet.SeedWallet, currency string, work <-chan recoveryW
 //addresses. Considers all addresses found if the scan goes more than minRounds * addressCount
 //addresses without seeing any used. It's possible the ranges will need to be tweaked for older or
 //larger wallets
-func RecoverAddresses(seed, currency string, startIndex, maxEmptyRounds, addressCount, lastKnownIndex uint64, callback js.Value) {
+func RecoverAddresses(seed, currency string, startIndex, lookahead, lastKnownIndex uint64, callback js.Value) {
 	var wg sync.WaitGroup
 
 	w, err := recoverWallet(seed, currency)
@@ -146,7 +122,7 @@ func RecoverAddresses(seed, currency string, startIndex, maxEmptyRounds, address
 	go func() {
 		var round uint64
 
-		for i := startIndex; ; i += addressCount {
+		for i := startIndex; ; i += 500 {
 			select {
 			case <-done:
 				close(work)
@@ -156,7 +132,7 @@ func RecoverAddresses(seed, currency string, startIndex, maxEmptyRounds, address
 
 			work <- recoveryWork{
 				Start: i,
-				End:   i + addressCount,
+				End:   i + 500,
 				Round: round,
 			}
 
@@ -164,9 +140,8 @@ func RecoverAddresses(seed, currency string, startIndex, maxEmptyRounds, address
 		}
 	}()
 
-	var lastIndex, usedTotal uint64
+	var lastIndex uint64
 	var lastUsageType string
-	var empty []uint64
 
 	for res := range results {
 		if res.Error != nil {
@@ -180,25 +155,19 @@ func RecoverAddresses(seed, currency string, startIndex, maxEmptyRounds, address
 			continue
 		}
 
-		if len(res.Addresses) == 0 && res.End >= lastKnownIndex {
-			empty = append(empty, res.Round)
-
-			if consecutive := consecutiveEmptyRounds(empty); consecutive >= maxEmptyRounds {
-				//close the done channel to signal completion if it isn't already closed
-				select {
-				case <-done:
-					break
-				default:
-					close(done)
-				}
-			}
-		}
-
-		usedTotal += uint64(len(res.Addresses))
-
 		if res.LastUsedIndex > lastIndex {
 			lastIndex = res.LastUsedIndex
-			lastUsageType = res.LastUsedType
+		}
+
+		if lastIndex > lastKnownIndex && res.End > lastIndex && res.End-lastIndex > lookahead {
+			log.Printf("found gap of %d addresses from %d to %d (%d)", res.End-lastIndex, lastIndex, res.End, lookahead)
+			//close the done channel to signal completion if it isn't already closed
+			select {
+			case <-done:
+				break
+			default:
+				close(done)
+			}
 		}
 
 		data, err := interfaceToJSON(map[string]interface{}{
