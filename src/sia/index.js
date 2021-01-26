@@ -65,7 +65,7 @@ export function getTransactions(addresses, currency) {
 }
 
 export async function exportTransactions(addresses, currency, min, max, progress) {
-	return spawnWorker(['exportTransactions', addresses, currency, min, max], 30000, progress);
+	return spawnWorker(['exportTransactions', addresses, currency, min, max], 300000, progress);
 }
 
 export function signTransaction(seed, currency, txn, indexes) {
@@ -85,5 +85,5 @@ export function encodeUnlockHashes(unencoded) {
 }
 
 export async function recoverAddresses(seed, currency, i = 0, lookahead = 25000, last = 0, progress) {
-	return spawnWorker(['recoverAddresses', seed, currency, i, lookahead, last], 30000, progress);
+	return spawnWorker(['recoverAddresses', seed, currency, i, lookahead, last], 300000, progress);
 }
