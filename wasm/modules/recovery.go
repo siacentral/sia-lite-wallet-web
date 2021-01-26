@@ -160,12 +160,12 @@ func RecoverAddresses(seed, currency string, startIndex, lookahead, lastKnownInd
 		}
 
 		if lastIndex > lastKnownIndex && res.End > lastIndex && res.End-lastIndex > lookahead {
-			log.Printf("found gap of %d addresses from %d to %d (%d)", res.End-lastIndex, lastIndex, res.End, lookahead)
 			//close the done channel to signal completion if it isn't already closed
 			select {
 			case <-done:
 				break
 			default:
+				log.Printf("found gap of %d addresses from %d to %d (%d)", res.End-lastIndex, lastIndex, res.End, lookahead)
 				close(done)
 			}
 		}
