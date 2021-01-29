@@ -1,5 +1,4 @@
 /* global sia, Go */
-importScripts('/sia/wasm_exec.js');
 import { loadWASM } from './wasm.js';
 
 async function load() {

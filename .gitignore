@@ -27,4 +27,3 @@ publish.sh
 
 #Ignore Sia WASM
 sia.wasm
-wasm_exec.js

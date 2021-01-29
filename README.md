@@ -40,7 +40,7 @@ docker run -p 80:80 -d siacentral/sia-lite-wallet-web
 ### Prerequisites
 + Node v12.10.X
 + NPM 6.14.X
-+ Go 1.15.X
++ Go 1.15.7
 
 ### Compiles and hot-reloads for development
 ```

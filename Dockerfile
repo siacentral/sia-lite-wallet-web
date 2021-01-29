@@ -1,5 +1,5 @@
 # build wasm
-FROM golang:1.15 AS buildgo
+FROM golang:1.15.7 AS buildgo
 
 WORKDIR /app
 

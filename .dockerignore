@@ -27,7 +27,6 @@ publish.sh
 
 #Ignore Sia WASM
 sia.wasm
-wasm_exec.js
 
 #Ignore translation utils
 translation/utils/*
