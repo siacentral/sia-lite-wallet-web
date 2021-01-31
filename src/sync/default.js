@@ -19,6 +19,8 @@ export default {
 				startIndex = lastKnownIndex - maxLookahead;
 		}
 
+		console.log(`starting quick scan of ${wallet.title} starting at ${startIndex}/${lastKnownIndex} with ${maxLookahead} lookahead`);
+
 		await recoverAddresses(wallet.seed, wallet.currency, startIndex, maxLookahead, lastKnownIndex, async(progress) => {
 			if (!progress || !Array.isArray(progress.addresses))
 				return;
@@ -36,6 +38,8 @@ export default {
 
 		if (typeof maxLookahead !== 'number' || maxLookahead < 0 || maxLookahead > 500000)
 			maxLookahead = 25000;
+
+		console.log(`starting full scan of ${wallet.title} with ${maxLookahead} lookahead`);
 
 		await recoverAddresses(wallet.seed, wallet.currency, 0, maxLookahead, 0, async(progress) => {
 			if (!progress || !Array.isArray(progress.addresses))

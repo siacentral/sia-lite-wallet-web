@@ -140,8 +140,10 @@ func RecoverAddresses(seed, currency string, startIndex, lookahead, lastKnownInd
 		}
 	}()
 
-	var lastIndex uint64
+	var lastUsedIndex, lastScannedIndex uint64
 	var lastUsageType string
+
+	lastScannedIndex = lastKnownIndex
 
 	for res := range results {
 		if res.Error != nil {
@@ -155,17 +157,21 @@ func RecoverAddresses(seed, currency string, startIndex, lookahead, lastKnownInd
 			continue
 		}
 
-		if res.LastUsedIndex > lastIndex {
-			lastIndex = res.LastUsedIndex
+		if res.LastUsedIndex > lastUsedIndex {
+			lastUsedIndex = res.LastUsedIndex
 		}
 
-		if lastIndex >= lastKnownIndex && res.End >= lastIndex && res.End-lastIndex > lookahead {
+		if res.End > lastScannedIndex {
+			lastScannedIndex = res.End
+		}
+
+		if lastScannedIndex-lastUsedIndex > lookahead {
 			//close the done channel to signal completion if it isn't already closed
 			select {
 			case <-done:
 				break
 			default:
-				log.Printf("found gap of %d addresses from %d to %d (%d)", res.End-lastIndex, lastIndex, res.End, lookahead)
+				log.Printf("found gap of %d addresses from %d to %d (%d)", lastScannedIndex-lastUsedIndex, lastUsedIndex, res.End, lookahead)
 				close(done)
 			}
 		}
@@ -173,7 +179,7 @@ func RecoverAddresses(seed, currency string, startIndex, lookahead, lastKnownInd
 		data, err := interfaceToJSON(map[string]interface{}{
 			"found":     len(res.Addresses),
 			"addresses": res.Addresses,
-			"index":     lastIndex,
+			"index":     lastUsedIndex,
 		})
 
 		if err != nil {
@@ -187,14 +193,14 @@ func RecoverAddresses(seed, currency string, startIndex, lookahead, lastKnownInd
 	var additional []recoveredAddress
 
 	if lastUsageType == "sent" {
-		lastIndex++
+		lastUsedIndex++
 
-		additional = append(additional, generateAddress(w, lastIndex))
+		additional = append(additional, generateAddress(w, lastUsedIndex))
 	}
 
 	data, err := interfaceToJSON(map[string]interface{}{
 		"addresses": additional,
-		"index":     lastIndex,
+		"index":     lastUsedIndex,
 	})
 
 	if err != nil {
