@@ -140,10 +140,8 @@ func RecoverAddresses(seed, currency string, startIndex, lookahead, lastKnownInd
 		}
 	}()
 
-	var lastUsedIndex, lastScannedIndex uint64
 	var lastUsageType string
-
-	lastScannedIndex = lastKnownIndex
+	lastScannedIndex, lastUsedIndex := startIndex, startIndex
 
 	for res := range results {
 		if res.Error != nil {
@@ -165,7 +163,7 @@ func RecoverAddresses(seed, currency string, startIndex, lookahead, lastKnownInd
 			lastScannedIndex = res.End
 		}
 
-		if lastScannedIndex-lastUsedIndex > lookahead {
+		if lastScannedIndex >= lastKnownIndex && lastScannedIndex-lastUsedIndex > lookahead {
 			//close the done channel to signal completion if it isn't already closed
 			select {
 			case <-done:
