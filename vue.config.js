@@ -23,8 +23,11 @@ module.exports = {
 			rules: [
 				{
 					test: /\.wasm$/,
+					loader: 'file-loader',
 					type: 'javascript/auto',
-					loaders: ['arraybuffer-loader']
+					options: {
+						name: '[name].[contenthash].[ext]'
+					}
 				}
 			]
 		}
