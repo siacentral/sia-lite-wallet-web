@@ -1,11 +1,13 @@
 package wallet
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"strings"
 	"unicode"
 
+	"gitlab.com/NebulousLabs/Sia/crypto"
 	siacrypto "gitlab.com/NebulousLabs/Sia/crypto"
 	mnemonics "gitlab.com/NebulousLabs/entropy-mnemonics"
 	"gitlab.com/NebulousLabs/fastrand"
@@ -72,7 +74,16 @@ func RecoverSiaSeed(phrase, currency string) (*SeedWallet, error) {
 		return nil, err
 	}
 
+	if len(checksumSeedBytes) != 38 {
+		return nil, fmt.Errorf("seed is not valid: wrong number of bytes %d expected 38", len(checksumSeedBytes))
+	}
+
 	copy(wallet.s[:], checksumSeedBytes)
+
+	fullChecksum := crypto.HashObject(wallet.s)
+	if len(checksumSeedBytes) != crypto.EntropySize+6 || !bytes.Equal(fullChecksum[:6], checksumSeedBytes[crypto.EntropySize:]) {
+		return nil, fmt.Errorf("seed failed verification: usually a flipped or missing word")
+	}
 
 	wallet.Currency = currency
 
