@@ -82,7 +82,7 @@ func RecoverSiaSeed(phrase, currency string) (*SeedWallet, error) {
 
 	fullChecksum := crypto.HashObject(wallet.s)
 	if len(checksumSeedBytes) != crypto.EntropySize+6 || !bytes.Equal(fullChecksum[:6], checksumSeedBytes[crypto.EntropySize:]) {
-		return nil, fmt.Errorf("seed failed verification: usually a flipped or missing word")
+		return nil, fmt.Errorf("unable to validate seed: incorrect checksum: usually a flipped or missing word")
 	}
 
 	wallet.Currency = currency
