@@ -19,6 +19,22 @@ module.exports = {
 		plugins: [
 			new WorkerPlugin()
 		],
+		optimization: {
+			splitChunks: {
+				chunks: 'all',
+				maxInitialRequests: Infinity,
+				maxSize: 200000,
+				cacheGroups: {
+					vendor: {
+						test: /[\\/]node_modules[\\/]/,
+						name(module) {
+							const packageName = module.context.match(/[\\/]node_modules[\\/](.*?)([\\/]|$)/)[1];
+							return `npm.${packageName.replace('@', '')}`;
+						}
+					}
+				}
+			}
+		},
 		module: {
 			rules: [
 				{
@@ -47,6 +63,21 @@ module.exports = {
 			});
 
 		types.forEach(type => addStyleResource(config.module.rule('stylus').oneOf(type)));
+
+		/*
+		Disable (or customize) prefetch, see:
+		https://cli.vuejs.org/guide/html-and-static-assets.html#prefetch
+		*/
+		config.plugins.delete('prefetch');
+
+		/*
+		Configure preload to load all chunks
+		NOTE: use `allChunks` instead of `all` (deprecated)
+		*/
+		config.plugin('preload').tap((options) => {
+			options[0].include = 'allChunks';
+			return options;
+		});
 	}
 };
 
