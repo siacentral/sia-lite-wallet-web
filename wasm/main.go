@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"syscall/js"
 	"time"
 
@@ -12,6 +13,7 @@ import (
 )
 
 func main() {
+	log.Printf("starting sia wasm %s", build.Revision())
 	js.Global().Set("sia", map[string]interface{}{
 		"build": map[string]interface{}{
 			"revision":  build.Revision(),

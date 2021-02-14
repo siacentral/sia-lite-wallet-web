@@ -4,8 +4,7 @@
 		<primary-nav />
 		<div class="page-wrapper">
 			<transition name="fade" mode="out-in" appear>
-				<version-mismatch v-if="uiRevision !== walletRevision && !ignoreVersionWarning" />
-				<setup v-else-if="!setup" />
+				<setup v-if="!setup" />
 				<unavailable v-else-if="typeof unavailable === 'string'" />
 				<unlock-wallet v-else-if="!unlocked" />
 				<router-view v-else />
@@ -22,7 +21,6 @@ import PrimaryNav from '@/components/PrimaryNav';
 import Setup from '@/views/Setup';
 import Unavailable from '@/views/Unavailable.vue';
 import UnlockWallet from '@/views/UnlockWallet';
-import VersionMismatch from '@/views/VersionMismatch';
 
 export default {
 	components: {
@@ -30,11 +28,10 @@ export default {
 		PrimaryNav,
 		Setup,
 		Unavailable,
-		UnlockWallet,
-		VersionMismatch
+		UnlockWallet
 	},
 	computed: {
-		...mapState(['setup', 'wallets', 'autoLock', 'unavailable', 'walletRevision', 'ignoreVersionWarning']),
+		...mapState(['setup', 'wallets', 'autoLock', 'unavailable']),
 		unlocked() {
 			return Array.isArray(this.wallets) && this.wallets.length !== 0;
 		}

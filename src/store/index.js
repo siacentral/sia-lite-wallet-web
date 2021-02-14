@@ -33,8 +33,6 @@ migrateRoundsToLookahead();
 
 const store = new Vuex.Store({
 	state: {
-		walletRevision: null,
-		ignoreVersionWarning: false,
 		dbType: 'memory',
 		setup: false,
 		offline: false,
@@ -60,12 +58,6 @@ const store = new Vuex.Store({
 		exchangeRateSCPF: {}
 	},
 	mutations: {
-		setWalletRevision(state, rev) {
-			state.walletRevision = rev;
-		},
-		setIgnoreVersionWarning(state, val) {
-			state.ignoreVersionWarning = val;
-		},
 		setUnavailable(state, unavailable) {
 			state.unavailable = unavailable;
 		},
@@ -177,12 +169,6 @@ const store = new Vuex.Store({
 		}
 	},
 	actions: {
-		setWalletRevision({ commit }, rev) {
-			commit('setWalletRevision', rev);
-		},
-		setIgnoreVersionWarning({ commit }, val) {
-			commit('setIgnoreVersionWarning', val);
-		},
 		setUnavailable({ commit }, unavailable) {
 			commit('setUnavailable', unavailable);
 		},

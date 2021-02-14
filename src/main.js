@@ -1,4 +1,3 @@
-/* global sia */
 import './registerServiceWorker';
 
 import Vue from 'vue';
@@ -12,7 +11,6 @@ import { faExclamationTriangle, faCreditCard, faSitemap, faFile, faFileExport, f
 import { faUsb, faGithub } from '@fortawesome/free-brands-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { siaAPI } from '@/api/siacentral';
-import { loadWASM } from '@/sia/wasm.js';
 
 library.add(faExclamationTriangle, faCreditCard, faSitemap, faFile, faFileExport, faUnlock, faLock, faEllipsisV, faChevronLeft, faChevronRight, faChevronDown, faEye, faUsb, faGithub, faPencilAlt, faTrash, faPaperPlane, faWallet, faAddressBook, faCogs, faPlus, faTimes, faRedo);
 
@@ -51,12 +49,8 @@ Vue.mixin({
 });
 
 async function load() {
-	await loadWASM();
 	const dbType = await connect();
 
-	console.log(sia.build.revision);
-
-	store.dispatch('setWalletRevision', sia?.build?.revision || 'unknown');
 	store.dispatch('setDBType', dbType);
 	store.dispatch('setSetup', (await walletCount()) !== 0);
 
