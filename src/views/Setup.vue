@@ -22,7 +22,7 @@
 				</div>
 				<h2>{{ translate('setup.header') }}</h2>
 				<div class="setup-content">
-					<p>{{ translate('setup.password1') }}</p>
+					<p>{{ translate('setup.password1') }} <router-link :to="{ name: 'about' }">Learn more</router-link>.</p>
 					<div class="control">
 						<label>{{ translate('unlockPassword') }}</label>
 						<input type="password" v-model="unlockPassword" autocomplete="new-password" />

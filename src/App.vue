@@ -4,10 +4,10 @@
 		<primary-nav />
 		<div class="page-wrapper">
 			<transition name="fade" mode="out-in" appear>
-				<setup v-if="!setup" />
-				<unavailable v-else-if="typeof unavailable === 'string'" />
-				<unlock-wallet v-else-if="!unlocked" />
-				<router-view v-else />
+				<unavailable v-if="typeof unavailable === 'string'" />
+				<router-view v-if="insecureRoute || (setup && unlocked)" />
+				<setup v-else-if="!setup" />
+				<unlock-wallet v-else />
 			</transition>
 		</div>
 		<notification-queue />
@@ -34,6 +34,9 @@ export default {
 		...mapState(['setup', 'wallets', 'autoLock', 'unavailable']),
 		unlocked() {
 			return Array.isArray(this.wallets) && this.wallets.length !== 0;
+		},
+		insecureRoute() {
+			return this.$route?.meta?.insecure === true;
 		}
 	},
 	data() {
