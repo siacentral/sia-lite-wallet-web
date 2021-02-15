@@ -324,18 +324,18 @@ func GetTransactions(addresses []string, currency string, callback js.Value) {
 			if _, exists := ownedAddresses[txnSiacoinOutput.UnlockHash]; exists {
 				procSiacoinOutput.Owned = true
 				ownedSiacoinOutput = ownedSiacoinOutput.Add(txnSiacoinOutput.Value)
-				ownedSiacoinInputsCount++
+				ownedSiacoinOutputsCount++
 			}
 
 			processed.SiacoinOutputs = append(processed.SiacoinOutputs, procSiacoinOutput)
 		}
 
-		if len(txn.SiafundInputs) != 0 && len(txn.SiafundOutputs) != 0 {
-			processed.Tags = append(processed.Tags, "siafund_transaction")
+		if len(txn.SiacoinOutputs) != 0 && len(txn.SiacoinInputs) != 0 && len(txn.SiacoinInputs) == ownedSiacoinInputsCount && len(txn.SiacoinOutputs) == ownedSiacoinOutputsCount {
+			processed.Tags = append(processed.Tags, "defrag")
 		}
 
-		if len(txn.SiacoinInputs) != 0 && len(txn.SiacoinOutputs) != 0 {
-			processed.Tags = append(processed.Tags, "siacoin_transaction")
+		if len(txn.SiafundOutputs) != 0 && len(txn.SiafundInputs) != 0 && len(txn.SiafundInputs) == ownedSiafundInputsCount && len(txn.SiafundOutputs) == ownedSiafundOutputsCount {
+			processed.Tags = append(processed.Tags, "defrag")
 		}
 
 		if len(txn.SiacoinInputs) == 0 && len(txn.SiacoinOutputs) != 0 {
@@ -362,8 +362,12 @@ func GetTransactions(addresses []string, currency string, callback js.Value) {
 			processed.Tags = append(processed.Tags, "host_announcement")
 		}
 
-		if len(txn.SiafundOutputs) == 0 && len(txn.SiacoinOutputs) != 0 && len(txn.SiacoinInputs) == ownedSiacoinInputsCount && len(txn.SiacoinOutputs) == ownedSiacoinOutputsCount {
-			processed.Tags = append(processed.Tags, "defrag")
+		if len(txn.SiafundInputs) != 0 && len(txn.SiafundOutputs) != 0 {
+			processed.Tags = append(processed.Tags, "siafund_transaction")
+		}
+
+		if len(txn.SiacoinInputs) != 0 && len(txn.SiacoinOutputs) != 0 {
+			processed.Tags = append(processed.Tags, "siacoin_transaction")
 		}
 
 		if ownedSiacoinOutput.Cmp(ownedSiacoinInput) == -1 {

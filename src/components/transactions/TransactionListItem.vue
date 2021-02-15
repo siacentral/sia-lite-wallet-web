@@ -99,6 +99,10 @@ export default {
 				return this.translate('transactionTypes.contractCompleted');
 			else if (this.transaction.tags.indexOf('block_reward') !== -1)
 				return this.translate('transactionTypes.blockReward');
+			else if (this.transaction.tags.indexOf('siafund_claim') !== -1)
+				return this.translate('transactionTypes.siafundClaim');
+			else if (this.transaction.tags.indexOf('defrag') !== -1)
+				return this.translate('transactionTypes.defrag');
 			else if (this.transaction.tags.indexOf('siacoin_transaction') !== -1) {
 				if (this.wallet.currency === 'scp')
 					return this.translate('transactionTypes.scprimeTransaction');
@@ -106,10 +110,6 @@ export default {
 				return this.translate('transactionTypes.siacoinTransaction');
 			} else if (this.transaction.tags.indexOf('siafund_transaction') !== -1)
 				return this.translate('transactionTypes.siafundTransaction');
-			else if (this.transaction.tags.indexOf('siafund_claim') !== -1)
-				return this.translate('transactionTypes.siafundClaim');
-			else if (this.transaction.tags.indexOf('defrag') !== -1)
-				return this.translate('transactionTypes.defrag');
 
 			return this.transaction.tags[0];
 		},
