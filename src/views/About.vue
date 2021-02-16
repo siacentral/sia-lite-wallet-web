@@ -4,11 +4,9 @@
       <h1 class="text-primary text-center">About</h1>
       <p>
         Sia Central's Lite Wallet is a secure non-custodial cryptocurrency
-        wallet with support for Siacoin (SC) and ScPrimeCoin (SCP). This wallet
-        has been tested and works with Chromium based browsers on Desktop, iOS
-        11, and Chrome on Android. Sensitive data, such as wallet seeds, is
-        stored encrypted using a user-set passphrase and never leaves the
-        device.
+        wallet with support for Siacoin (SC) and ScPrimeCoin (SCP). Sensitive data, like your wallet keys,
+		are encrypted and never leave your device. This wallet has been tested and supports
+		Chromium based browsers on Desktop, iOS 11, and Chrome on Android.
       </p>
       <h3>Features</h3>
       <ul>
@@ -69,16 +67,6 @@
         Watch-Only wallets are read-only wallets used to monitor the balance of
         a group of addresses. Addresses to watch are imported manually to view
         balance.
-      </p>
-      <h4>How It Works</h4>
-      <p>
-        This wallet uses a Sia wrapper that allows parts of Sia to be run
-        directly in the browser. This lets the wallet generate, recover seeds,
-        addresses, and sign transactions without using an external server or
-        daemon. The wallet uses the Sia Central Explorer API to retrieve balance
-        and transaction data without downloading the full blockchain. All
-        transaction generation and signing happens locally, the signed
-        transaction is then broadcast to the network.
       </p>
     </div>
   </div>
