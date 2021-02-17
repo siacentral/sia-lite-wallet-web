@@ -7,8 +7,8 @@
 				</div>
 				<h2 class="text-warning">{{ translate('setup.warning') }}</h2>
 				<div class="setup-content">
-					<p>Your browser does not support local data storage, all data will be erased when you close this tab. To prevent loss when creating or recovering wallets export the seed outside of your browser tab.</p>
-					<p>Browsers disable local data storage when in "Private Browsing" mode or when "Never Remember History" is enabled. The recommended browser for using this lite wallet is <a href="https://brave.com/sia608">Brave</a></p>
+					<p>Your browser does not support local data storage, all data will be erased when you close this tab. Browsers disable local data storage when in
+						"Private Browsing" mode or when "Never Remember History" is enabled. The recommended browser for using this lite wallet is <a href="https://brave.com/sia608">Brave</a></p>
 					<p class="text-warning text-small">{{ translate('setup.caution1') }}</p>
 					<p class="text-warning text-small">{{ translate('setup.caution2') }}</p>
 					<div class="buttons">
