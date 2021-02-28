@@ -25,5 +25,6 @@ publish.sh
 #Electron-builder output
 /dist_electron
 
-#Ignore Sia WASM
+#Ignore WASM
 sia.wasm
+wasm_exec.js
