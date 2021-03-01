@@ -1,39 +1,38 @@
 name: Build
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - master
+  pull_request:
 
 jobs:
-  build:
-
+  lint:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@master
-
-      - name: Setup Node.js 12.x
-        uses: actions/setup-node@master
+      - uses: actions/checkout@master
+      - uses: actions/setup-node@master
         with:
-          node-version: 12.x
-
-      - name: Setup Go 1.15.7
-        uses: actions/setup-go@v1
+          node-version: 12
+      - uses: actions/setup-go@v1
         with:
-          go-version: 1.15.7
+          go-version: 1.16
 
-      - name: Install Node Dependencies
-        run: npm install
-
-      - name: Install Go Dependencies
-        working-directory: ./wasm
-        run: GOARCH=wasm GOOS=js go get
-
-      - name: Build WASM
-        working-directory: ./wasm
-        run: GOARCH=wasm GOOS=js go build -o ../src/sia/sia.wasm main.go
+      - name: Install Dependencies
+        run: npm i
 
       - name: Lint
         run: npm run lint
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - uses: actions/setup-node@master
+        with:
+          node-version: 12
+      - uses: actions/setup-go@v1
+        with:
+          go-version: 1.16
 
-      - name: Build Web
-        run: npm run build
+      - name: Build
+        run: make build

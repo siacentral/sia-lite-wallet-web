@@ -121,7 +121,7 @@ func exportAddressWorker(ownedAddresses map[string]bool, currency string, work <
 
 			apiclient := siacentralAPIClient(currency)
 
-			balanceResp, err := apiclient.FindAddressBalance(2000, j, addresses)
+			balanceResp, err := apiclient.FindAddressBalance(500, j, addresses)
 			if err != nil {
 				errors <- fmt.Errorf("unable to get wallet transactions: %s", err)
 				return

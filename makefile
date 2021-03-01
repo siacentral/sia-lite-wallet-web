@@ -12,6 +12,7 @@ lint:
 	npm run lint -- --fix
 
 install-dependencies:
+	cp "$(shell go env GOROOT)/misc/wasm/wasm_exec.js" src/sia/wasm_exec.js
 	npm i
 
 build-wasm:
