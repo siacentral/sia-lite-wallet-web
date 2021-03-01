@@ -2,10 +2,8 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 	<url>
 		<loc>https://wallet.siacentral.com/</loc>
-		<priority>1</priority>
 	</url>
 	<url>
-		<loc>https://wallet.siacentral.com/</loc>
-		<priority>0.5</priority>
+		<loc>https://wallet.siacentral.com/about</loc>
 	</url>
 </urlset>
