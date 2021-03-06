@@ -16,6 +16,8 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USER }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: test
+        run: echo ${{ github.head_ref }}
       - name: push wallet
         if: ${{ github.head_ref == 'master' }}
         uses: docker/build-push-action@v2
