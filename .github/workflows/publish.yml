@@ -16,10 +16,8 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USER }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: test
-        run: echo ${{ github.ref }}
-      - name: push wallet
-        if: ${{ github.ref == '/refs/heads/master' }}
+      - name: push latest
+        if: ${{ github.ref == 'refs/heads/master' }}
         uses: docker/build-push-action@v2
         with:
           context: .
@@ -27,7 +25,7 @@ jobs:
           push: true
           tags: siacentral/sia-lite-wallet-web:latest
       - name: push scprime
-        if: ${{ github.ref == '/refs/heads/scprime' }}
+        if: ${{ github.ref == 'refs/heads/scprime' }}
         uses: docker/build-push-action@v2
         with:
           context: .
