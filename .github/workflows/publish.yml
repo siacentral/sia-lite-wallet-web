@@ -23,7 +23,7 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: siacentral/sia-lite-wallet-web:latest
+          tags: siacentral/sia-lite-wallet-web:latest,siacentral/sia-lite-wallet-web:sia
       - name: push scprime
         if: ${{ github.ref == 'refs/heads/scprime' }}
         uses: docker/build-push-action@v2
