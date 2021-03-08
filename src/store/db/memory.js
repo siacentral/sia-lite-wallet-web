@@ -83,4 +83,9 @@ export default class MemoryStore {
 
 		delete this._wallets[walletID];
 	}
+
+	reset() {
+		this._wallets = {};
+		this._addresses = {};
+	}
 }
