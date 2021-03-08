@@ -77,7 +77,8 @@ type (
 		Owned bool `json:"owned"`
 	}
 
-	transactionResp struct {
+	walletBalance struct {
+		SiafundClaim            siatypes.Currency          `json:"siafund_claim"`
 		Transactions            []processedTransaction     `json:"transactions"`
 		UnspentSiacoinOutputs   []siacentral.SiacoinOutput `json:"unspent_siacoin_outputs"`
 		UnspentSiafundOutputs   []siacentral.SiafundOutput `json:"unspent_siafund_outputs"`

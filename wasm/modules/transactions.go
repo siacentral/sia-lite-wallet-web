@@ -93,7 +93,7 @@ func GetTransactions(addresses []string, currency string, callback js.Value) {
 	transactions := make(map[string]siacentral.Transaction)
 	ownedAddresses := make(map[string]bool)
 	count := len(addresses)
-	resp := transactionResp{}
+	resp := walletBalance{}
 
 	for _, addr := range addresses {
 		ownedAddresses[addr] = true
@@ -114,6 +114,7 @@ func GetTransactions(addresses []string, currency string, callback js.Value) {
 			return
 		}
 
+		resp.SiafundClaim = resp.SiafundClaim.Add(callResp.SiafundClaim)
 		resp.ConfirmedSiacoinBalance = resp.ConfirmedSiacoinBalance.Add(callResp.UnspentSiacoins)
 		resp.ConfirmedSiafundBalance = resp.ConfirmedSiafundBalance.Add(callResp.UnspentSiafunds)
 		resp.UnspentSiacoinOutputs = append(resp.UnspentSiacoinOutputs, callResp.UnspentSiacoinOutputs...)
