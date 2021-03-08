@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"strings"
 
-	"github.com/siacentral/apisdkgo"
+	"github.com/siacentral/sia-lite-wallet-web/wasm/siacentral"
 	"github.com/siacentral/sia-lite-wallet-web/wasm/wallet"
 	siatypes "gitlab.com/NebulousLabs/Sia/types"
 )
@@ -13,18 +13,12 @@ const (
 	workers = 5
 )
 
-func siacentralAPIClient(currency string) *apisdkgo.APIClient {
-	var baseAddress string
-
+func siacentralAPIClient(currency string) siacentral.API {
 	switch currency {
 	case "scp":
-		baseAddress = "https://api.siacentral.com/v2/scprime"
+		return siacentral.NewSCPrimeAPI()
 	default:
-		baseAddress = "https://api.siacentral.com/v2"
-	}
-
-	return &apisdkgo.APIClient{
-		BaseAddress: baseAddress,
+		return siacentral.NewSiaAPI()
 	}
 }
 

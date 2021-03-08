@@ -3,7 +3,7 @@ package modules
 import (
 	"time"
 
-	apitypes "github.com/siacentral/apisdkgo/types"
+	"github.com/siacentral/sia-lite-wallet-web/wasm/siacentral"
 	siatypes "gitlab.com/NebulousLabs/Sia/types"
 )
 
@@ -34,22 +34,22 @@ type (
 	}
 
 	processedTransaction struct {
-		TransactionID     string                   `json:"transaction_id"`
-		BlockHeight       uint64                   `json:"block_height"`
-		Confirmations     uint64                   `json:"confirmations"`
-		Fees              siatypes.Currency        `json:"fees"`
-		SiacoinValue      processedTxnValue        `json:"siacoin_value"`
-		SiafundValue      processedTxnValue        `json:"siafund_value"`
-		Timestamp         time.Time                `json:"timestamp"`
-		Tags              []string                 `json:"tags"`
-		SiacoinInputs     []processedSiacoinInput  `json:"siacoin_inputs"`
-		SiacoinOutputs    []processedSiacoinOutput `json:"siacoin_outputs"`
-		SiafundOutputs    []processedSiafundOutput `json:"siafund_outputs"`
-		SiafundInputs     []processedSiafundInput  `json:"siafund_inputs"`
-		Contracts         []processedContract      `json:"contracts"`
-		ContractRevisions []processedContract      `json:"contract_revisions"`
-		StorageProofs     []apitypes.StorageProof  `json:"storage_proofs"`
-		HostAnnouncements []apitypes.Announcement  `json:"host_announcements"`
+		TransactionID     string                    `json:"transaction_id"`
+		BlockHeight       uint64                    `json:"block_height"`
+		Confirmations     uint64                    `json:"confirmations"`
+		Fees              siatypes.Currency         `json:"fees"`
+		SiacoinValue      processedTxnValue         `json:"siacoin_value"`
+		SiafundValue      processedTxnValue         `json:"siafund_value"`
+		Timestamp         time.Time                 `json:"timestamp"`
+		Tags              []string                  `json:"tags"`
+		SiacoinInputs     []processedSiacoinInput   `json:"siacoin_inputs"`
+		SiacoinOutputs    []processedSiacoinOutput  `json:"siacoin_outputs"`
+		SiafundOutputs    []processedSiafundOutput  `json:"siafund_outputs"`
+		SiafundInputs     []processedSiafundInput   `json:"siafund_inputs"`
+		Contracts         []processedContract       `json:"contracts"`
+		ContractRevisions []processedContract       `json:"contract_revisions"`
+		StorageProofs     []siacentral.StorageProof `json:"storage_proofs"`
+		HostAnnouncements []siacentral.Announcement `json:"host_announcements"`
 	}
 
 	processedTxnValue struct {
@@ -58,35 +58,35 @@ type (
 	}
 
 	processedSiacoinOutput struct {
-		apitypes.SiacoinOutput
+		siacentral.SiacoinOutput
 		Owned bool `json:"owned"`
 	}
 
 	processedSiacoinInput struct {
-		apitypes.SiacoinInput
+		siacentral.SiacoinInput
 		Owned bool `json:"owned"`
 	}
 
 	processedSiafundOutput struct {
-		apitypes.SiafundOutput
+		siacentral.SiafundOutput
 		Owned bool `json:"owned"`
 	}
 
 	processedSiafundInput struct {
-		apitypes.SiafundInput
+		siacentral.SiafundInput
 		Owned bool `json:"owned"`
 	}
 
 	transactionResp struct {
-		Transactions            []processedTransaction   `json:"transactions"`
-		UnspentSiacoinOutputs   []apitypes.SiacoinOutput `json:"unspent_siacoin_outputs"`
-		UnspentSiafundOutputs   []apitypes.SiafundOutput `json:"unspent_siafund_outputs"`
-		SpentSiacoinOutputs     []string                 `json:"spent_siacoin_outputs"`
-		SpentSiafundOutputs     []string                 `json:"spent_siafund_outputs"`
-		ConfirmedSiafundBalance siatypes.Currency        `json:"confirmed_siafund_balance"`
-		ConfirmedSiacoinBalance siatypes.Currency        `json:"confirmed_siacoin_balance"`
-		UnconfirmedSiacoinDelta string                   `json:"unconfirmed_siacoin_delta"`
-		UnconfirmedSiafundDelta string                   `json:"unconfirmed_siafund_delta"`
+		Transactions            []processedTransaction     `json:"transactions"`
+		UnspentSiacoinOutputs   []siacentral.SiacoinOutput `json:"unspent_siacoin_outputs"`
+		UnspentSiafundOutputs   []siacentral.SiafundOutput `json:"unspent_siafund_outputs"`
+		SpentSiacoinOutputs     []string                   `json:"spent_siacoin_outputs"`
+		SpentSiafundOutputs     []string                   `json:"spent_siafund_outputs"`
+		ConfirmedSiafundBalance siatypes.Currency          `json:"confirmed_siafund_balance"`
+		ConfirmedSiacoinBalance siatypes.Currency          `json:"confirmed_siacoin_balance"`
+		UnconfirmedSiacoinDelta string                     `json:"unconfirmed_siacoin_delta"`
+		UnconfirmedSiafundDelta string                     `json:"unconfirmed_siafund_delta"`
 	}
 
 	// UnsignedTransaction a transaction and the required signature indices to sign that transaction
