@@ -75,4 +75,11 @@ export default class DexieStore {
 			this._db.wallets.filter(w => w.id === walletID).delete()
 		]);
 	}
+
+	reset() {
+		return Promise.all([
+			this._db.addresses.clear(),
+			this._db.wallets.clear()
+		]);
+	}
 }
