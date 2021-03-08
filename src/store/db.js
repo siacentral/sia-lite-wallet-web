@@ -99,7 +99,7 @@ export function getAddresses(walletID, addresses) {
 	return db.getAddresses(walletID, addresses);
 }
 
-export async function getWalletChangeAddress(walletID) {
+export function getWalletChangeAddress(walletID) {
 	return db.getWalletChangeAddress(walletID);
 }
 
@@ -107,6 +107,10 @@ export function getLastWalletAddresses(walletID, limit, offset) {
 	return db.getLastWalletAddresses(walletID, limit, offset);
 }
 
-export async function deleteWallet(walletID) {
+export function deleteWallet(walletID) {
 	return db.deleteWallet(walletID);
+}
+
+export function reset() {
+	return db.reset();
 }
