@@ -107,7 +107,7 @@ func BenchmarkBIP39(b *testing.B) {
 		var entropy [16]byte
 		frand.Read(entropy[:])
 		for i := 0; i < b.N; i++ {
-			encodeBIP39Phrase(entropy)
+			_ = encodeBIP39Phrase(entropy)
 		}
 	})
 	b.Run("decode", func(b *testing.B) {
@@ -115,7 +115,7 @@ func BenchmarkBIP39(b *testing.B) {
 		frand.Read(entropy[:])
 		phrase := encodeBIP39Phrase(entropy)
 		for i := 0; i < b.N; i++ {
-			decodeBIP39Phrase(phrase)
+			_, _ = decodeBIP39Phrase(phrase)
 		}
 	})
 }

@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/siacentral/apisdkgo"
+	"github.com/siacentral/sia-lite-wallet-web/wasm/siacentral"
 	siacrypto "gitlab.com/NebulousLabs/Sia/crypto"
 	"gitlab.com/NebulousLabs/Sia/types"
 )
@@ -41,18 +41,12 @@ func (wallet *SeedWallet) GetAddresses(idx uint64, keys []SpendableKey) {
 	}
 }
 
-func apiClient(currency string) *apisdkgo.APIClient {
-	var baseAddress string
-
+func apiClient(currency string) siacentral.API {
 	switch currency {
 	case "scp":
-		baseAddress = "https://api.siacentral.com/v2/scprime"
+		return siacentral.NewSCPrimeAPI()
 	default:
-		baseAddress = "https://api.siacentral.com/v2"
-	}
-
-	return &apisdkgo.APIClient{
-		BaseAddress: baseAddress,
+		return siacentral.NewSiaAPI()
 	}
 }
 
@@ -61,12 +55,12 @@ func (wallet *SeedWallet) currentHeight() (types.BlockHeight, error) {
 		return 0, nil
 	}
 
-	block, err := apiClient(wallet.Currency).GetLatestBlock()
+	height, err := apiClient(wallet.Currency).GetBlockHeight()
 	if err != nil {
 		return 0, err
 	}
 
-	return types.BlockHeight(block.Height), nil
+	return types.BlockHeight(height), nil
 }
 
 //SignTransaction signs a transaction, for simplicity only supports standard 1 signature keys

@@ -8,7 +8,7 @@ import (
 
 	"syscall/js"
 
-	apitypes "github.com/siacentral/apisdkgo/types"
+	"github.com/siacentral/sia-lite-wallet-web/wasm/siacentral"
 	siatypes "gitlab.com/NebulousLabs/Sia/types"
 )
 
@@ -90,7 +90,7 @@ func SignTransactions(transactions []UnsignedTransaction, phrase, currency strin
 
 //GetTransactions gets the last 500 transactions belonging to each address
 func GetTransactions(addresses []string, currency string, callback js.Value) {
-	transactions := make(map[string]apitypes.Transaction)
+	transactions := make(map[string]siacentral.Transaction)
 	ownedAddresses := make(map[string]bool)
 	count := len(addresses)
 	resp := transactionResp{}
@@ -197,7 +197,6 @@ func GetTransactions(addresses []string, currency string, callback js.Value) {
 		for i, contract := range txn.StorageContracts {
 			procContract := processedContract{
 				ID:                     contract.ID,
-				BlockID:                contract.BlockID,
 				TransactionID:          contract.TransactionID,
 				MerkleRoot:             contract.MerkleRoot,
 				UnlockHash:             contract.UnlockHash,
@@ -237,7 +236,6 @@ func GetTransactions(addresses []string, currency string, callback js.Value) {
 		for i, contract := range txn.ContractRevisions {
 			procContract := processedContract{
 				ID:                     contract.ID,
-				BlockID:                contract.BlockID,
 				TransactionID:          contract.TransactionID,
 				MerkleRoot:             contract.MerkleRoot,
 				UnlockHash:             contract.UnlockHash,
