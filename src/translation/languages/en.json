@@ -106,6 +106,12 @@
 		"unlockWalletModal": {
 			"pWalletsLocked": "Your wallets are currently encrypted and locked. Enter your password to unlock your wallets and access your funds."
 		},
+		"resetWalletModal": {
+			"heading": "Forgot Password?",
+			"pExplain": "Wallet data is stored locally and encrypted using your unlock password, there is no way to recover a forgotton password. This will delete all stored data and reset your password. After resetting you can recover your wallet using the recovery seed or import addresses from your Ledger Nano S.",
+			"chkConfirm": "I understand that all data will be permanently erased and I will lose access to my wallets",
+			"btnDelete": "Delete all data and reset"
+		},
 		"createWalletModal": {
 			"newWallet": "New Wallet",
 			"recoverWallet": "Recover Wallet",

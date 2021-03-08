@@ -13,19 +13,28 @@
 					<button class="btn btn-success btn-inline" :disabled="unlocking">{{ translate('unlock') }}</button>
 				</div>
 			</form>
+			<div class="buttons">
+				<button class="reset-button" @click.prevent="forgotPassword = true">Forgot Password?</button>
+			</div>
 			<p class="text-small text-secondary text-center">Version: {{ uiRevision }}</p>
 		</div>
+		<transition name="fade" mode="out-in">
+			<forgot-password v-if="forgotPassword" @close="forgotPassword = false" />
+		</transition>
 	</div>
 </template>
 
 <script>
 import { mapActions } from 'vuex';
+import ForgotPassword from '../components/ForgotPassword.vue';
 
 export default {
+	components: { ForgotPassword },
 	data() {
 		return {
 			password: '',
-			unlocking: false
+			unlocking: false,
+			forgotPassword: false
 		};
 	},
 	methods: {
@@ -92,5 +101,13 @@ h2, p {
 
 .text-secondary {
 	color: rgba(255, 255, 255, 0.24);
+}
+
+.reset-button {
+	color: rgba(255, 255, 255, 0.4);
+	background: none !important;
+	border: none !important;
+	outline: none !important;
+	cursor: pointer;
 }
 </style>
