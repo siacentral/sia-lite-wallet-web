@@ -13,7 +13,7 @@
 			</div>
 			<div class="wallet-siacoin-balance" v-html="formatSiacoinString(siacoinBalance)"></div>
 			<div class="wallet-display-balance" v-html="formatCurrencyString(siacoinBalance)"></div>
-			<div class="wallet-display-balance" v-if="siafundBalance.gt(0)" v-html="formatSiafundString(siafundBalance)"></div>
+			<siafund-balance :siafunds="siafundBalance" :claim="claimBalance" :wallet="wallet" />
 			<div class="wallet-button-wrapper">
 				<div class="wallet-buttons">
 					<button class="btn wallet-btn" @click="modal='send'" v-if="wallet.type !== 'watch'">{{ translate('send') }}</button>
@@ -98,6 +98,7 @@ import SendSiacoinModal from '@/modal/SendSiacoinModal';
 import SelectWalletModal from '@/modal/SelectWalletModal';
 import TransactionDetailModal from '@/modal/TransactionDetailModal';
 import TransactionListItem from '@/components/transactions/TransactionListItem';
+import SiafundBalance from './SiafundBalance.vue';
 
 export default {
 	components: {
@@ -109,6 +110,7 @@ export default {
 		ReceiveSiacoinModal,
 		SendSiacoinModal,
 		SelectWalletModal,
+		SiafundBalance,
 		TransactionDetailModal,
 		TransactionListItem
 	},
@@ -140,6 +142,12 @@ export default {
 				return new BigNumber(0);
 
 			return this.wallet.unconfirmedSiafundBalance();
+		},
+		claimBalance() {
+			if (!this.wallet)
+				return new BigNumber(0);
+
+			return this.wallet.siafundClaimBalance();
 		},
 		outputsLen() {
 			const outputs = this.wallet && Array.isArray(this.wallet.unspent_siacoin_outputs) ? this.wallet.unspent_siacoin_outputs : [],
