@@ -12,6 +12,7 @@ export default class Wallet {
 		this.currency = data.currency || 'sc';
 		this.server_url = data.server_url;
 		this.transactions = Array.isArray(data.transactions) ? data.transactions : [];
+		this.siafund_claim = new BigNumber(data.siafund_claim || 0);
 		this.unspent_siacoin_outputs = Array.isArray(data.unspent_siacoin_outputs) ? data.unspent_siacoin_outputs : [];
 		this.unspent_siafund_outputs = Array.isArray(data.unspent_siafund_outputs) ? data.unspent_siafund_outputs : [];
 		this.spent_siacoin_outputs = Array.isArray(data.spent_siacoin_outputs) ? data.spent_siacoin_outputs : [];
@@ -71,5 +72,14 @@ export default class Wallet {
 			delta = new BigNumber(0);
 
 		return balance.plus(delta);
+	}
+
+	siafundClaimBalance() {
+		let balance = new BigNumber(this.siafund_claim);
+
+		if (!balance || balance.isNaN())
+			balance = new BigNumber(0);
+
+		return balance;
 	}
 };
