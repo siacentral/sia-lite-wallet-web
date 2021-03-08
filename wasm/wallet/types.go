@@ -35,7 +35,7 @@ type (
 		Value      types.Currency `json:"value"`
 	}
 
-	//UnlockConditions maps sia unlock conditions to a more managable type
+	//UnlockConditions maps sia unlock conditions to a more manageable type
 	UnlockConditions struct {
 		PublicKeys         []string `json:"publickeys"`
 		SignaturesRequired uint64   `json:"signaturesrequired"`

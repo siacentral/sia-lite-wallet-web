@@ -11,7 +11,7 @@ import (
 	"syscall/js"
 
 	"github.com/shopspring/decimal"
-	"github.com/siacentral/apisdkgo/types"
+	"github.com/siacentral/sia-lite-wallet-web/wasm/siacentral"
 	siatypes "gitlab.com/NebulousLabs/Sia/types"
 )
 
@@ -33,7 +33,7 @@ type (
 	}
 )
 
-func transactionType(txn types.Transaction, currency string) string {
+func transactionType(txn siacentral.Transaction, currency string) string {
 	if len(txn.SiafundInputs) != 0 && len(txn.SiafundOutputs) != 0 {
 		if currency == "scp" {
 			return "SCPrimeFund Transaction"
@@ -86,7 +86,7 @@ func transactionType(txn types.Transaction, currency string) string {
 
 // feesPaid attempts to determine if the wallet owner paid the transaction fees of if
 // another party paid the fee.
-func feesPaid(txn types.Transaction, ownedInput, unownedInput siatypes.Currency, ownedOutput, unownedOutput siatypes.Currency) siatypes.Currency {
+func feesPaid(txn siacentral.Transaction, ownedInput, unownedInput siatypes.Currency, ownedOutput, unownedOutput siatypes.Currency) siatypes.Currency {
 	if unownedInput.Equals64(0) {
 		return txn.Fees
 	}
