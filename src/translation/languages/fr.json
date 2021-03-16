@@ -16,6 +16,7 @@
 		"unlockWallet": "Déverrouiller le portefeuille",
 		"walletPassword": "Mot de passe du portefeuille",
 		"unlockPassword": "Mot de passe de déverrouillage",
+		"confirmPassword": "Confirm Password",
 		"transactionFee": "Frais de transaction",
 		"total": "Total",
 		"siacoinTotal": "Total de Siacoin",
@@ -85,7 +86,8 @@
 			"continue": "Poursuivre quand même",
 			"caution1": "Afin d'éviter toute perte, renez les plus grandes précautions lors de l'envoi ou de la réception de cryptomonnaies. Les transactions de cryptomonnaies sont permanentes et irréversibles. Sia Central ne pourra être tenu responsable en cas de dommages causés lors de l'utilisation de ce portefeuille.",
 			"caution2": "Faites nous part de votre feedback ou de bugs rencontrés sur GitHub.",
-			"password1": "Créez un mot de passe \"fort\" pour encrypter votre portefeuille. Ce mot de passe sera nécessaire pour déverrouiller et utiliser vos portefeuilles."
+			"password1": "Créez un mot de passe \"fort\" pour encrypter votre portefeuille. Ce mot de passe sera nécessaire pour déverrouiller et utiliser vos portefeuilles.",
+			"passwordMatchError": "Unlock password does not match. Check your passwords and try again."
 		},
 		"settings": {
 			"displayHeader": "Affichage",

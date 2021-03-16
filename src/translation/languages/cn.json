@@ -16,6 +16,7 @@
 		"unlockWallet": "解锁钱包",
 		"walletPassword": "钱包密码",
 		"unlockPassword": "解锁密码",
+		"confirmPassword": "Confirm Password",
 		"transactionFee": "交易费",
 		"total": "共计",
 		"siacoinTotal": "Siacoin Total",
@@ -85,7 +86,8 @@
 			"continue": "Continue Anyway",
 			"caution1": "Use caution when sending or receiving cryptocurrencies to prevent coin loss. Cryptocurrency transactions are permanent and non-reversable. Sia Central is not responsible for any damages incurred while using this wallet.",
 			"caution2": "Report any bugs or submit feedback on GitHub.",
-			"password1": "请设置一个安全密码来加密您的钱包。 用以解锁和使用您的钱包。"
+			"password1": "请设置一个安全密码来加密您的钱包。 用以解锁和使用您的钱包。",
+			"passwordMatchError": "Unlock password does not match. Check your passwords and try again."
 		},
 		"settings": {
 			"displayHeader": "显示",

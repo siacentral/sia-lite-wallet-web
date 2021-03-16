@@ -25,7 +25,12 @@
 					<p>{{ translate('setup.password1') }} <router-link :to="{ name: 'about' }">Learn more</router-link>.</p>
 					<div class="control">
 						<label>{{ translate('unlockPassword') }}</label>
-						<input type="password" v-model="unlockPassword" autocomplete="new-password" />
+						<input type="password" v-model="unlockPassword" autocomplete="new-password" @input="onCheckPassword" @blur="onCheckPassword" />
+					</div>
+					<div class="control">
+						<label>{{ translate('confirmPassword') }}</label>
+						<input type="password" v-model="confirmPassword" autocomplete="new-password" @input="onCheckPassword" @blur="onCheckPassword" />
+						<div class="text-error text-small" v-if="!passwordsMatch">{{ translate('setup.passwordMatchError') }}</div>
 					</div>
 					<div class="control">
 						<label>{{ translate('settings.lblDisplayLanguage') }}</label>
@@ -36,7 +41,7 @@
 					<p class="text-warning text-small">{{ translate('setup.caution1') }}</p>
 					<p class="text-warning text-small">{{ translate('setup.caution2') }}</p>
 					<div class="buttons">
-						<button class="btn btn-success btn-inline" @click="onSetPassword" :disabled="unlockPassword.length === 0">{{ translate('next') }}</button>
+						<button class="btn btn-success btn-inline" @click="onSetPassword" :disabled="!enableNext">{{ translate('next') }}</button>
 					</div>
 				</div>
 			</div>
@@ -63,6 +68,9 @@ export default {
 	},
 	computed: {
 		...mapState(['dbType']),
+		enableNext() {
+			return this.unlockPassword.length > 0 && this.unlockPassword === this.confirmPassword;
+		},
 		languages() {
 			return languages;
 		}
@@ -71,6 +79,8 @@ export default {
 		return {
 			step: null,
 			unlockPassword: '',
+			confirmPassword: '',
+			passwordsMatch: true,
 			newLanguage: null,
 			accepted: false
 		};
@@ -88,9 +98,16 @@ export default {
 	},
 	methods: {
 		...mapActions(['setPassword', 'setSetup', 'setDisplayLanguage']),
+		onCheckPassword() {
+			try {
+				this.passwordsMatch = this.confirmPassword === this.unlockPassword;
+			} catch (ex) {
+				console.error('onCheckPassword', ex);
+			}
+		},
 		onSetPassword() {
 			try {
-				if (this.unlockPassword.length === 0)
+				if (this.unlockPassword.length === 0 || this.unlockPassword !== this.confirmPassword)
 					return;
 
 				this.setPassword(this.unlockPassword);
