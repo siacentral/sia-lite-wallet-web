@@ -117,8 +117,8 @@ export default {
 			if (this.transaction) {
 				if (this.transaction.confirmations === 0)
 					return this.translate('unconfirmed');
-				else if (this.transaction.confirmations < 3)
-					return this.translate('confirmations', this.transaction.confirmations, 3);
+				else if (this.transaction.confirmations < 6)
+					return this.translate('confirmations', this.transaction.confirmations, 6);
 			}
 
 			return '';
@@ -128,7 +128,7 @@ export default {
 
 			if (this.transaction && this.transaction.confirmations === 0)
 				classes['transaction-unconfirmed'] = true;
-			else if (this.transaction && this.transaction.confirmations < 3)
+			else if (this.transaction && this.transaction.confirmations < 6)
 				classes['transaction-partial-confirmed'] = true;
 
 			return classes;
