@@ -13,7 +13,7 @@
 			</div>
 			<div class="wallet-siacoin-balance" v-html="formatSiacoinString(siacoinBalance)"></div>
 			<div class="wallet-display-balance" v-html="formatCurrencyString(siacoinBalance)"></div>
-			<siafund-balance :siafunds="siafundBalance" :claim="claimBalance" :wallet="wallet" />
+			<siafund-balance :siafunds="siafundBalance" :claim="claimBalance" :wallet="wallet" v-if="siafundBalance.gt(0)" />
 			<div class="wallet-button-wrapper">
 				<div class="wallet-buttons">
 					<button class="btn wallet-btn" @click="modal='send'" v-if="wallet.type !== 'watch'">{{ translate('send') }}</button>
