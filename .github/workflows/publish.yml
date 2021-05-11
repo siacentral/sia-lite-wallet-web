@@ -21,4 +21,23 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: siacentral/sia-lite-wallet-web:latest,siacentral/sia-lite-wallet-web:sia
+          tags: siacentral/sia-lite-wallet-web:latest
+  skynet:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@master
+        with:
+          node-version: 12
+      - uses: actions/setup-go@v1
+        with:
+          go-version: 1.16
+      - name: Build
+        run: |
+          export VUE_APP_VERSION=$(git rev-parse --short HEAD)
+          make build
+      - name: Deploy
+        uses: kwypchlo/deploy-to-skynet-action@91305d507e88cd61a774f678e9f7ee69550ea06b
+        with:
+          upload-dir: dist
+          registry-seed: ${{ secrets.SKYWALLET_SKYDB_SEED }}
