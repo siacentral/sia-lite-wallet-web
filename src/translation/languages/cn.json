@@ -5,34 +5,34 @@
 		"siacoin": "Siacoin",
 		"scprimecoin": "SCPrimeCoin",
 		"addWallet": "增加钱包",
-		"buySiacoin": "Buy Siacoin (PREVIEW)",
+		"buySiacoin": "购买SC (预览)",
 		"rescanWallet": "重新扫描钱包",
-		"defragWallet": "Defrag Wallet",
-		"defrag": "Defrag",
+		"defragWallet": "钱包整理",
+		"defrag": "碎片整理",
 		"addAddresses": "增加地址",
 		"exportSeed": "导出种子",
-		"exportTransactions": "Export Transactions",
+		"exportTransactions": "导出交易",
 		"deleteWallet": "删除钱包",
 		"unlockWallet": "解锁钱包",
 		"walletPassword": "钱包密码",
 		"unlockPassword": "解锁密码",
-		"confirmPassword": "Confirm Password",
+		"confirmPassword": "确认密码",
 		"transactionFee": "交易费",
 		"total": "共计",
-		"siacoinTotal": "Siacoin Total",
-		"siafundTotal": "Siafund Total",
-		"scpTotal": "SCP Total",
-		"spfTotal": "SPF Total",
+		"siacoinTotal": "Siacoin 总计",
+		"siafundTotal": "Siafund 总计",
+		"scpTotal": "SCP 总计",
+		"spfTotal": "SPF 总计",
 		"minerFee": "矿工费",
 		"address": "地址",
 		"amount": "金额",
 		"summary": "概况",
 		"inputs": "输入",
 		"outputs": "输出",
-		"siafundOutputs": "Siafund Outputs",
+		"siafundOutputs": "Siafund 输出",
 		"add": "增加",
-		"confirm": "Confirm",
-		"continue": "Continue",
+		"confirm": "确认",
+		"continue": "继续",
 		"connect": "连接",
 		"send": "发送",
 		"receive": "接收",
@@ -51,13 +51,13 @@
 		"status": "状态",
 		"wallet": "钱包",
 		"unconfirmed": "未确认",
-		"confirmations": "{{0}}/{{1}} Confirmations",
-		"half": "Half",
-		"full": "Full",
+		"confirmations": "{{0}}/{{1}} 确认数",
+		"half": "50%",
+		"full": "100%",
 		"siacentral": "Sia Central",
 		"walrus": "Walrus",
 		"narwal": "Narwal",
-		"ledgerSCPWarning": "The Sia Ledger Nano S App will not work with ScPrime, in order to send funds you need to side-load the ScPrime App from ",
+		"ledgerSCPWarning": "Sia Ledger Nano S 应用程序不能与ScPrime一起使用，为了发送资金，您需要从以下位置加载ScPrime应用程序",
 		"walletStatus": {
 			"scanning": "扫描中...",
 			"queued": "等待扫描..."
@@ -81,13 +81,13 @@
 			"settings": "设置"
 		},
 		"setup": {
-			"header": "Get Started",
-			"warning": "Warning!",
-			"continue": "Continue Anyway",
-			"caution1": "Use caution when sending or receiving cryptocurrencies to prevent coin loss. Cryptocurrency transactions are permanent and non-reversable. Sia Central is not responsible for any damages incurred while using this wallet.",
-			"caution2": "Report any bugs or submit feedback on GitHub.",
+			"header": "开始使用",
+			"warning": "警告！",
+			"continue": "仍然继续",
+			"caution1": "在发送或接收加密货币时要小心，以防止硬币丢失。 加密货币交易是永久性且不可逆的。 Sia Central对使用此钱包造成的任何损失不承担任何责任。",
+			"caution2": "在GitHub上报告错误或提交反馈。",
 			"password1": "请设置一个安全密码来加密您的钱包。 用以解锁和使用您的钱包。",
-			"passwordMatchError": "Unlock password does not match. Check your passwords and try again."
+			"passwordMatchError": "解锁密码不匹配。 检查您的密码，然后重试。"
 		},
 		"settings": {
 			"displayHeader": "显示",
@@ -96,23 +96,23 @@
 			"lblDisplayCurrency": "显示币种",
 			"lblDisplayLanguage": "语言",
 			"lblAutomaticLock": "锁定时间（分钟)",
-			"lblAddressLookaHead": "Address Lookahead",
+			"lblAddressLookaHead": "地址前缀",
 			"chkShowAdvanced": "高级选项",
 			"chkWalrusSeeds": "生成12字种子",
-			"chkChangeWalletServer": "Enable 3rd-party wallet servers",
+			"chkChangeWalletServer": "启用第三方钱包服务",
 			"chkCurrency": "Enable SCPrime",
 			"pChangeSeedType": "12字种子与官方Sia钱包不兼容。它们通常与Walrus钱包一起使用。启用此设置将在创建新钱包时显示一个下拉列表，允许您生成新的Sia种子或12字种子。",
-			"pChangeServerType": "[EXPERIMENTAL] Allows the usage of 3rd-party wallet servers, like Walrus. 3rd-party servers help reduce centralization and allow for choice between trusting Sia Central or another party. Some wallet features may be broken or unsupported.",
-			"pExplainLookahead": "Wallets are composed of multiple addresses, the lookahead window is the maximum gap between two unused addresses before the wallet expects no more used addresses. Sia hosts and renters generate a lot of unused addresses, so some wallets may need to increase this value to find all of their funds."
+			"pChangeServerType": "[实验性]允许使用第三方钱包服务器，例如Walrus。 第三方服务器有助于降低集中度，并允许在信任Sia Central或另一方之间进行选择。 某些钱包功能可能已损坏或不受支持。",
+			"pExplainLookahead": "钱包由多个地址组成，前缀窗口是两个未使用的地址之间的最大间隔，在钱包可能不再有已使用的地址之前。 Sia的房东和房客会产生大量未使用的地址，因此某些钱包可能需要增加此值才能找到他们的所有资金。"
 		},
 		"unlockWalletModal": {
 			"pWalletsLocked": "您的钱包目前已加密并锁定，输入密码解锁您的钱包并查看您的资金。"
 		},
 		"resetWalletModal": {
-			"heading": "Forgot Password?",
-			"pExplain": "Wallet data is stored locally and encrypted using your unlock password, there is no way to recover a forgotton password. This will delete all stored data and reset your password. After resetting you can recover your wallet using the recovery seed or import addresses from your Ledger Nano S.",
-			"chkConfirm": "I understand that all data will be permanently erased and I will lose access to my wallets",
-			"btnDelete": "Delete all data and reset"
+			"heading": "忘记密码?",
+			"pExplain": "钱包数据存储在本地并使用您的解锁密码进行加密，无法恢复忘记的密码。 这将删除所有存储的数据并重置您的密码。 重置后，您可以使用恢复种子恢复钱包，或从Ledger Nano S导入地址。",
+			"chkConfirm": "我了解所有数据都将被永久删除，并且我将无法使用我的钱包",
+			"btnDelete": "删除所有数据并重置"
 		},
 		"createWalletModal": {
 			"newWallet": "新建钱包",
@@ -131,10 +131,10 @@
 			"lblWalletName": "钱包名称",
 			"lblRecoverySeed": "恢复种子",
 			"lblSeedType": "种子类型",
-			"lblServerType": "Server Type",
-			"lblServerURL": "Server URL",
-			"lblCurrencyType": "Currency",
-			"seedExported": "My recovery seed is saved in a secure location",
+			"lblServerType": "服务类型",
+			"lblServerURL": "服务网址",
+			"lblCurrencyType": "货币",
+			"seedExported": "我的恢复种子保存在安全的位置",
 			"siaSeed": "Sia种子",
 			"walrusSeed": "Walrus种子"
 		},
@@ -151,12 +151,12 @@
 			"connected": "已连接",
 			"disconnected": "已断开",
 			"instructions": "当前余额",
-			"outdated": "Sia Ledger app out of date, close the browser and update in Ledger Live"
+			"outdated": "Sia Ledger应用程序已过期，请关闭浏览器并在Ledger Live中进行更新"
 		},
 		"sendSiacoinsModal": {
 			"spendableBalance": "可用余额",
 			"recipientAddress": "接收地址",
-			"receiveAddress": "Receive Address",
+			"receiveAddress": "接收地址",
 			"spent": "花费",
 			"remainingBalance": "余额",
 			"txtRecipientPlaceholder": "发送Siacoin到...",
@@ -164,32 +164,32 @@
 			"errorNotEnough": "发送金额超过余额",
 			"errorHighFee": "发送的金额少于交易费",
 			"errorBadRecipient": "无效的接收地址",
-			"errorTooManyInputs": "Transaction has too many inputs. Wallet needs to be defragmented before sending.",
+			"errorTooManyInputs": "交易输入过多。 在发送之前，需要对钱包进行碎片整理。",
 			"statusSigning": "正在签署交易...",
 			"statusBroadcasting": "正在广播交易... {{0}}/{{1}}"
 		},
 		"defragModal": {
 			"outputCount": "# of Outputs (Before)",
 			"transactionCount": "# of Transactions",
-			"defragExplain": "Transactions on the Sia network are limited to 32 KB, or about 90 inputs. Defragmenting a wallet will combine and send all of your outputs to an address in your wallet or an address in another wallet. It is only necessary if your wallet controls a lot of small outputs and you are having trouble sending transactions.",
-			"defragUnnecessary": "Wallet does not need to be defragmented",
-			"receiveAmount": "Receive Amount",
-			"sendAmount": "Send Amount"
+			"defragExplain": "Sia网络上的事务被限制为32 KB，或大约90个输入。 对钱包进行碎片整理将合并所有输出并将其发送到您钱包中的地址或另一个钱包中的地址。 仅当您的钱包控制着很多小输出并且在发送交易时遇到麻烦时才需要。",
+			"defragUnnecessary": "钱包不需要整理",
+			"receiveAmount": "收取金额",
+			"sendAmount": "发送金额"
 		},
 		"exportTransactionsModal": {
-			"dateRangeAll": "All",
-			"dateRangeYear": "This Year",
-			"dateRangeLastYear": "Last Year",
-			"dateRangeMonth": "This Month",
-			"dateRangeLastMonth": "Last Month",
-			"dateRangeCustom": "Custom",
-			"labelMin": "Min",
-			"labelMax": "Max",
-			"errMaxGtMin": "Min must be greater than Max",
-			"exportMessage": "Exporting {{0}}/{{1}} transactions from {{2}} addresses"
+			"dateRangeAll": "所有",
+			"dateRangeYear": "今年",
+			"dateRangeLastYear": "去年",
+			"dateRangeMonth": "本月",
+			"dateRangeLastMonth": "上月",
+			"dateRangeCustom": "自定义",
+			"labelMin": "最小",
+			"labelMax": "最大",
+			"errMaxGtMin": "最小值必须大于最大值",
+			"exportMessage": "正在从 {{2}} 地址，导出 {{0}}/{{1}} 个交易。"
 		},
 		"transactionTypes": {
-			"contractRenewal": "Contract Renewal",
+			"contractRenewal": "续约",
 			"contractRevision": "合同修订",
 			"contractFormation": "合同形成",
 			"storageProof": "储存证明",
@@ -240,16 +240,16 @@
 			"walletsLocked": "因不活动钱包已自动锁定。"
 		},
 		"ofac": {
-			"blockedHeader": "Wallet Access Limited",
-			"blockedExplain1": "Due to a recent settlement between the United States of America's Office of Foreign Asset Control and BitGo, Inc, Sia Central has decided to prevent sending transactions in our non-custodial lite wallet from certain countries. Our lite wallet does not have user accounts and all wallet data is managed and stored locally on your device. However, it is our understanding of the current regulations that we are required to prevent transactions originating in certain countries sanctioned by the U.S. government from being broadcast through our node.",
-			"blockedExplain2": "We did not make this change lightly and are still researching compliance requirements in an ever changing regulatory climate. If you believe you have received this message in error, please reach out via email, Github, or in the official Sia Discord.",
+			"blockedHeader": "钱包访问限制",
+			"blockedExplain1": "由于美国外国资产控制办公室与BitGo，Inc之间最近达成和解，Sia Central已决定阻止从某些国家/地区通过我们的非托管lite钱包发送交易。 我们的精简版钱包没有用户帐户，所有钱包数据均在您的设备上本地管理和存储。 但是，我们对当前法规的理解要求我们防止对美国政府认可的某些国家/地区进行的交易通过我们的节点进行广播。",
+			"blockedExplain2": "我们并没有轻易做出改变，并且仍在不断变化的法规环境中研究合规性要求。 如果您认为收到此消息是错误的，请通过电子邮件，Github或通过官方的Sia Discord联系。",
 			"discordLabel": "Sia Discord",
 			"githubLabel": "GitHub"
 		},
 		"version": {
-			"header": "Outdated Wallet Detected",
-			"explain": "An old version of the wallet has been detected. This can be caused by your browser's cache. Try refreshing your browser. Continuing may cause issues.",
-			"walletLabel": "Wallet Version"
+			"header": "检测到旧版钱包",
+			"explain": "检测到旧版钱包。 这可能是由浏览器的缓存引起的。 尝试刷新您的浏览器。 继续可能会导致问题。",
+			"walletLabel": "钱包版本"
 		}
 	}
 }
