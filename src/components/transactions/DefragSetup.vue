@@ -289,7 +289,7 @@ export default {
 						{
 							unlock_hash: feeAddress,
 							value: apiFee.toString(10),
-							tag: 'API Fee',
+							tag: 'Broadcast Fee',
 							owned: false
 						}
 					]

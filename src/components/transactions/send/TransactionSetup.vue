@@ -284,7 +284,7 @@ export default {
 				txn.siacoin_outputs.push({
 					unlock_hash: feeAddress,
 					value: this.apiFee.toString(10),
-					tag: 'API Fee',
+					tag: 'Broadcast Fee',
 					owned: false
 				});
 			}

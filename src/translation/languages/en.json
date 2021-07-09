@@ -204,7 +204,7 @@
 		},
 		"outputTags": {
 			"received": "Received",
-			"apiFee": "API Fee",
+			"apiFee": "Broadcast Fee",
 			"recipient": "Recipient",
 			"sent": "Sent",
 			"sender": "Sender"

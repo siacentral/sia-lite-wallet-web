@@ -98,7 +98,7 @@ export default {
 		},
 		apiFee() {
 			return this.outputs.reduce((total, o) => {
-				if (o.tag !== 'API Fee')
+				if (o.tag !== 'Broadcast Fee')
 					return total;
 
 				const value = total.plus(o.value);
