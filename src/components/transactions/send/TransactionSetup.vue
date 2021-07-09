@@ -94,10 +94,10 @@ export default {
 				b = new BigNumber(b.value);
 
 				if (a.gt(b))
-					return 1;
+					return -1;
 
 				if (a.lt(b))
-					return -1;
+					return 1;
 
 				return 0;
 			});
@@ -231,6 +231,23 @@ export default {
 
 				if (added.gte(amount))
 					break;
+			}
+
+			if (inputs.length <= 5 && this.unspent.length >= 30) {
+				for (let i = 1; i <= 10; i++) {
+					const output = this.unspent[this.unspent.length - i],
+						addr = this.ownedAddresses.find(a => output.unlock_hash === a.address && a.unlock_conditions);
+
+					if (!addr)
+						continue;
+
+					added = added.plus(output.value);
+					inputs.push({
+						...output,
+						...addr,
+						owned: true
+					});
+				}
 			}
 
 			return inputs;
