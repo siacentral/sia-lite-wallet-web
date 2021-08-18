@@ -58,7 +58,7 @@
 import { mapState, mapActions } from 'vuex';
 import { generateAddresses } from '@/sia';
 import { saveAddresses } from '@/store/db';
-import { ledgerSupported } from '@/ledger';
+import { supportedTransports } from '@/ledger/sia';
 
 import BuildWallet from '@/components/wallet/BuildWallet';
 import ExportSeedModal from '@/modal/ExportSeedModal';
@@ -104,7 +104,7 @@ export default {
 		};
 	},
 	async mounted() {
-		this.ledgerSupported = await ledgerSupported();
+		this.ledgerSupported = (await supportedTransports()).length > 0;
 		setTimeout(() => {
 			this.step = 'choose';
 		}, 300);

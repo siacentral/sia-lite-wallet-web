@@ -22,14 +22,14 @@
 
 <script>
 import { formatNumber } from '@/utils/format';
-import { getPublicKey, getAddress } from '@/ledger';
 
 export default {
 	props: {
 		wallet: Object,
 		value: Array,
 		publickey: Boolean,
-		readonly: Boolean
+		readonly: Boolean,
+		ledgerDevice: Object
 	},
 	computed: {
 		walletType() {
@@ -40,10 +40,13 @@ export default {
 		formatNumber,
 		async onVerifyLedger(i) {
 			try {
+				if (!this.ledgerDevice)
+					throw new Error('No ledger device');
+
 				if (this.publickey)
-					await getPublicKey(i);
+					await this.ledgerDevice.getPublicKey(i);
 				else
-					await getAddress(i);
+					await this.ledgerDevice.getAddress(i);
 			} catch (ex) {
 				console.error('ImportAddressList.onVerifyLedger', ex);
 			}

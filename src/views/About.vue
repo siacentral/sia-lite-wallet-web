@@ -19,8 +19,7 @@
           an existing wallet in under 2 minutes.
         </li>
         <li>
-          <b>Ledger Nano S</b> - easily send and receive transactions with full
-          Ledger Nano S support
+          <b>Hardware Wallet Support</b> - easily send and receive transactions with a Ledger Nano S or Ledger Nano X hardware wallet using USB or Bluetooth.
         </li>
         <li>
           <b>Multiple Wallets</b> - create any number of separate wallets.

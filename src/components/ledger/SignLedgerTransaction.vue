@@ -28,7 +28,6 @@
 
 <script>
 import { encodeTransaction } from '@/sia';
-import { getVersion, signTransaction, signTransactionV044 } from '@/ledger';
 import { formatNumber } from '@/utils/format';
 
 import ConnectLedger from './ConnectLedger';
@@ -45,6 +44,7 @@ export default {
 	},
 	data() {
 		return {
+			ledgerDevice: null,
 			connected: false,
 			signing: false,
 			signed: null,
@@ -65,6 +65,10 @@ export default {
 	},
 	beforeMount() {
 		this.signed = { ...this.transaction };
+	},
+	beforeDestroy() {
+		if (this.ledgerDevice)
+			this.ledgerDevice.close();
 	},
 	methods: {
 		formatNumber,
@@ -97,13 +101,13 @@ export default {
 
 			return 0;
 		},
-		async onConnected(connected) {
+		async onConnected(device) {
 			try {
-				this.connected = connected;
-
-				if (this.connected)
-					this.version = await getVersion();
+				this.ledgerDevice = device;
+				this.connected = true;
+				this.version = await this.ledgerDevice.getVersion();
 			} catch (ex) {
+				this.ledgerDevice.close();
 				console.error('onConnected', ex);
 				this.pushNotification({
 					severity: 'danger',
@@ -122,19 +126,20 @@ export default {
 			try {
 				if (!this.signed)
 					throw new Error('no transaction to sign');
+				else if (!this.ledgerDevice || !this.connected)
+					throw new Error('ledger not connected');
 
 				const encoded = await encodeTransaction(this.signed),
+					version = await this.ledgerDevice.getVersion(),
 					// compat: v0.4.5 introduces the change index to the sign txn ADPU
-					signCompat = this.versionCmp(this.version, '0.4.5') < 0;
-
-				console.log(this.version, this.changeIndex, this.versionCmp(this.version, '0.4.5'));
+					signCompat = this.versionCmp(version, '0.4.5') < 0;
 
 				for (; this.signatures < this.requiredSignatures.length; this.signatures++) {
 					let sig;
 					if (signCompat)
-						sig = await signTransactionV044(encoded, this.signatures, this.requiredSignatures[this.signatures]);
+						sig = await this.ledgerDevice.signTransactionV044(encoded, this.signatures, this.requiredSignatures[this.signatures]);
 					else
-						sig = await signTransaction(encoded, this.signatures, this.requiredSignatures[this.signatures], this.changeIndex);
+						sig = await this.ledgerDevice.signTransaction(encoded, this.signatures, this.requiredSignatures[this.signatures], this.changeIndex);
 
 					this.signed.transactionsignatures[this.signatures].signature = sig;
 				}

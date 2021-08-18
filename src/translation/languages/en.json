@@ -110,7 +110,7 @@
 		},
 		"resetWalletModal": {
 			"heading": "Forgot Password?",
-			"pExplain": "Wallet data is stored locally and encrypted using your unlock password, there is no way to recover a forgotton password. This will delete all stored data and reset your password. After resetting you can recover your wallet using the recovery seed or import addresses from your Ledger Nano S.",
+			"pExplain": "Wallet data is stored locally and encrypted using your unlock password, there is no way to recover a forgotton password. This will delete all stored data and reset your password. After resetting you can recover your wallet using the recovery seed or import addresses from your Ledger Nano.",
 			"chkConfirm": "I understand that all data will be permanently erased and I will lose access to my wallets",
 			"btnDelete": "Delete all data and reset"
 		},
@@ -150,7 +150,7 @@
 		"ledger": {
 			"connected": "Connected",
 			"disconnected": "Disconnected",
-			"instructions": "Unlock your Ledger Nano S and open the Sia App.",
+			"instructions": "Unlock your Ledger Nano and open the Sia App.",
 			"outdated": "Sia Ledger app out of date, close the browser and update in Ledger Live"
 		},
 		"sendSiacoinsModal": {

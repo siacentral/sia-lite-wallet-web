@@ -36,7 +36,6 @@ import BigNumber from 'bignumber.js';
 import { verifyAddress } from '@/utils';
 import { generateAddresses as generateSiaAddresses, encodeUnlockHash } from '@/sia';
 import { formatPriceString, formatNumber } from '@/utils/format';
-import { getVersion, getPublicKey as generateLedgerPubKey } from '@/ledger';
 import WalrusClient from '@/api/walrus';
 
 import ConnectLedger from '@/components/ledger/ConnectLedger';
@@ -53,6 +52,7 @@ export default {
 	data() {
 		return {
 			apiClient: null,
+			ledgerDevice: null,
 			ledgerVersion: '',
 			addresses: [],
 			siacoinBalance: new BigNumber(0),
@@ -125,23 +125,35 @@ export default {
 			});
 		}
 	},
+	beforeDestroy() {
+		// Close the ledger device when we're done
+		if (this.ledgerDevice)
+			this.ledgerDevice.close();
+	},
 	methods: {
 		formatNumber,
 		async generateLedgerAddr(nextIndex) {
-			const key = await generateLedgerPubKey(nextIndex),
-				unlockConditions = {
-					timelock: 0,
-					signaturesrequired: 1,
-					publickeys: [key]
-				},
-				address = await encodeUnlockHash(unlockConditions);
+			try {
+				if (!this.ledgerDevice || !this.connected)
+					throw new Error('Ledger not connected');
 
-			return {
-				address: address,
-				pubkey: key.substr(8),
-				unlock_conditions: unlockConditions,
-				index: nextIndex
-			};
+				const key = await this.ledgerDevice.getPublicKey(nextIndex),
+					unlockConditions = {
+						timelock: 0,
+						signaturesrequired: 1,
+						publickeys: [key]
+					},
+					address = await encodeUnlockHash(unlockConditions);
+
+				return {
+					address: address,
+					pubkey: key.substr(8),
+					unlock_conditions: unlockConditions,
+					index: nextIndex
+				};
+			} catch (ex) {
+				this.ledgerDevice.close();
+			}
 		},
 		async generateAddress() {
 			const nextIndex = this.addresses.reduce((v, a) => a.index > v ? a.index : v, -1) + 1;
@@ -170,14 +182,14 @@ export default {
 
 			this.siacoinBalance = new BigNumber(balance);
 		},
-		async onConnected(connected) {
+		async onConnected(device) {
 			try {
-				this.ready = connected;
-				this.connected = connected;
-
-				if (connected)
-					this.ledgerVersion = await getVersion();
+				this.ledgerVersion = await device.getVersion();
+				this.ledgerDevice = device;
+				this.ready = true;
+				this.connected = true;
 			} catch (ex) {
+				device.close();
 				console.error('onConnected', ex);
 				this.pushNotification({
 					severity: 'danger',

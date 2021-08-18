@@ -6,7 +6,7 @@ Sia Central's Lite Wallet is a secure cryptocurrency wallet web app with support
 
 + **Secure** - Keep control of your seeds. All sensitive information is stored and encrypted locally, never leaving your device.
 + **No blockchain download** - Instantly create a new wallet. Recover an existing wallet in under 2 minutes.
-+ **Ledger Nano S** - Easily send and receive transactions with full Ledger Nano S support
++ **Ledger Nano** - Easily send and receive transactions with full Ledger Nano S and Ledger Nano X support
 + **Multiple Wallets** - Create any number of separate wallets. Easily track host or renter wallets and top them up from a Ledger wallet.
 + **Compatible** - Generate or recover wallets using 29 word seeds.
 + **Multilingual** - Supports English, Chinese and French. Additional languages can be easily added by the community.
