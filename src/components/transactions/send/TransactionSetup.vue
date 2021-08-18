@@ -263,6 +263,7 @@ export default {
 		buildTransaction() {
 			const added = this.inputs.reduce((v, i) => v.plus(i.value), new BigNumber(0)),
 				txn = {
+					change_index: 0,
 					miner_fees: [this.siaFee.toString(10)],
 					siacoin_inputs: this.inputs,
 					siacoin_outputs: []
@@ -293,6 +294,7 @@ export default {
 				if (!this.changeAddress || !this.changeAddress.address || !verifyAddress(this.changeAddress.address))
 					throw new Error('unable to send transaction. no change address');
 
+				txn.change_index = this.changeAddress.index;
 				txn.siacoin_outputs.push({
 					unlock_hash: this.changeAddress.address,
 					value: change.toString(10),

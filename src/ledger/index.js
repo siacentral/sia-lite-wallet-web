@@ -145,16 +145,38 @@ export async function close() {
 	transport = null;
 }
 
-export async function signTransaction(encodedTxn, sig, key) {
+export async function signTransactionV044(encodedTxn, sig, key) {
 	if (!transport)
 		await connect();
 
 	const buf = Buffer.alloc(encodedTxn.length + 6);
 	let resp;
 
-	buf.writeInt32LE(key, 0);
-	buf.writeInt16LE(sig, 4);
+	buf.writeUInt32LE(key, 0);
+	buf.writeUInt16LE(sig, 4);
 	buf.set(encodedTxn, 6);
+
+	for (let i = 0; i < encodedTxn.length; i += 255) {
+		const p1 = i === 0 ? 0x00 : 0x80,
+			data = buf.subarray(i, i + 255);
+
+		resp = await exchange(0x08, p1, 0x01, data);
+	}
+
+	return encode(resp);
+}
+
+export async function signTransaction(encodedTxn, sig, key, change) {
+	if (!transport)
+		await connect();
+
+	const buf = Buffer.alloc(encodedTxn.length + 10);
+	let resp;
+
+	buf.writeUInt32LE(key, 0);
+	buf.writeUInt16LE(sig, 4);
+	buf.writeUInt32LE(change, 6);
+	buf.set(encodedTxn, 10);
 
 	for (let i = 0; i < encodedTxn.length; i += 255) {
 		const p1 = i === 0 ? 0x00 : 0x80,

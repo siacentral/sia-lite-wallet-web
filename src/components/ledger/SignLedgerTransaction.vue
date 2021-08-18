@@ -27,10 +27,8 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
-
 import { encodeTransaction } from '@/sia';
-import { getVersion, signTransaction } from '@/ledger';
+import { getVersion, signTransaction, signTransactionV044 } from '@/ledger';
 import { formatNumber } from '@/utils/format';
 
 import ConnectLedger from './ConnectLedger';
@@ -42,6 +40,7 @@ export default {
 	props: {
 		currency: String,
 		transaction: Object,
+		changeIndex: Number,
 		requiredSignatures: Array
 	},
 	data() {
@@ -54,13 +53,11 @@ export default {
 		};
 	},
 	computed: {
-		...mapState(['siaBlockHeight']),
 		outdated() {
-			if (this.currency === 'scp' || this.siaBlockHeight === 0 || !this.connected)
+			if (!this.connected)
 				return false;
 
-			// Sia Foundation hard fork
-			if (this.siaBlockHeight >= 298000 && this.versionCmp(this.version, '0.4.2') !== 1)
+			if (this.versionCmp(this.version, '0.4.4') < 0)
 				return true;
 
 			return false;
@@ -126,11 +123,18 @@ export default {
 				if (!this.signed)
 					throw new Error('no transaction to sign');
 
-				const encoded = await encodeTransaction(this.signed);
+				const encoded = await encodeTransaction(this.signed),
+					// compat: v0.4.5 introduces the change index to the sign txn ADPU
+					signCompat = this.versionCmp(this.version, '0.4.5') < 0;
+
+				console.log(this.version, this.changeIndex, this.versionCmp(this.version, '0.4.5'));
 
 				for (; this.signatures < this.requiredSignatures.length; this.signatures++) {
-					const sig = await signTransaction(encoded, this.signatures,
-						this.requiredSignatures[this.signatures]);
+					let sig;
+					if (signCompat)
+						sig = await signTransactionV044(encoded, this.signatures, this.requiredSignatures[this.signatures]);
+					else
+						sig = await signTransaction(encoded, this.signatures, this.requiredSignatures[this.signatures], this.changeIndex);
 
 					this.signed.transactionsignatures[this.signatures].signature = sig;
 				}

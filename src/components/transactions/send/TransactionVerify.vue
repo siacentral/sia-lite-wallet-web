@@ -27,6 +27,7 @@
 				:currency="wallet.currency"
 				:transaction="siaTransaction"
 				:requiredSignatures="requiredSignatures"
+				:changeIndex="changeIndex"
 				@signed="onLedgerSigned" />
 			<div v-else-if="sending" :key="status">{{ status }}</div>
 			<div v-else-if="!valid" :key="valid" class="text-danger">Transaction is not valid, would burn <template v-html="remStr" /></div>
@@ -86,6 +87,12 @@ export default {
 					coveredfields: { wholetransaction: true }
 				}))
 			};
+		},
+		changeIndex() {
+			if (!this.transaction.change_index || isNaN(this.transaction.change_index) || this.transaction.change_index < 0)
+				return 0;
+
+			return this.transaction.change_index;
 		},
 		remStr() {
 			const format = formatPriceString(this.remainder, 2);
