@@ -133,27 +133,23 @@ export default {
 	methods: {
 		formatNumber,
 		async generateLedgerAddr(nextIndex) {
-			try {
-				if (!this.ledgerDevice || !this.connected)
-					throw new Error('Ledger not connected');
+			if (!this.ledgerDevice || !this.connected)
+				throw new Error('Ledger not connected');
 
-				const key = await this.ledgerDevice.getPublicKey(nextIndex),
-					unlockConditions = {
-						timelock: 0,
-						signaturesrequired: 1,
-						publickeys: [key]
-					},
-					address = await encodeUnlockHash(unlockConditions);
+			const key = await this.ledgerDevice.getPublicKey(nextIndex),
+				unlockConditions = {
+					timelock: 0,
+					signaturesrequired: 1,
+					publickeys: [key]
+				},
+				address = await encodeUnlockHash(unlockConditions);
 
-				return {
-					address: address,
-					pubkey: key.substr(8),
-					unlock_conditions: unlockConditions,
-					index: nextIndex
-				};
-			} catch (ex) {
-				this.ledgerDevice.close();
-			}
+			return {
+				address: address,
+				pubkey: key.substr(8),
+				unlock_conditions: unlockConditions,
+				index: nextIndex
+			};
 		},
 		async generateAddress() {
 			const nextIndex = this.addresses.reduce((v, a) => a.index > v ? a.index : v, -1) + 1;
