@@ -23,7 +23,7 @@
 				@click="displayPublicKey = !displayPublicKey">{{ displayText }}</button>
 			<button class="btn btn-inline btn-success" @click="onAddAddress" :disabled="!ready">{{ addText }}</button>
 		</div>
-		<import-address-list v-model="addresses" :wallet="wallet" :publickey="displayPublicKey" />
+		<import-address-list v-model="addresses" :wallet="wallet" :ledgerDevice="ledgerDevice" :publickey="displayPublicKey" />
 		<div class="buttons">
 			<button class="btn btn-inline btn-success" @click="onAddAddresses" :disabled="!valid || !ready">{{ translate('done') }}</button>
 		</div>
