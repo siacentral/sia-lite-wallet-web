@@ -4,8 +4,6 @@ import { decode } from '@stablelib/utf8';
 import { Buffer } from 'buffer';
 import { encode } from '@stablelib/base64';
 
-console.log(Buffer);
-
 function uint32ToBuffer(val) {
 	const buf = Buffer.alloc(4);
 	buf.writeUInt32LE(val, 0);
@@ -52,7 +50,7 @@ class AppSia {
 		buf.writeUInt16LE(sigIndex, 4);
 		buf.set(encodedTxn, 6);
 
-		for (let i = 0; i < encodedTxn.length; i += 255) {
+		for (let i = 0; i < buf.length; i += 255) {
 			resp = await this._transport.send(0xe0,
 				0x08,
 				i === 0 ? 0x00 : 0x80,
@@ -64,7 +62,7 @@ class AppSia {
 	}
 
 	async signTransaction(encodedTxn, sigIndex, keyIndex, changeIndex) {
-		const buf = Buffer.alloc(encodedTxn.length + 6);
+		const buf = Buffer.alloc(encodedTxn.length + 10);
 		let resp = Buffer.alloc(0);
 
 		if (encodedTxn.length === 0)
@@ -75,16 +73,12 @@ class AppSia {
 		buf.writeUInt32LE(changeIndex, 6);
 		buf.set(encodedTxn, 10);
 
-		for (let i = 0; i < encodedTxn.length; i += 250) {
-			const b = buf.subarray(i, i + 250),
-				b2 = Buffer.alloc(b.length);
-
-			b2.set(b);
+		for (let i = 0; i < buf.length; i += 255) {
 			resp = await this._transport.send(0xe0,
 				0x08,
 				i === 0 ? 0x00 : 0x80,
 				0x01,
-				b2);
+				Buffer.from(buf.subarray(i, i + 255)));
 		}
 
 		return encode(resp);

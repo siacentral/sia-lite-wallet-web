@@ -77,6 +77,9 @@ export class SiaCentralAPI {
 	async broadcastTransaction(transactions) {
 		const resp = await sendJSONRequest(`${this._baseURL}/wallet/broadcast`, {
 			method: 'POST',
+			headers: {
+				Authorization: `Token ${process.env.VUE_APP_SIACENTRAL_TOKEN}`
+			},
 			body: {
 				transactions
 			}

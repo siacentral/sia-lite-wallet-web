@@ -203,10 +203,13 @@ export default {
 			return this.ownedAddresses.findIndex(a => a.address === address && a.unlock_conditions) !== -1;
 		},
 		calcTxnFees(inputs) {
-			const sia = calculateFee(inputs, 3, new BigNumber(this.networkFees.minimum));
+			const sia = calculateFee(inputs, 3, new BigNumber(this.networkFees.minimum)),
+				serverType = this.wallet?.server_type,
+				walletType = this.wallet?.type,
+				authed = !!(process.env?.VUE_APP_SIACENTRAL_TOKEN?.length > 0);
 			let api = new BigNumber(0);
 
-			if (this.wallet.server_type && this.wallet.server_type === 'siacentral')
+			if (serverType === 'siacentral' && (walletType !== 'ledger' || !authed))
 				api = calculateFee(inputs, 3, new BigNumber(this.networkFees.api.fee));
 
 			return { sia, api, total: sia.plus(api) };

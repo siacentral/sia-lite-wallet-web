@@ -15,13 +15,26 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USER }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: push docker
+      - uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: dockerhub
         uses: docker/build-push-action@v2
         with:
           context: .
           platforms: linux/amd64,linux/arm64
           push: true
           tags: siacentral/sia-lite-wallet-web:latest
+      - name: ghcr
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          build-args: SIACENTRAL_TOKEN=${{ secrets.WALLET_AUTH_TOKEN }}
+          push: true
+          tags: ghcr.io/siacentral/sia-lite-wallet-web:latest
   skynet:
     runs-on: ubuntu-latest
     steps:

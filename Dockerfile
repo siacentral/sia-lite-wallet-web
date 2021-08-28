@@ -17,8 +17,9 @@ COPY --from=buildgo /app .
 RUN npm install
 
 ENV NODE_ENV=production
+ARG SIACENTRAL_TOKEN=
 
-RUN echo "\nVUE_APP_VERSION=$(git rev-parse --short HEAD)" >> .env
+RUN echo "\nVUE_APP_VERSION=$(git rev-parse --short HEAD)\nVUE_APP_SIACENTRAL_TOKEN=${SIACENTRAL_TOKEN}" >> .env
 RUN npm run build
 
 # production
