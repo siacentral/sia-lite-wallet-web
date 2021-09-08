@@ -3,7 +3,7 @@
 		<div class="step-icon"><icon :icon="icon" /></div>
 		<div class="title">{{ translate('ledger.instructions') }}</div>
 		<div class="control" v-if="supported.length > 1">
-		<select v-model="mode" :disabled="connected">
+		<select v-model="mode" :disabled="connected" @change="onChangeMode">
 			<option v-for="mode in supported" :value="mode" :key="mode">{{ friendlyMode(mode) }}</option>
 		</select>
 		</div>
@@ -30,8 +30,15 @@ export default {
 	},
 	async beforeMount() {
 		this.supported = await supportedTransports();
-		if (this.supported.length === 1)
-			this.mode = this.supported[0];
+
+		if (this.supported.length === 0)
+			return;
+
+		let defaultMode = localStorage.getItem('ledgerDefaultMode');
+		if (this.supported.indexOf(defaultMode) === -1)
+			defaultMode = this.supported[0];
+
+		this.mode = defaultMode;
 	},
 	computed: {
 		icon() {
@@ -53,6 +60,9 @@ export default {
 			default:
 				throw new Error('Unknown transport mode: ' + mode);
 			}
+		},
+		onChangeMode() {
+			localStorage.setItem('ledgerDefaultMode', this.mode);
 		},
 		async onConnect() {
 			let sia;
