@@ -2,17 +2,16 @@
 	<div class="address-list">
 		<table>
 			<tbody>
-				<tr v-for="(address, i) in value" :key="i">
-					<td class="text-right fit-text">{{ formatNumber(value[i].index) }}</td>
-					<td v-if="publickey"><input :value="`ed25519:${value[i].pubkey}`" :placeholder="translate('importAddresses.addressPlaceholder')" readonly /></td>
-					<td v-else><input v-model="value[i].address" :placeholder="translate('importAddresses.addressPlaceholder')" @input="$emit('change', value)" :readonly="readonly" />
-					<td class="fit-text" v-if="value.length > 1 && walletType === 'watch'">
+				<tr v-for="(address, i) in addresses" :key="i">
+					<td class="text-right fit-text">{{ formatNumber(addresses[i].index) }}</td>
+					<td><input v-model="addresses[i].address" :placeholder="translate('importAddresses.addressPlaceholder')" @input="$emit('change', addresses)" :readonly="readonly" />
+					<td class="fit-text" v-if="addresses.length > 1 && walletType === 'watch'">
 						<button class="delete-btn" @click="$emit('delete', i)">
 							<icon icon="times" />
 						</button>
 					</td>
 					<td class="fit-text" v-else-if="walletType === 'ledger'">
-						<button class="btn btn-inline" @click="onVerifyLedger(value[i].index)">{{ translate('verify') }}</button>
+						<button class="btn btn-inline" @click="onVerifyLedger(addresses[i].index)">{{ translate('verify') }}</button>
 					</td>
 				</tr>
 			</tbody>
@@ -27,9 +26,16 @@ export default {
 	props: {
 		wallet: Object,
 		value: Array,
-		publickey: Boolean,
 		readonly: Boolean,
 		ledgerDevice: Object
+	},
+	data() {
+		return {
+			addresses: []
+		};
+	},
+	mounted() {
+		this.addresses = this.value;
 	},
 	computed: {
 		walletType() {
@@ -43,12 +49,22 @@ export default {
 				if (!this.ledgerDevice)
 					throw new Error('No ledger device');
 
-				if (this.publickey)
-					await this.ledgerDevice.getPublicKey(i);
-				else
-					await this.ledgerDevice.getAddress(i);
+				await this.ledgerDevice.verifyStandardAddress(i);
 			} catch (ex) {
+				this.pushNotification({
+					severity: 'danger',
+					icon: ['fab', 'usb'],
+					message: ex.message
+				});
 				console.error('ImportAddressList.onVerifyLedger', ex);
+			}
+		}
+	},
+	watch: {
+		value: {
+			deep: true,
+			handler(addresses) {
+				this.addresses = addresses;
 			}
 		}
 	}

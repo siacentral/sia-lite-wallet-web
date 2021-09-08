@@ -10,7 +10,7 @@ module.exports = {
 	},
 	extends: [
 		'plugin:vue/essential',
-		'standard'
+		'@vue/standard'
 	],
 	globals: {
 		'__static': 'readonly'

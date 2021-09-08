@@ -14,12 +14,9 @@
 			<!--<div class="text-right" v-if="siafundBalance.gt(0)" v-html="balanceSF" />-->
 		</div>
 		<div class="buttons text-right">
-			<button class="btn btn-inline"
-				v-if="walletType === 'ledger'"
-				@click="displayPublicKey = !displayPublicKey">{{ displayText }}</button>
-			<button class="btn btn-inline btn-success" @click="onAddAddress" :disabled="!ready">{{ addText }}</button>
+			<button class="btn btn-inline btn-success" @click="onAddAddress" :disabled="!ready">{{ translate('importAddresses.addAddress') }}</button>
 		</div>
-		<import-address-list v-model="addresses" :wallet="wallet" :ledgerDevice="ledgerDevice" :publickey="displayPublicKey" :readonly="walletType === 'ledger'" />
+		<import-address-list v-model="addresses" :wallet="wallet" :ledgerDevice="ledgerDevice" :readonly="walletType === 'ledger'" />
 		<div class="buttons">
 			<button class="btn btn-inline btn-success" @click="onAddAddresses" :disabled="!valid || !ready">{{ translate('done') }}</button>
 		</div>
@@ -52,7 +49,6 @@ export default {
 			addresses: [],
 			siacoinBalance: new BigNumber(0),
 			siafundBalance: new BigNumber(0),
-			displayPublicKey: false,
 			ready: false,
 			connected: false,
 			refreshTimeout: null
@@ -62,12 +58,6 @@ export default {
 		...mapState(['currency', 'exchangeRateSC', 'exchangeRateSCP']),
 		walletType() {
 			return this.wallet && typeof this.wallet.type === 'string' ? this.wallet.type : 'watch';
-		},
-		addText() {
-			return this.walletType === 'ledger' ? this.translate('importAddresses.publicKey') : this.translate('importAddresses.addAddress');
-		},
-		displayText() {
-			return this.displayPublicKey ? this.translate('importAddresses.displayAddress') : this.translate('importAddresses.displayPublicKey');
 		},
 		balanceSC() {
 			let balance = new BigNumber(this.siacoinBalance);
@@ -156,18 +146,16 @@ export default {
 			if (!this.ledgerDevice || !this.connected)
 				throw new Error('Ledger not connected');
 
-			const key = await this.ledgerDevice.getPublicKey(nextIndex),
-				unlockConditions = {
-					timelock: 0,
-					signaturesrequired: 1,
-					publickeys: [key]
-				},
-				address = await encodeUnlockHash(unlockConditions);
+			const { publicKey, address } = await this.ledgerDevice.verifyStandardAddress(nextIndex);
 
 			return {
 				address: address,
-				pubkey: key.substr(8),
-				unlock_conditions: unlockConditions,
+				pubkey: publicKey.substr(8),
+				unlock_conditions: {
+					timelock: 0,
+					signaturesrequired: 1,
+					publickeys: [publicKey]
+				},
 				index: nextIndex
 			};
 		},
