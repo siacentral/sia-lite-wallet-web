@@ -49,7 +49,15 @@ export default {
 				if (!this.ledgerDevice)
 					throw new Error('No ledger device');
 
-				await this.ledgerDevice.verifyStandardAddress(i);
+				const { address } = await this.ledgerDevice.verifyStandardAddress(i),
+					storedAddress = this.addresses.filter(a => a.index === i)[0];
+
+				if (storedAddress?.address !== address)
+					throw new Error('Address does not match device');
+				this.pushNotification({
+					icon: ['fab', 'usb'],
+					message: 'Successfully generated Ledger address'
+				});
 			} catch (ex) {
 				this.pushNotification({
 					severity: 'danger',
