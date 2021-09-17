@@ -50,7 +50,7 @@ jobs:
           export VUE_APP_VERSION=$(git rev-parse --short HEAD)
           make build
       - name: Deploy
-        uses: kwypchlo/deploy-to-skynet-action@91305d507e88cd61a774f678e9f7ee69550ea06b
+        uses: SkynetLabs/deploy-to-skynet-action@v2
         with:
           upload-dir: dist
           registry-seed: ${{ secrets.SKYWALLET_SKYDB_SEED }}
