@@ -7,7 +7,6 @@ import (
 	"strings"
 	"unicode"
 
-	"gitlab.com/NebulousLabs/Sia/crypto"
 	siacrypto "gitlab.com/NebulousLabs/Sia/crypto"
 	mnemonics "gitlab.com/NebulousLabs/entropy-mnemonics"
 	"gitlab.com/NebulousLabs/fastrand"
@@ -54,7 +53,7 @@ func RecoverSiaSeed(phrase, currency string) (*SeedWallet, error) {
 		}
 	}
 
-	words := strings.Fields(phrase)
+	words := strings.Fields(strings.TrimSpace(phrase))
 
 	// Check seed has 28 or 29 words
 	if len(words) != 28 && len(words) != 29 {
@@ -68,7 +67,7 @@ func RecoverSiaSeed(phrase, currency string) (*SeedWallet, error) {
 	}
 
 	// Decode the string into the checksummed byte slice.
-	checksumSeedBytes, err := mnemonics.FromString(phrase, mnemonics.DictionaryID("english"))
+	checksumSeedBytes, err := mnemonics.FromString(strings.Join(words, " "), mnemonics.DictionaryID("english"))
 
 	if err != nil {
 		return nil, err
@@ -80,8 +79,8 @@ func RecoverSiaSeed(phrase, currency string) (*SeedWallet, error) {
 
 	copy(wallet.s[:], checksumSeedBytes)
 
-	fullChecksum := crypto.HashObject(wallet.s)
-	if len(checksumSeedBytes) != crypto.EntropySize+6 || !bytes.Equal(fullChecksum[:6], checksumSeedBytes[crypto.EntropySize:]) {
+	fullChecksum := siacrypto.HashObject(wallet.s)
+	if len(checksumSeedBytes) != siacrypto.EntropySize+6 || !bytes.Equal(fullChecksum[:6], checksumSeedBytes[siacrypto.EntropySize:]) {
 		return nil, fmt.Errorf("unable to validate seed: incorrect checksum: usually a flipped or missing word")
 	}
 
