@@ -12,7 +12,8 @@ module.exports = {
 		appleMobileWebAppCapable: 'yes',
 		appleMobileWebAppStatusBarStyle: 'black-translucent',
 		manifestOptions: {
-			background_color: '#1d1e21'
+			background_color: '#1d1e21',
+			skylink: 'AQD-AsRr6-cB_xKegTR_7d0Dtzh73VPR08MGiEZgQ7Edxw'
 		}
 	},
 	configureWebpack: {
