@@ -34,6 +34,8 @@
 </template>
 
 <script>
+import { mapState } from 'vuex';
+
 import { getWalletAddresses } from '@/store/db';
 import { exportTransactions } from '@/sia';
 import { formatNumber } from '@/utils/format';
@@ -48,6 +50,7 @@ export default {
 		wallet: Object
 	},
 	computed: {
+		...mapState(['currency']),
 		name() {
 			if (!this.wallet || !this.wallet.title || this.wallet.title.length === 0)
 				return 'Wallet';
@@ -160,7 +163,7 @@ export default {
 				if (!Array.isArray(addresses) || addresses.length === 0)
 					throw new Error('wallet has no addresses');
 
-				const buf = await exportTransactions(addresses.map(a => a.address), this.wallet.currency, this.min, this.max, this.onExportProgress);
+				const buf = await exportTransactions(addresses.map(a => a.address), this.wallet.currency, this.currency, this.min, this.max, this.onExportProgress);
 
 				this.downloadFile(buf);
 				this.$emit('close');

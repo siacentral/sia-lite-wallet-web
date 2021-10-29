@@ -14,7 +14,7 @@
 <script>
 import BigNumber from 'bignumber.js';
 import { mapState } from 'vuex';
-import { formatPriceString, formatSiafundString } from '@/utils/format';
+import { formatPriceString, formatSiafundString, formatExchangeRate } from '@/utils/format';
 
 export default {
 	props: {
@@ -22,7 +22,7 @@ export default {
 		transaction: Object
 	},
 	computed: {
-		...mapState(['currency', 'exchangeRateSC', 'exchangeRateSCP']),
+		...mapState(['currency', 'exchangeRateSC', 'exchangeRateSCP', 'useCostBasis']),
 		siacoinAmount() {
 			if (!this.transaction || !this.transaction.siacoin_value)
 				return new BigNumber(0);
@@ -65,17 +65,27 @@ export default {
 			return `${format.value} <span class="currency-display">${this.translate(`currency.${format.label}`)}</span>`;
 		},
 		displayCurrency() {
-			let exchangeRate = this.exchangeRateSC;
+			let exchangeRate = this.exchangeRateSC[this.currency],
+				label = this.currency;
 
-			if (this.wallet.currency && this.wallet.currency === 'scp')
-				exchangeRate = this.exchangeRateSCP;
+			if (this.wallet.currency === 'sc' && this.useCostBasis) {
+				exchangeRate = this.transaction.exchange_rate.rate;
+				label = this.transaction.exchange_rate.currency;
+			} else if (this.wallet.currency && this.wallet.currency === 'scp')
+				exchangeRate = this.exchangeRateSCP[this.currency];
 
-			const format = formatPriceString(this.siacoinAmount, 2, this.currency, exchangeRate[this.currency], this.wallet.precision());
+			const format = formatPriceString(this.siacoinAmount, 2, label, exchangeRate, this.wallet.precision());
+			let display = `${format.value} <span class="currency-display">${this.translate(`currency.${format.label}`)}`;
+
+			if (this.useCostBasis)
+				display += ` @ ${formatExchangeRate(exchangeRate, label, 'never')}`;
+
+			display += '</span>';
 
 			if (this.transaction.siacoin_value.direction === 'sent')
-				return `-${format.value} <span class="currency-display">${this.translate(`currency.${format.label}`)}</span>`;
+				display = '-' + display;
 
-			return `${format.value} <span class="currency-display">${this.translate(`currency.${format.label}`)}</span>`;
+			return display;
 		},
 		displayType() {
 			if (!this.transaction || !Array.isArray(this.transaction.tags)) {

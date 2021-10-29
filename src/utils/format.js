@@ -256,3 +256,40 @@ export function formatPriceString(val, dec, currency, rate, precision = new BigN
 
 	return formatCryptoString(val, dec, currency, 1, precision);
 }
+
+/**
+ * Safari does not support 'narrowSymbol' and will throw an exception
+ */
+const symbolStyle = (() => {
+	try {
+		new Intl.NumberFormat([], {
+			style: 'currency',
+			currency: 'usd',
+			currencyDisplay: 'narrowSymbol'
+		}).format(1.512);
+
+		return 'narrowSymbol';
+	} catch (ex) {
+		return 'symbol';
+	}
+})();
+
+export function formatExchangeRate(rate, code = 'usd', sign = 'always') {
+	switch (code.toLowerCase()) {
+	case 'btc':
+		return new Intl.NumberFormat([], {
+			signDisplay: sign,
+			minimumFractionDigits: 0,
+			maximumFractionDigits: 0
+		}).format(rate * 100000000) + ' SAT';
+	default:
+		return new Intl.NumberFormat([], {
+			signDisplay: sign,
+			style: 'currency',
+			currency: code,
+			currencyDisplay: symbolStyle,
+			minimumFractionDigits: 2,
+			maximumFractionDigits: 4
+		}).format(rate);
+	}
+}

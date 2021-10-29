@@ -216,20 +216,21 @@ func recoverAddresses(this js.Value, args []js.Value) interface{} {
 }
 
 func getTransactions(this js.Value, args []js.Value) interface{} {
-	if err := checkArgs(args, js.TypeObject, js.TypeString, js.TypeFunction); err != nil {
+	if err := checkArgs(args, js.TypeObject, js.TypeString, js.TypeString, js.TypeFunction); err != nil {
 		return err.Error()
 	}
 
 	count := args[0].Length()
-	currency := args[1].String()
-	callback := args[2]
+	walletCurrency := args[1].String()
+	displayCurrency := args[2].String()
+	callback := args[3]
 	addresses := make([]string, count)
 
 	for i := 0; i < count; i++ {
 		addresses[i] = args[0].Index(i).String()
 	}
 
-	go modules.GetTransactions(addresses, currency, callback)
+	go modules.GetTransactions(addresses, walletCurrency, displayCurrency, callback)
 
 	return nil
 }
@@ -237,15 +238,16 @@ func getTransactions(this js.Value, args []js.Value) interface{} {
 func exportTransactions(this js.Value, args []js.Value) interface{} {
 	var min, max time.Time
 
-	if err := checkArgs(args, js.TypeObject, js.TypeString, js.TypeNumber, js.TypeNumber, js.TypeFunction); err != nil {
+	if err := checkArgs(args, js.TypeObject, js.TypeString, js.TypeString, js.TypeNumber, js.TypeNumber, js.TypeFunction); err != nil {
 		return err.Error()
 	}
 
 	count := args[0].Length()
-	currency := args[1].String()
-	minTimestamp := args[2].Int()
-	maxTimestamp := args[3].Int()
-	callback := args[4]
+	walletCurrency := args[1].String()
+	displayCurrency := args[2].String()
+	minTimestamp := args[3].Int()
+	maxTimestamp := args[4].Int()
+	callback := args[5]
 	addresses := make([]string, count)
 
 	for i := 0; i < count; i++ {
@@ -260,7 +262,7 @@ func exportTransactions(this js.Value, args []js.Value) interface{} {
 		max = time.Unix(int64(maxTimestamp), 0)
 	}
 
-	go modules.ExportTransactions(addresses, currency, min, max, callback)
+	go modules.ExportTransactions(addresses, walletCurrency, displayCurrency, min, max, callback)
 
 	return nil
 }

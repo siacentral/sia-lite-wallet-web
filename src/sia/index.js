@@ -60,12 +60,12 @@ export function signTransactions(seed, currency, unsigned) {
 	return spawnWorker(['signTransactions', seed, currency, JSON.stringify(unsigned)], 15000);
 }
 
-export function getTransactions(addresses, currency) {
-	return spawnWorker(['getTransactions', addresses, currency], 30000);
+export function getTransactions(addresses, walletCurrency, displayCurrency) {
+	return spawnWorker(['getTransactions', addresses, walletCurrency, displayCurrency], 30000);
 }
 
-export async function exportTransactions(addresses, currency, min, max, progress) {
-	return spawnWorker(['exportTransactions', addresses, currency, min, max], 300000, progress);
+export async function exportTransactions(addresses, walletCurrency, displayCurrency, min, max, progress) {
+	return spawnWorker(['exportTransactions', addresses, walletCurrency, displayCurrency, min, max], 300000, progress);
 }
 
 export function signTransaction(seed, currency, txn, indexes) {

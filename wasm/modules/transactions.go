@@ -89,7 +89,7 @@ func SignTransactions(transactions []UnsignedTransaction, phrase, currency strin
 }
 
 //GetTransactions gets the last 500 transactions belonging to each address
-func GetTransactions(addresses []string, currency string, callback js.Value) {
+func GetTransactions(addresses []string, walletCurrency, displayCurrency string, callback js.Value) {
 	transactions := make(map[string]siacentral.Transaction)
 	ownedAddresses := make(map[string]bool)
 	count := len(addresses)
@@ -106,8 +106,8 @@ func GetTransactions(addresses []string, currency string, callback js.Value) {
 			end = count
 		}
 
-		apiclient := siacentralAPIClient(currency)
-		callResp, err := apiclient.FindAddressBalance(500, 0, addresses[i:end])
+		apiclient := siacentralAPIClient(walletCurrency)
+		callResp, err := apiclient.FindAddressBalance(500, 0, displayCurrency, addresses[i:end])
 
 		if err != nil {
 			callback.Invoke(err.Error(), js.Null())
@@ -193,6 +193,7 @@ func GetTransactions(addresses []string, currency string, callback js.Value) {
 			HostAnnouncements: txn.HostAnnouncements,
 			Contracts:         make([]processedContract, len(txn.StorageContracts)),
 			ContractRevisions: make([]processedContract, len(txn.ContractRevisions)),
+			ExchangeRate:      txn.ExchangeRate,
 		}
 
 		for i, contract := range txn.StorageContracts {

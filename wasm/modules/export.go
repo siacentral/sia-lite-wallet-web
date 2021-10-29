@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"math"
 	"sort"
+	"strings"
 	"time"
 
 	"syscall/js"
@@ -24,6 +25,7 @@ type (
 		SiafundInputs  siatypes.Currency
 		SiafundOutputs siatypes.Currency
 		Fee            siatypes.Currency
+		CostBasis      siacentral.CostBasis
 		Timestamp      time.Time
 	}
 
@@ -114,14 +116,14 @@ func siafundString(c siatypes.Currency) string {
 	return c.String()
 }
 
-func exportAddressWorker(ownedAddresses map[string]bool, currency string, work <-chan []string, results chan<- apiResults, errors chan<- error) {
+func exportAddressWorker(ownedAddresses map[string]bool, walletCurrency, displayCurrency string, work <-chan []string, results chan<- apiResults, errors chan<- error) {
 	for addresses := range work {
 		for j := 0; j < 1e4; j++ {
 			var transactions []exportTransaction
 
-			apiclient := siacentralAPIClient(currency)
+			apiclient := siacentralAPIClient(walletCurrency)
 
-			balanceResp, err := apiclient.FindAddressBalance(500, j, addresses)
+			balanceResp, err := apiclient.FindAddressBalance(500, j, displayCurrency, addresses)
 			if err != nil {
 				errors <- fmt.Errorf("unable to get wallet transactions: %s", err)
 				return
@@ -137,8 +139,9 @@ func exportAddressWorker(ownedAddresses map[string]bool, currency string, work <
 				ownedInputs := 0
 				exportTxn := exportTransaction{
 					ID:        txn.ID,
-					Type:      transactionType(txn, currency),
+					Type:      transactionType(txn, walletCurrency),
 					Timestamp: txn.Timestamp,
+					CostBasis: txn.ExchangeRate,
 				}
 
 				for _, output := range txn.SiacoinOutputs {
@@ -193,17 +196,18 @@ func exportAddressWorker(ownedAddresses map[string]bool, currency string, work <
 }
 
 //ExportTransactions gets all transactions belonging to the addresses
-func ExportTransactions(addresses []string, currency string, min, max time.Time, callback js.Value) {
+func ExportTransactions(addresses []string, walletCurrency, displayCurrency string, min, max time.Time, callback js.Value) {
 	var currencyLabel, fundLabel string
 
 	var buf []byte
 	var transactions []exportTransaction
 	var matching uint64
 
-	if currency == "scp" {
+	switch walletCurrency {
+	case "scp":
 		currencyLabel = "SCP"
 		fundLabel = "SCPF"
-	} else {
+	default:
 		currencyLabel = "SC"
 		fundLabel = "SF"
 	}
@@ -221,7 +225,7 @@ func ExportTransactions(addresses []string, currency string, min, max time.Time,
 	errors := make(chan error, 1)
 
 	for i := 0; i < workers; i++ {
-		go exportAddressWorker(ownedAddresses, currency, work, results, errors)
+		go exportAddressWorker(ownedAddresses, walletCurrency, displayCurrency, work, results, errors)
 	}
 
 	go func() {
@@ -294,42 +298,47 @@ func ExportTransactions(addresses []string, currency string, min, max time.Time,
 		"ID",
 		"Type",
 		"Timestamp",
+		fmt.Sprintf("Exchange Rate (%s)", strings.ToUpper(displayCurrency)),
 		"Fee",
 		fmt.Sprintf("%s Amount", currencyLabel),
+		fmt.Sprintf("%s Cost Basis (%s)", currencyLabel, strings.ToUpper(displayCurrency)),
 		fmt.Sprintf("%s Balance", currencyLabel),
 		fmt.Sprintf("%s Amount", fundLabel),
 		fmt.Sprintf("%s Balance", fundLabel),
 	})
 
 	for _, txn := range transactions {
-		var siacoinAmount, siafundAmount string
 
 		siacoinBalance = siacoinBalance.Add(txn.SiacoinOutputs).Sub(txn.SiacoinInputs)
 		siafundBalance = siafundBalance.Add(txn.SiafundOutputs).Sub(txn.SiafundInputs)
 
+		siacoinAmount := siacoinString(txn.SiacoinInputs.Sub(txn.SiacoinOutputs), walletCurrency)
 		if txn.SiacoinInputs.Cmp(txn.SiacoinOutputs) == 1 {
-			siacoinAmount = "-" + siacoinString(txn.SiacoinInputs.Sub(txn.SiacoinOutputs), currency)
-		} else {
-			siacoinAmount = siacoinString(txn.SiacoinOutputs.Sub(txn.SiacoinInputs), currency)
+			siacoinAmount = "-" + siacoinAmount
 		}
 
+		siafundAmount := siafundString(txn.SiafundOutputs.Sub(txn.SiafundInputs))
 		if txn.SiafundInputs.Cmp(txn.SiafundOutputs) == 1 {
-			siafundAmount = "-" + siafundString(txn.SiafundInputs.Sub(txn.SiafundOutputs))
-		} else {
-			siafundAmount = siafundString(txn.SiafundOutputs.Sub(txn.SiafundInputs))
+			siafundAmount = "-" + siafundAmount
 		}
 
 		if (!min.IsZero() && txn.Timestamp.Before(min)) || (!max.IsZero() && txn.Timestamp.After(max)) {
 			continue
 		}
 
+		siacoinCostBasis := decimal.NewFromBigInt(txn.SiacoinOutputs.Big(), -24).
+			Sub(decimal.NewFromBigInt(txn.SiacoinInputs.Big(), -24)).
+			Mul(txn.CostBasis.Rate)
+
 		err := cw.Write([]string{
 			txn.ID,
 			txn.Type,
 			txn.Timestamp.Local().Format(time.RFC1123Z),
-			siacoinString(txn.Fee, currency),
+			txn.CostBasis.Rate.Round(4).String(),
+			siacoinString(txn.Fee, walletCurrency),
 			siacoinAmount,
-			siacoinString(siacoinBalance, currency),
+			siacoinCostBasis.Round(4).String(),
+			siacoinString(siacoinBalance, walletCurrency),
 			siafundAmount,
 			siafundString(siafundBalance),
 		})
@@ -340,5 +349,5 @@ func ExportTransactions(addresses []string, currency string, min, max time.Time,
 	}
 
 	cw.Flush()
-	callback.Invoke(js.Null(), string(out.Bytes()))
+	callback.Invoke(js.Null(), out.String())
 }

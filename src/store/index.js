@@ -39,6 +39,7 @@ const store = new Vuex.Store({
 		unavailable: null,
 		autoLock: getLocalStorageNumeric('autoLock', 15),
 		currency: localStorage.getItem('displayCurrency') || 'usd',
+		useCostBasis: localStorage.getItem('useCostBasis') === 'true',
 		changeSeedType: localStorage.getItem('changeSeedType') === 'true',
 		changeServerType: localStorage.getItem('changeServerType') === 'true',
 		addressLookahead: getLocalStorageNumeric('addressLookahead', 25000),
@@ -101,6 +102,9 @@ const store = new Vuex.Store({
 		},
 		setAutoLock(state, autoLock) {
 			state.autoLock = autoLock;
+		},
+		setUseCostBasis(state, useCostBasis) {
+			state.useCostBasis = useCostBasis;
 		},
 		saveWallet(state, wallet) {
 			if (!wallet || !wallet.seed)
@@ -209,6 +213,10 @@ const store = new Vuex.Store({
 		setCurrency({ commit }, currency) {
 			localStorage.setItem('displayCurrency', currency);
 			commit('setCurrency', currency);
+		},
+		setUseCostBasis({ commit }, useCostBasis) {
+			localStorage.setItem('useCostBasis', useCostBasis);
+			commit('setUseCostBasis', useCostBasis);
 		},
 		setAutoLock({ commit }, lockMin) {
 			localStorage.setItem('autoLock', lockMin);

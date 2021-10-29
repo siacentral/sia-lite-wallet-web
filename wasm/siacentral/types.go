@@ -3,6 +3,7 @@ package siacentral
 import (
 	"time"
 
+	"github.com/shopspring/decimal"
 	siatypes "gitlab.com/NebulousLabs/Sia/types"
 )
 
@@ -153,6 +154,11 @@ type (
 		CoveredFields  CoveredFields `json:"covered_fields"`
 	}
 
+	CostBasis struct {
+		Currency string          `json:"currency"`
+		Rate     decimal.Decimal `json:"rate"`
+	}
+
 	// Transaction a Sia transaction
 	Transaction struct {
 		ID                    string                 `json:"id"`
@@ -172,6 +178,7 @@ type (
 		HostAnnouncements     []Announcement         `json:"host_announcements"`
 		ArbitraryData         [][]byte               `json:"arbitrary_data"`
 		TransactionSignatures []TransactionSignature `json:"transaction_signatures"`
+		ExchangeRate          CostBasis              `json:"exchange_rate"`
 	}
 
 	//UnlockCondition unlock conditions of a transaction input

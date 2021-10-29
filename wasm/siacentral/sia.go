@@ -3,6 +3,8 @@ package siacentral
 import (
 	"fmt"
 	"net/http"
+	"net/url"
+	"strconv"
 )
 
 type (
@@ -11,10 +13,15 @@ type (
 )
 
 // FindAddressBalance gets the balance and transactions of the addresses
-func (s *siaAPI) FindAddressBalance(limit int, page int, addresses []string) (WalletBalance, error) {
+func (s *siaAPI) FindAddressBalance(limit int, page int, currency string, addresses []string) (WalletBalance, error) {
 	var resp transactionsResp
 
-	u := fmt.Sprintf("https://api.siacentral.com/v2/wallet/addresses?limit=%d&page=%d", limit, page)
+	v := make(url.Values)
+	v.Set("limit", strconv.Itoa(limit))
+	v.Set("page", strconv.Itoa(page))
+	v.Set("currency", currency)
+
+	u := fmt.Sprintf("https://api.siacentral.com/v2/wallet/addresses?%s", v.Encode())
 	code, err := makeAPIRequest(http.MethodPost, u, map[string]interface{}{
 		"addresses": addresses,
 	}, &resp)

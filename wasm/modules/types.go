@@ -50,6 +50,7 @@ type (
 		ContractRevisions []processedContract       `json:"contract_revisions"`
 		StorageProofs     []siacentral.StorageProof `json:"storage_proofs"`
 		HostAnnouncements []siacentral.Announcement `json:"host_announcements"`
+		ExchangeRate      siacentral.CostBasis      `json:"exchange_rate"`
 	}
 
 	processedTxnValue struct {

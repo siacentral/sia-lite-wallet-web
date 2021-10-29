@@ -86,7 +86,7 @@
 <script>
 import { mapState, mapActions } from 'vuex';
 import BigNumber from 'bignumber.js';
-import { formatPriceString, formatSiafundString } from '@/utils/format';
+import { formatPriceString, formatSiafundString, formatExchangeRate } from '@/utils/format';
 
 import AddAddressesModal from '@/modal/AddAddressesModal';
 import ConfirmModal from '@/modal/ConfirmModal';
@@ -333,7 +333,7 @@ export default {
 
 			const format = formatPriceString(val, 2, this.currency, exchangeRate[this.currency], this.wallet.precision());
 
-			return `${format.value} <span class="currency-display">${this.translate(`currency.${format.label}`)}</span>`;
+			return `${format.value} <span class="currency-display">${this.translate(`currency.${format.label}`)} @ ${formatExchangeRate(exchangeRate[this.currency], this.currency, 'never')}</span>`;
 		}
 	}
 };

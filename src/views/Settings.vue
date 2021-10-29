@@ -3,27 +3,34 @@
 		<mobile-nav />
 		<div class="settings">
 			<h2>{{ translate('settings.displayHeader') }}</h2>
+			<div class="control-group">
+				<div class="control">
+					<p class="text-warning" v-if="useCostBasis">{{ translate('settings.pCurrencyCostBasis') }}</p>
+					<label>{{ translate('settings.lblDisplayCurrency') }}</label>
+					<select v-model="newCurrency" @change="setCurrency(newCurrency)">
+						<optgroup :label="translate('currency.fiat')">
+							<option value="usd">{{ translate('currency.usd') }}</option>
+							<option value="jpy">{{ translate('currency.jpy') }}</option>
+							<option value="eur">{{ translate('currency.eur') }}</option>
+							<option value="gbp">{{ translate('currency.gbp') }}</option>
+							<option value="aus">{{ translate('currency.aus') }}</option>
+							<option value="cad">{{ translate('currency.cad') }}</option>
+							<option value="rub">{{ translate('currency.rub') }}</option>
+							<option value="cny">{{ translate('currency.cny') }}</option>
+						</optgroup>
+						<optgroup :label="translate('currency.crypto')">
+							<option value="btc">{{ translate('currency.btc') }}</option>
+							<option value="bch">{{ translate('currency.bch') }}</option>
+							<option value="eth">{{ translate('currency.eth') }}</option>
+							<option value="xrp">{{ translate('currency.xrp') }}</option>
+							<option value="ltc">{{ translate('currency.ltc') }}</option>
+						</optgroup>
+					</select>
+				</div>
+			</div>
 			<div class="control">
-				<label>{{ translate('settings.lblDisplayCurrency') }}</label>
-				<select v-model="newCurrency" @change="setCurrency(newCurrency)">
-					<optgroup :label="translate('currency.fiat')">
-						<option value="usd">{{ translate('currency.usd') }}</option>
-						<option value="jpy">{{ translate('currency.jpy') }}</option>
-						<option value="eur">{{ translate('currency.eur') }}</option>
-						<option value="gbp">{{ translate('currency.gbp') }}</option>
-						<option value="aus">{{ translate('currency.aus') }}</option>
-						<option value="cad">{{ translate('currency.cad') }}</option>
-						<option value="rub">{{ translate('currency.rub') }}</option>
-						<option value="cny">{{ translate('currency.cny') }}</option>
-					</optgroup>
-					<optgroup :label="translate('currency.crypto')">
-						<option value="btc">{{ translate('currency.btc') }}</option>
-						<option value="bch">{{ translate('currency.bch') }}</option>
-						<option value="eth">{{ translate('currency.eth') }}</option>
-						<option value="xrp">{{ translate('currency.xrp') }}</option>
-						<option value="ltc">{{ translate('currency.ltc') }}</option>
-					</optgroup>
-				</select>
+				<input type="checkbox" id="chk-use-cost-basis" v-model="newUseCostBasis" @change="setUseCostBasis(newUseCostBasis)" />
+				<label for="chk-use-cost-basis">{{ translate('settings.lblUseCostBasis') }}</label>
 			</div>
 			<div class="control">
 				<label>{{ translate('settings.lblDisplayLanguage') }}</label>
@@ -83,7 +90,7 @@ export default {
 	},
 	computed: {
 		...mapState(['currency', 'autoLock', 'changeSeedType', 'changeServerType',
-			'addressLookahead', 'displayLanguage']),
+			'addressLookahead', 'displayLanguage', 'useCostBasis']),
 		languages() {
 			return languages;
 		}
@@ -96,11 +103,13 @@ export default {
 			newChangeSeedType: false,
 			newChangeServerType: false,
 			newMinLookahead: 1000,
-			newLanguage: 'detect'
+			newLanguage: 'detect',
+			newUseCostBasis: false
 		};
 	},
 	mounted() {
 		this.newCurrency = this.currency;
+		this.newUseCostBasis = this.useCostBasis;
 		this.newAutoLock = this.autoLock;
 		this.newChangeSeedType = this.changeSeedType;
 		this.newChangeServerType = this.changeServerType;
@@ -109,7 +118,7 @@ export default {
 	},
 	methods: {
 		...mapActions(['setCurrency', 'setAutoLock', 'setChangeSeedType', 'setChangeServerType',
-			'setAddressLookahead', 'setDisplayLanguage']),
+			'setAddressLookahead', 'setDisplayLanguage', 'setUseCostBasis']),
 		formatNumber
 	}
 };

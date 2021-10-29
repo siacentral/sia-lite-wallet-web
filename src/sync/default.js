@@ -57,7 +57,7 @@ export default {
 		if (!Array.isArray(addresses) || addresses.length === 0)
 			throw new Error('wallet has no addresses');
 
-		const balance = await getTransactions(addresses.map(a => a.address), wallet.currency);
+		const balance = await getTransactions(addresses.map(a => a.address), wallet.currency, Store.state.currency);
 
 		wallet = new Wallet({
 			...wallet,

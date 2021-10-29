@@ -13,7 +13,7 @@ type (
 	// API defines an interface for accessing the Sia Central API
 	API interface {
 		// FindAddressBalance gets the balance and transactions of the addresses
-		FindAddressBalance(limit int, page int, addresses []string) (resp WalletBalance, err error)
+		FindAddressBalance(limit int, page int, currency string, addresses []string) (resp WalletBalance, err error)
 		// FindUsedAddresses returns an array of all used addresses
 		FindUsedAddresses(addresses []string) (used []AddressUsage, err error)
 
