@@ -68,7 +68,7 @@ export default {
 			let exchangeRate = this.exchangeRateSC[this.currency],
 				label = this.currency;
 
-			if (this.wallet.currency === 'sc' && this.useCostBasis) {
+			if (this.wallet.currency === 'sc' && this.useCostBasis && this.transaction.confirmations) {
 				exchangeRate = this.transaction.exchange_rate.rate;
 				label = this.transaction.exchange_rate.currency;
 			} else if (this.wallet.currency && this.wallet.currency === 'scp')
