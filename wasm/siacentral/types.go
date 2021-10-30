@@ -164,6 +164,7 @@ type (
 		ID                    string                 `json:"id"`
 		BlockID               string                 `json:"block_id"`
 		BlockHeight           uint64                 `json:"block_height,omitempty"`
+		BlockIndex            int                    `json:"block_index"`
 		Confirmations         uint64                 `json:"confirmations"`
 		Timestamp             time.Time              `json:"timestamp"`
 		Size                  siatypes.Currency      `json:"size"`

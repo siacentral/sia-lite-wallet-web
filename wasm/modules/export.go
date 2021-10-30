@@ -19,6 +19,8 @@ import (
 type (
 	exportTransaction struct {
 		ID             string
+		BlockHeight    uint64
+		BlockIndex     int
 		Type           string
 		SiacoinInputs  siatypes.Currency
 		SiacoinOutputs siatypes.Currency
@@ -138,10 +140,12 @@ func exportAddressWorker(ownedAddresses map[string]bool, walletCurrency, display
 
 				ownedInputs := 0
 				exportTxn := exportTransaction{
-					ID:        txn.ID,
-					Type:      transactionType(txn, walletCurrency),
-					Timestamp: txn.Timestamp,
-					CostBasis: txn.ExchangeRate,
+					ID:          txn.ID,
+					BlockHeight: txn.BlockHeight,
+					BlockIndex:  txn.BlockIndex,
+					Type:        transactionType(txn, walletCurrency),
+					Timestamp:   txn.Timestamp,
+					CostBasis:   txn.ExchangeRate,
 				}
 
 				for _, output := range txn.SiacoinOutputs {
@@ -286,7 +290,12 @@ func ExportTransactions(addresses []string, walletCurrency, displayCurrency stri
 	close(errors)
 
 	sort.Slice(transactions, func(i, j int) bool {
-		return transactions[i].Timestamp.Before(transactions[j].Timestamp)
+		if transactions[i].BlockHeight != transactions[j].BlockHeight {
+			return transactions[i].BlockHeight < transactions[j].BlockHeight
+		} else if transactions[i].BlockIndex != transactions[j].BlockIndex {
+			return transactions[i].BlockIndex < transactions[j].BlockIndex
+		}
+		return false
 	})
 
 	out := bytes.NewBuffer(buf)
