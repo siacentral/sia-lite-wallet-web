@@ -300,6 +300,7 @@ func ExportTransactions(addresses []string, walletCurrency, displayCurrency stri
 		"Timestamp",
 		fmt.Sprintf("Exchange Rate (%s)", strings.ToUpper(displayCurrency)),
 		"Fee",
+		fmt.Sprintf("Fee (%s)", strings.ToUpper(displayCurrency)),
 		fmt.Sprintf("%s Amount", currencyLabel),
 		fmt.Sprintf("%s Cost Basis (%s)", currencyLabel, strings.ToUpper(displayCurrency)),
 		fmt.Sprintf("%s Balance", currencyLabel),
@@ -308,18 +309,21 @@ func ExportTransactions(addresses []string, walletCurrency, displayCurrency stri
 	})
 
 	for _, txn := range transactions {
+		var siacoinAmount, siafundAmount string
 
 		siacoinBalance = siacoinBalance.Add(txn.SiacoinOutputs).Sub(txn.SiacoinInputs)
 		siafundBalance = siafundBalance.Add(txn.SiafundOutputs).Sub(txn.SiafundInputs)
 
-		siacoinAmount := siacoinString(txn.SiacoinInputs.Sub(txn.SiacoinOutputs), walletCurrency)
 		if txn.SiacoinInputs.Cmp(txn.SiacoinOutputs) == 1 {
-			siacoinAmount = "-" + siacoinAmount
+			siacoinAmount = "-" + siacoinString(txn.SiacoinInputs.Sub(txn.SiacoinOutputs), walletCurrency)
+		} else {
+			siacoinAmount = siacoinString(txn.SiacoinOutputs.Sub(txn.SiacoinInputs), walletCurrency)
 		}
 
-		siafundAmount := siafundString(txn.SiafundOutputs.Sub(txn.SiafundInputs))
 		if txn.SiafundInputs.Cmp(txn.SiafundOutputs) == 1 {
-			siafundAmount = "-" + siafundAmount
+			siafundAmount = "-" + siafundString(txn.SiafundInputs.Sub(txn.SiafundOutputs))
+		} else {
+			siafundAmount = siafundString(txn.SiafundOutputs.Sub(txn.SiafundInputs))
 		}
 
 		if (!min.IsZero() && txn.Timestamp.Before(min)) || (!max.IsZero() && txn.Timestamp.After(max)) {
@@ -330,12 +334,15 @@ func ExportTransactions(addresses []string, walletCurrency, displayCurrency stri
 			Sub(decimal.NewFromBigInt(txn.SiacoinInputs.Big(), -24)).
 			Mul(txn.CostBasis.Rate)
 
+		feeCostBasis := decimal.NewFromBigInt(txn.Fee.Big(), -24).Mul(txn.CostBasis.Rate)
+
 		err := cw.Write([]string{
 			txn.ID,
 			txn.Type,
 			txn.Timestamp.Local().Format(time.RFC1123Z),
 			txn.CostBasis.Rate.Round(4).String(),
 			siacoinString(txn.Fee, walletCurrency),
+			feeCostBasis.Round(4).String(),
 			siacoinAmount,
 			siacoinCostBasis.Round(4).String(),
 			siacoinString(siacoinBalance, walletCurrency),
