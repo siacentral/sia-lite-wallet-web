@@ -123,7 +123,7 @@
 			"watchWallet": "Watch-Only Wallet",
 			"pNewWalletExplain": "Generates a new wallet seed in the browser. Transactions can be sent and received.",
 			"pRecoverWalletExplain": "Recovers an existing wallet from a {{0}} seed. Transactions can be sent and received.",
-			"pCreateLedgerExplain": "Creates a new hardware backed wallet. All transactions must be signed by the Ledger device.",
+			"pCreateLedgerExplain": "Connect a Ledger hardware wallet, all transactions must be signed by the Ledger device.",
 			"pLedgerUnsupportedExplain": "Ledger support is only available in the Chrome browser. Enable \"Experimental Web Platform Features\" in Chrome to connect to the Ledger device.",
 			"pWatchWalletExplain": "Creates a new watch-only wallet. Addresses must be added manually and transactions cannot be sent.",
 			"pReviewLedger": "Your Ledger wallet has been imported. Balance and transactions can now be viewed without the Ledger device. To send transactions you will need to plugin and unlock the device.",
