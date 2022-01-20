@@ -57,7 +57,7 @@ export default {
 			if (!this.connected)
 				return false;
 
-			if (this.versionCmp(this.version, '0.4.4') < 0)
+			if (this.versionCmp(this.version, '0.4.3') < 0)
 				return true;
 
 			return false;
