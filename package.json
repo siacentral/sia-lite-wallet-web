@@ -24,7 +24,7 @@
     "buffer": "^5.7.1",
     "core-js": "^3.12.1",
     "decimal.js-light": "^2.5.1",
-    "dexie": "^2.0.4",
+    "dexie": "^3.2.2",
     "register-service-worker": "^1.7.1",
     "tweetnacl": "^1.0.3",
     "vue": "^2.6.12",
