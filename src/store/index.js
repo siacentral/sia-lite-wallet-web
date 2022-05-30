@@ -5,7 +5,7 @@ import { encode as encodeB64 } from '@stablelib/base64';
 import { encode as encodeUTF8 } from '@stablelib/utf8';
 import { saveWallet, loadWallets, deleteWallet } from './db';
 import { scanner } from '@/sync/scanner';
-import { siaAPI, scprimeAPI } from '@/api/siacentral';
+import { siaAPI } from '@/api/siacentral';
 import Wallet from '@/types/wallet';
 
 Vue.use(Vuex);
@@ -49,14 +49,10 @@ const store = new Vuex.Store({
 		notifications: [],
 		scanQueue: [],
 		siaBlockHeight: 0,
-		scprimeBlockHeight: 0,
 		siaNetworkFees: {},
-		scprimeNetworkFees: {},
 		feeAddresses: [],
 		exchangeRateSC: {},
-		exchangeRateSF: {},
-		echangeRateSCP: {},
-		exchangeRateSCPF: {}
+		exchangeRateSF: {}
 	},
 	mutations: {
 		setUnavailable(state, unavailable) {
@@ -134,19 +130,15 @@ const store = new Vuex.Store({
 
 			state.wallets.splice(idx, 1);
 		},
-		setExchangeRate(state, { siacoin, siafund, scprimecoin, scprimefund }) {
+		setExchangeRate(state, { siacoin, siafund }) {
 			state.exchangeRateSC = siacoin;
 			state.exchangeRateSF = siafund;
-			state.exchangeRateSCP = scprimecoin;
-			state.exchangeRateSCPF = scprimefund;
 		},
-		setConsensusHeight(state, { sia, scprime }) {
+		setConsensusHeight(state, { sia }) {
 			state.siaBlockHeight = sia;
-			state.scprimeBlockHeight = scprime;
 		},
-		setNetworkFees(state, { sia, scprime }) {
+		setNetworkFees(state, { sia }) {
 			state.siaNetworkFees = sia;
-			state.scprimeNetworkFees = scprime;
 		},
 		pushNotification(state, notification) {
 			state.notifications.push(notification);
@@ -306,18 +298,14 @@ async function updateMetadata() {
 	try {
 		const price = await siaAPI.getCoinPrice(),
 			siaFees = await siaAPI.getNetworkFees(),
-			scprimeFees = await scprimeAPI.getNetworkFees(),
 			addresses = await siaAPI.getFeeAddresses(),
-			siaBlock = await siaAPI.getBlock(),
-			scprimeBlock = await scprimeAPI.getBlock();
+			siaBlock = await siaAPI.getBlock();
 
 		store.dispatch('setNetworkFees', {
-			sia: siaFees,
-			scprime: scprimeFees
+			sia: siaFees
 		});
 		store.dispatch('setConsensusHeight', {
-			sia: siaBlock.height,
-			scprime: scprimeBlock.height
+			sia: siaBlock.height
 		});
 		store.dispatch('setExchangeRate', price);
 		store.dispatch('setFeeAddresses', addresses);

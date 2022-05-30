@@ -24,9 +24,6 @@ export default class Wallet {
 	}
 
 	precision() {
-		if (this.currency && this.currency === 'scp')
-			return new BigNumber(1e27);
-
 		return new BigNumber(1e24);
 	}
 

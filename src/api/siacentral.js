@@ -31,7 +31,7 @@ export class SiaCentralAPI {
 	}
 
 	async getCoinPrice() {
-		const resp = await sendJSONRequest(`${this._baseURL}/market/exchange-rate?currencies=sc,sf,scp`, {
+		const resp = await sendJSONRequest(`${this._baseURL}/market/exchange-rate?currencies=sc,sf`, {
 			method: 'GET'
 		});
 
@@ -43,7 +43,6 @@ export class SiaCentralAPI {
 
 		return {
 			siacoin: resp.body.rates.sc,
-			scprimecoin: resp.body.rates.scp,
 			siafund: resp.body.rates.sf
 		};
 	}
@@ -91,4 +90,3 @@ export class SiaCentralAPI {
 }
 
 export const siaAPI = new SiaCentralAPI();
-export const scprimeAPI = new SiaCentralAPI('https://api.siacentral.com/v2/scprime');
