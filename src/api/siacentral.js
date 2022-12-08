@@ -14,6 +14,16 @@ export class SiaCentralAPI {
 			throw new Error(resp.body.message);
 	}
 
+	async getBlockHeight() {
+		const resp = await sendJSONRequest(`${this._baseURL}/consensus/index`, {
+			method: 'GET'
+		});
+		if (resp.body.type !== 'success')
+			throw new Error(resp.body.message);
+
+		return resp.body.index.height;
+	}
+
 	async getBlock(height) {
 		let url = `${this._baseURL}/explorer/blocks`;
 

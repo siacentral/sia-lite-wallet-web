@@ -15,8 +15,6 @@ const (
 
 func siacentralAPIClient(currency string) siacentral.API {
 	switch currency {
-	case "scp":
-		return siacentral.NewSCPrimeAPI()
 	default:
 		return siacentral.NewSiaAPI()
 	}

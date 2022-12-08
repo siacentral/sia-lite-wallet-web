@@ -17,7 +17,7 @@ type (
 	}
 )
 
-//GetAddress returns the spendable address at the specified index
+// GetAddress returns the spendable address at the specified index
 func (wallet *SeedWallet) GetAddress(index uint64) SpendableKey {
 	sk, pk := siacrypto.GenerateKeyPairDeterministic(siacrypto.HashAll(wallet.s, index))
 
@@ -30,9 +30,9 @@ func (wallet *SeedWallet) GetAddress(index uint64) SpendableKey {
 	}
 }
 
-//GetAddresses returns the n addresses starting at idx and incrementing by 1.
-//Wanted to import this directly from modules, but cannot because of bbolt
-//https://gitlab.com/NebulousLabs/Sia/blob/fb65620/modules/wallet/seed.go#L49
+// GetAddresses returns the n addresses starting at idx and incrementing by 1.
+// Wanted to import this directly from modules, but cannot because of bbolt
+// https://gitlab.com/NebulousLabs/Sia/blob/fb65620/modules/wallet/seed.go#L49
 func (wallet *SeedWallet) GetAddresses(idx uint64, keys []SpendableKey) {
 	var n int
 
@@ -43,8 +43,6 @@ func (wallet *SeedWallet) GetAddresses(idx uint64, keys []SpendableKey) {
 
 func apiClient(currency string) siacentral.API {
 	switch currency {
-	case "scp":
-		return siacentral.NewSCPrimeAPI()
 	default:
 		return siacentral.NewSiaAPI()
 	}
@@ -63,8 +61,8 @@ func (wallet *SeedWallet) currentHeight() (types.BlockHeight, error) {
 	return types.BlockHeight(height), nil
 }
 
-//SignTransaction signs a transaction, for simplicity only supports standard 1 signature keys
-//and siacoin inputs
+// SignTransaction signs a transaction, for simplicity only supports standard 1 signature keys
+// and siacoin inputs
 func (wallet *SeedWallet) SignTransaction(txn *types.Transaction, requiredSigIndices []uint64) error {
 	unlockHashMap := make(map[string]SpendableKey)
 

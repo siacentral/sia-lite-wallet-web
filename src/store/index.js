@@ -299,7 +299,7 @@ async function updateMetadata() {
 		const price = await siaAPI.getCoinPrice(),
 			siaFees = await siaAPI.getNetworkFees(),
 			addresses = await siaAPI.getFeeAddresses(),
-			siaBlock = await siaAPI.getBlock();
+			siaBlock = await siaAPI.getBlockHeight();
 
 		store.dispatch('setNetworkFees', {
 			sia: siaFees
