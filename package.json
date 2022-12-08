@@ -32,11 +32,11 @@
     "vuex": "^3.6.0"
   },
   "devDependencies": {
-    "@vue/cli-plugin-babel": "^4.5.13",
-    "@vue/cli-plugin-eslint": "^4.5.13",
-    "@vue/cli-plugin-pwa": "^4.5.13",
-    "@vue/cli-service": "^4.5.13",
-    "@vue/eslint-config-standard": "^5.1.2",
+    "@vue/cli-plugin-babel": "^5.0.8",
+    "@vue/cli-plugin-eslint": "^5.0.8",
+    "@vue/cli-plugin-pwa": "^5.0.8",
+    "@vue/cli-service": "^5.0.8",
+    "@vue/eslint-config-standard": "^8.0.1",
     "arraybuffer-loader": "^1.0.8",
     "babel-eslint": "^10.1.0",
     "eslint": "^6.7.2",
