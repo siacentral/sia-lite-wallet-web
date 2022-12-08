@@ -12,10 +12,7 @@ jobs:
       - uses: actions/setup-node@master
         with:
           node-version: 12
-      - uses: actions/setup-go@v1
-        with:
-          go-version: 1.16
-
+      - uses: actions/setup-go@v3
       - name: Install Dependencies
         run: npm i
 
@@ -28,9 +25,6 @@ jobs:
       - uses: actions/setup-node@master
         with:
           node-version: 12
-      - uses: actions/setup-go@v1
-        with:
-          go-version: 1.16
-
+      - uses: actions/setup-go@v3
       - name: Build
         run: make build
