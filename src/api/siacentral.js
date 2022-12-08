@@ -15,7 +15,7 @@ export class SiaCentralAPI {
 	}
 
 	async getBlockHeight() {
-		const resp = await sendJSONRequest(`${this._baseURL}/consensus/index`, {
+		const resp = await sendJSONRequest(`${this._baseURL}/explorer/consensus/index`, {
 			method: 'GET'
 		});
 		if (resp.body.type !== 'success')
