@@ -9,7 +9,7 @@ import (
 
 	"github.com/siacentral/sia-lite-wallet-web/wasm/build"
 	"github.com/siacentral/sia-lite-wallet-web/wasm/modules"
-	siatypes "gitlab.com/NebulousLabs/Sia/types"
+	siatypes "go.sia.tech/siad/types"
 )
 
 func main() {

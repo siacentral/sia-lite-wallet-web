@@ -1,5 +1,5 @@
 # build wasm
-FROM golang:1.16 AS buildgo
+FROM golang AS buildgo
 
 WORKDIR /app
 
@@ -25,4 +25,4 @@ RUN npm run build
 # production
 FROM n8maninger/vue-router
 
-COPY --from=buildnode /app/dist /usr/share/nginx/html
+COPY --from=buildnode /app/dist /www

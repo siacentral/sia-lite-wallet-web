@@ -7,9 +7,9 @@ import (
 	"strings"
 	"unicode"
 
-	siacrypto "gitlab.com/NebulousLabs/Sia/crypto"
 	mnemonics "gitlab.com/NebulousLabs/entropy-mnemonics"
-	"gitlab.com/NebulousLabs/fastrand"
+	siacrypto "go.sia.tech/siad/crypto"
+	"lukechampine.com/frand"
 )
 
 var englishWordMap = func() map[string]bool {
@@ -20,11 +20,11 @@ var englishWordMap = func() map[string]bool {
 	return m
 }()
 
-//NewSiaRecoveryPhrase creates a new unique 28 or 29 word wallet seed
+// NewSiaRecoveryPhrase creates a new unique 28 or 29 word wallet seed
 func NewSiaRecoveryPhrase() (string, error) {
 	var entropy [siacrypto.EntropySize]byte
 
-	fastrand.Read(entropy[:])
+	frand.Read(entropy[:])
 
 	fullChecksum := siacrypto.HashObject(entropy)
 	checksumSeed := append(entropy[:], fullChecksum[:SeedChecksumSize]...)
@@ -37,9 +37,9 @@ func NewSiaRecoveryPhrase() (string, error) {
 	return phrase.String(), nil
 }
 
-//RecoverSiaSeed loads a standard 29 word wallet phrase.
-//Wanted to import this directly from modules, but cannot because of bbolt
-//https://gitlab.com/NebulousLabs/Sia/blob/fb65620/modules/go#L526
+// RecoverSiaSeed loads a standard 29 word wallet phrase.
+// Wanted to import this directly from modules, but cannot because of bbolt
+// https://go.sia.tech/siad/blob/fb65620/modules/go#L526
 func RecoverSiaSeed(phrase, currency string) (*SeedWallet, error) {
 	wallet := new(SeedWallet)
 

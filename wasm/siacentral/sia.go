@@ -5,8 +5,6 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
-
-	"github.com/siacentral/apisdkgo"
 )
 
 type (
@@ -59,9 +57,15 @@ func (s *siaAPI) FindUsedAddresses(addresses []string) ([]AddressUsage, error) {
 }
 
 func (s *siaAPI) GetBlockHeight() (uint64, error) {
-	client := apisdkgo.NewSiaClient()
-	index, err := client.GetChainIndex()
-	return index.Height, err
+	var resp getChainIndexResp
+
+	code, err := makeAPIRequest(http.MethodGet, "https://api.siacentral.com/v2/explorer/consensus/index", nil, &resp)
+	if err != nil {
+		return 0, err
+	} else if code < 200 || code >= 300 || resp.Type != "success" {
+		return 0, fmt.Errorf(resp.Message)
+	}
+	return resp.Index.Height, err
 }
 
 // NewSiaAPI creates a new Sia client to access the Sia api

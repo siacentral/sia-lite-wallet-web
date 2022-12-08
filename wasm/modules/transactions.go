@@ -9,10 +9,10 @@ import (
 	"syscall/js"
 
 	"github.com/siacentral/sia-lite-wallet-web/wasm/siacentral"
-	siatypes "gitlab.com/NebulousLabs/Sia/types"
+	siatypes "go.sia.tech/siad/types"
 )
 
-//EncodeTransaction uses the MarshalSia function to encode the transaction to bytes
+// EncodeTransaction uses the MarshalSia function to encode the transaction to bytes
 func EncodeTransaction(txn siatypes.Transaction, callback js.Value) {
 	buf := new(bytes.Buffer)
 
@@ -28,7 +28,7 @@ func EncodeTransaction(txn siatypes.Transaction, callback js.Value) {
 	callback.Invoke(js.Null(), value)
 }
 
-//SignTransaction signs a transaction using the seed and required signatures
+// SignTransaction signs a transaction using the seed and required signatures
 func SignTransaction(txn siatypes.Transaction, phrase, currency string, requiredSignatures []uint64, callback js.Value) {
 	w, err := recoverWallet(phrase, currency)
 
@@ -52,7 +52,7 @@ func SignTransaction(txn siatypes.Transaction, phrase, currency string, required
 	callback.Invoke(js.Null(), data)
 }
 
-//SignTransactions signs a list of transaction using the seed and required signatures returns an error if any of the transactions cannot be signed
+// SignTransactions signs a list of transaction using the seed and required signatures returns an error if any of the transactions cannot be signed
 func SignTransactions(transactions []UnsignedTransaction, phrase, currency string, callback js.Value) {
 	w, err := recoverWallet(phrase, currency)
 
@@ -88,7 +88,7 @@ func SignTransactions(transactions []UnsignedTransaction, phrase, currency strin
 	callback.Invoke(js.Null(), signed)
 }
 
-//GetTransactions gets the last 500 transactions belonging to each address
+// GetTransactions gets the last 500 transactions belonging to each address
 func GetTransactions(addresses []string, walletCurrency, displayCurrency string, callback js.Value) {
 	transactions := make(map[string]siacentral.Transaction)
 	ownedAddresses := make(map[string]bool)

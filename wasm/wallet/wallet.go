@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	"github.com/siacentral/sia-lite-wallet-web/wasm/siacentral"
-	siacrypto "gitlab.com/NebulousLabs/Sia/crypto"
-	"gitlab.com/NebulousLabs/Sia/types"
+	siacrypto "go.sia.tech/siad/crypto"
+	"go.sia.tech/siad/types"
 )
 
 type (
@@ -32,7 +32,7 @@ func (wallet *SeedWallet) GetAddress(index uint64) SpendableKey {
 
 // GetAddresses returns the n addresses starting at idx and incrementing by 1.
 // Wanted to import this directly from modules, but cannot because of bbolt
-// https://gitlab.com/NebulousLabs/Sia/blob/fb65620/modules/wallet/seed.go#L49
+// https://go.sia.tech/siad/blob/fb65620/modules/wallet/seed.go#L49
 func (wallet *SeedWallet) GetAddresses(idx uint64, keys []SpendableKey) {
 	var n int
 

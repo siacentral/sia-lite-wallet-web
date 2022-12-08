@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/siacentral/sia-lite-wallet-web/wasm/siacentral"
-	siatypes "gitlab.com/NebulousLabs/Sia/types"
+	siatypes "go.sia.tech/siad/types"
 )
 
 type (

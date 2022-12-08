@@ -6,7 +6,7 @@ import (
 
 	"github.com/siacentral/sia-lite-wallet-web/wasm/siacentral"
 	"github.com/siacentral/sia-lite-wallet-web/wasm/wallet"
-	siatypes "gitlab.com/NebulousLabs/Sia/types"
+	siatypes "go.sia.tech/siad/types"
 )
 
 const (

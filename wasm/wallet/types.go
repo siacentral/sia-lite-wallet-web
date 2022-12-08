@@ -1,16 +1,16 @@
 package wallet
 
 import (
-	siacrypto "gitlab.com/NebulousLabs/Sia/crypto"
-	"gitlab.com/NebulousLabs/Sia/types"
+	siacrypto "go.sia.tech/siad/crypto"
+	"go.sia.tech/siad/types"
 )
 
-//Some of these funcs and consts are copied directly from the Sia code base. Unfortunately we can't
-//use some of the packages directly because of the wasm target
+// Some of these funcs and consts are copied directly from the Sia code base. Unfortunately we can't
+// use some of the packages directly because of the wasm target
 const (
 	//SeedChecksumSize is the number of bytes that are used to checksum
 	//addresses to prevent accidental spending.
-	//https://gitlab.com/NebulousLabs/Sia/blob/fb65620/modules/wallet.go#L24
+	//https://go.sia.tech/siad/blob/fb65620/modules/wallet.go#L24
 	SeedChecksumSize = 6
 )
 

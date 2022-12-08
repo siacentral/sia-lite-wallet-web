@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"time"
 )
@@ -29,7 +28,7 @@ var (
 )
 
 func drainAndClose(rc io.ReadCloser) {
-	io.Copy(ioutil.Discard, rc)
+	io.Copy(io.Discard, rc)
 	rc.Close()
 }
 

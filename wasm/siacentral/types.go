@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/shopspring/decimal"
-	siatypes "gitlab.com/NebulousLabs/Sia/types"
+	siatypes "go.sia.tech/siad/types"
 )
 
 type (
@@ -215,8 +215,14 @@ type (
 		Addresses []AddressUsage `json:"addresses"`
 	}
 
-	blockResp struct {
+	ChainIndex struct {
+		ID       string `json:"id"`
+		ParentID string `json:"parent_id"`
+		Height   uint64 `json:"height"`
+	}
+
+	getChainIndexResp struct {
 		response
-		Block Block `json:"block"`
+		Index ChainIndex `json:"index"`
 	}
 )

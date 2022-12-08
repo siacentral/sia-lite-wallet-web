@@ -13,7 +13,7 @@ import (
 
 	"github.com/shopspring/decimal"
 	"github.com/siacentral/sia-lite-wallet-web/wasm/siacentral"
-	siatypes "gitlab.com/NebulousLabs/Sia/types"
+	siatypes "go.sia.tech/siad/types"
 )
 
 type (
@@ -199,7 +199,7 @@ func exportAddressWorker(ownedAddresses map[string]bool, walletCurrency, display
 	}
 }
 
-//ExportTransactions gets all transactions belonging to the addresses
+// ExportTransactions gets all transactions belonging to the addresses
 func ExportTransactions(addresses []string, walletCurrency, displayCurrency string, min, max time.Time, callback js.Value) {
 	var currencyLabel, fundLabel string
 
