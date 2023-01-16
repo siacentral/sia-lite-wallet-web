@@ -37,8 +37,7 @@ body:
   - type: input
     id: browser
     attributes:
-      label: What browser version the problem occur on? (e.g. Chrome 80.12,
-      Safari 16.2, etc)
+      label: What browser version the problem occur on? (e.g. Chrome 80.12, Safari 16.2, etc)
     validations:
       required: true
   - type: textarea
