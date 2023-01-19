@@ -5,6 +5,7 @@ import (
 	"log"
 	"sync"
 	"syscall/js"
+	"time"
 
 	"github.com/siacentral/sia-lite-wallet-web/wasm/wallet"
 )
@@ -83,13 +84,14 @@ func recoveryWorker(w *wallet.SeedWallet, currency string, work <-chan recoveryW
 		}
 
 		results <- recovered
+		time.Sleep(200 * time.Millisecond)
 	}
 }
 
 // RecoverAddresses scans for addresses on the blockchain addressCount at a time up to a maximum of 100,000,000
-//addresses. Considers all addresses found if the scan goes more than minRounds * addressCount
-//addresses without seeing any used. It's possible the ranges will need to be tweaked for older or
-//larger wallets
+// addresses. Considers all addresses found if the scan goes more than minRounds * addressCount
+// addresses without seeing any used. It's possible the ranges will need to be tweaked for older or
+// larger wallets
 func RecoverAddresses(seed, currency string, startIndex, lookahead, lastKnownIndex uint64, callback js.Value) {
 	var wg sync.WaitGroup
 
