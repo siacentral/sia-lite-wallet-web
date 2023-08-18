@@ -3,8 +3,10 @@ package wallet
 import (
 	"errors"
 	"fmt"
+	"log"
 
 	"github.com/siacentral/sia-lite-wallet-web/wasm/siacentral"
+	"go.sia.tech/siad/build"
 	siacrypto "go.sia.tech/siad/crypto"
 	"go.sia.tech/siad/types"
 )
@@ -49,10 +51,6 @@ func apiClient(currency string) siacentral.API {
 }
 
 func (wallet *SeedWallet) currentHeight() (types.BlockHeight, error) {
-	if wallet.Currency == "scp" {
-		return 0, nil
-	}
-
 	height, err := apiClient(wallet.Currency).GetBlockHeight()
 	if err != nil {
 		return 0, err
@@ -84,6 +82,8 @@ func (wallet *SeedWallet) SignTransaction(txn *types.Transaction, requiredSigInd
 	if err != nil {
 		return fmt.Errorf("unable to get current block height: %w", err)
 	}
+
+	log.Println("sign height", height, types.FoundationHardforkHeight, types.ASICHardforkHeight, build.Release)
 
 	for i, input := range txn.SiacoinInputs {
 		key, exists := unlockHashMap[input.UnlockConditions.UnlockHash().String()]

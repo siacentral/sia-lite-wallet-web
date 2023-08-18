@@ -6,7 +6,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/shopspring/decimal v1.3.1
 	gitlab.com/NebulousLabs/entropy-mnemonics v0.0.0-20181018051301-7532f67e3500
-	go.sia.tech/siad v1.5.9
+	go.sia.tech/siad v1.5.10-0.20230802173757-1e6967cf1321
 	golang.org/x/crypto v0.4.0
 	lukechampine.com/frand v1.4.2
 )
@@ -18,6 +18,6 @@ require (
 	gitlab.com/NebulousLabs/errors v0.0.0-20200929122200-06c536cf6975 // indirect
 	gitlab.com/NebulousLabs/fastrand v0.0.0-20181126182046-603482d69e40 // indirect
 	gitlab.com/NebulousLabs/merkletree v0.0.0-20200118113624-07fbf710afc4 // indirect
-	golang.org/x/sys v0.3.0 // indirect
+	golang.org/x/sys v0.5.0 // indirect
 	golang.org/x/text v0.5.0 // indirect
 )

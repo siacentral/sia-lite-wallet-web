@@ -44,7 +44,7 @@ import { formatPriceString } from '@/utils/format';
 import { mapState } from 'vuex';
 import { signTransaction } from '@/sia';
 import { scanTransactions } from '@/sync/scanner';
-import { siaAPI, scprimeAPI } from '@/api/siacentral';
+import { siaAPI } from '@/api/siacentral';
 import WalrusClient from '@/api/walrus';
 
 import SignLedgerTransaction from '@/components/ledger/SignLedgerTransaction';
@@ -161,8 +161,6 @@ export default {
 				})));
 			default:
 				switch (this.wallet.currency) {
-				case 'scp':
-					return scprimeAPI.broadcastTransaction(txnset);
 				default:
 					return siaAPI.broadcastTransaction(txnset);
 				}

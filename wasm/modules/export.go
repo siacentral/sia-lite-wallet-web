@@ -39,10 +39,6 @@ type (
 
 func transactionType(txn siacentral.Transaction, currency string) string {
 	if len(txn.SiafundInputs) != 0 && len(txn.SiafundOutputs) != 0 {
-		if currency == "scp" {
-			return "SCPrimeFund Transaction"
-		}
-
 		return "Siafund Transaction"
 	}
 
@@ -80,11 +76,6 @@ func transactionType(txn siacentral.Transaction, currency string) string {
 	if len(txn.HostAnnouncements) != 0 {
 		return "Host Announcement"
 	}
-
-	if currency == "scp" {
-		return "SCPrime Transaction"
-	}
-
 	return "Siacoin Transaction"
 }
 
@@ -104,11 +95,6 @@ func feesPaid(txn siacentral.Transaction, ownedInput, unownedInput siatypes.Curr
 
 func siacoinString(c siatypes.Currency, currency string) string {
 	var precision int32 = -24
-
-	if currency == "scp" {
-		precision = -27
-	}
-
 	d := decimal.NewFromBigInt(c.Big(), precision)
 
 	return d.String()
@@ -208,9 +194,6 @@ func ExportTransactions(addresses []string, walletCurrency, displayCurrency stri
 	var matching uint64
 
 	switch walletCurrency {
-	case "scp":
-		currencyLabel = "SCP"
-		fundLabel = "SCPF"
 	default:
 		currencyLabel = "SC"
 		fundLabel = "SF"
