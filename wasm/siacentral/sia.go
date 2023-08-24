@@ -21,7 +21,7 @@ func (s *siaAPI) FindAddressBalance(limit int, page int, currency string, addres
 	v.Set("page", strconv.Itoa(page))
 	v.Set("currency", currency)
 
-	u := fmt.Sprintf("https://api.siacentral.com/v2/zen/wallet/addresses?%s", v.Encode())
+	u := fmt.Sprintf("https://api.siacentral.com/v2/wallet/addresses?%s", v.Encode())
 	code, err := makeAPIRequest(http.MethodPost, u, map[string]interface{}{
 		"addresses": addresses,
 	}, &resp)
@@ -41,7 +41,7 @@ func (s *siaAPI) FindAddressBalance(limit int, page int, currency string, addres
 func (s *siaAPI) FindUsedAddresses(addresses []string) ([]AddressUsage, error) {
 	var resp addressesResp
 
-	code, err := makeAPIRequest(http.MethodPost, "https://api.siacentral.com/v2/zen/wallet/addresses/used", map[string]interface{}{
+	code, err := makeAPIRequest(http.MethodPost, "https://api.siacentral.com/v2/wallet/addresses/used", map[string]interface{}{
 		"addresses": addresses,
 	}, &resp)
 
@@ -59,7 +59,7 @@ func (s *siaAPI) FindUsedAddresses(addresses []string) ([]AddressUsage, error) {
 func (s *siaAPI) GetBlockHeight() (uint64, error) {
 	var resp getChainIndexResp
 
-	code, err := makeAPIRequest(http.MethodGet, "https://api.siacentral.com/v2/zen/explorer/consensus/index", nil, &resp)
+	code, err := makeAPIRequest(http.MethodGet, "https://api.siacentral.com/v2/explorer/consensus/index", nil, &resp)
 	if err != nil {
 		return 0, err
 	} else if code < 200 || code >= 300 || resp.Type != "success" {

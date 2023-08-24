@@ -1,7 +1,7 @@
 import { sendJSONRequest } from './common';
 
 export class SiaCentralAPI {
-	constructor(baseURL = 'https://api.siacentral.com/v2/zen') {
+	constructor(baseURL = 'https://api.siacentral.com/v2') {
 		this._baseURL = baseURL;
 	}
 
