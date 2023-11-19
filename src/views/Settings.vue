@@ -59,13 +59,6 @@
 			<template v-if="showAdvanced">
 				<h2>Advanced</h2>
 				<div class="control-grouping">
-					<p class="text-warning">{{ translate('settings.pChangeSeedType') }}</p>
-					<div class="control">
-						<input type="checkbox" id="chk-change-seed-type" v-model="newChangeSeedType" @change="setChangeSeedType(newChangeSeedType)" />
-						<label for="chk-change-seed-type">{{ translate('settings.chkWalrusSeeds') }}</label>
-					</div>
-				</div>
-				<div class="control-grouping">
 					<p class="text-warning">{{ translate('settings.pChangeServerType') }}</p>
 					<div class="control">
 						<input type="checkbox" id="chk-change-server-type" v-model="newChangeServerType" @change="setChangeServerType(newChangeServerType)" />
