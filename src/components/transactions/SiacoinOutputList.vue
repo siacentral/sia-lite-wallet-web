@@ -2,10 +2,10 @@
 	<tbody>
 		<tr v-for="(output, i) in outputs" :key="i">
 			<td class="fit-text icon">
-				<identicon :value="output.unlock_hash" />
+				<identicon :value="output.address" />
 			</td>
 			<td>
-				<input class="output-address" :value="output.unlock_hash" readonly />
+				<input class="output-address" :value="output.address" readonly />
 			</td>
 			<td  class="fit-text text-center">
 				<span class="tag">{{ output.tag }}</span>

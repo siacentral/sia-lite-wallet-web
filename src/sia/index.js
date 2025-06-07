@@ -56,16 +56,8 @@ export function generateAddresses(seed, currency, i, n) {
 	return spawnWorker(['generateAddresses', seed, currency, i, n], 15000);
 }
 
-export function signTransactions(seed, currency, unsigned) {
-	return spawnWorker(['signTransactions', seed, currency, JSON.stringify(unsigned)], 15000);
-}
-
 export function getTransactions(addresses, walletCurrency, displayCurrency) {
 	return spawnWorker(['getTransactions', addresses, walletCurrency, displayCurrency], 30000);
-}
-
-export async function exportTransactions(addresses, walletCurrency, displayCurrency, min, max, progress) {
-	return spawnWorker(['exportTransactions', addresses, walletCurrency, displayCurrency, min, max], 300000, progress);
 }
 
 export function signTransaction(seed, currency, txn, indexes) {
@@ -78,10 +70,6 @@ export function encodeTransaction(txn) {
 
 export function encodeUnlockHash(unlockconditions) {
 	return spawnWorker(['encodeUnlockHash', JSON.stringify(unlockconditions)], 15000);
-}
-
-export function encodeUnlockHashes(unencoded) {
-	return spawnWorker(['encodeUnlockHashes', unencoded.map(u => JSON.stringify(u))], 15000);
 }
 
 export async function recoverAddresses(seed, currency, i = 0, lookahead = 25000, last = 0, progress) {

@@ -5,7 +5,7 @@ import { encode as encodeB64 } from '@stablelib/base64';
 import { encode as encodeUTF8 } from '@stablelib/utf8';
 import { saveWallet, loadWallets, deleteWallet } from './db';
 import { scanner } from '@/sync/scanner';
-import { siaAPI } from '@/api/siacentral';
+import { getExchangeRate } from '@/api/siacentral';
 import Wallet from '@/types/wallet';
 
 Vue.use(Vuex);
@@ -296,19 +296,15 @@ const store = new Vuex.Store({
 
 async function updateMetadata() {
 	try {
-		const price = await siaAPI.getCoinPrice(),
-			siaFees = await siaAPI.getNetworkFees(),
-			addresses = await siaAPI.getFeeAddresses(),
-			siaBlock = await siaAPI.getBlockHeight();
+		const usd = await getExchangeRate('https://api.siascan.com', 'usd'),
+			eur = await getExchangeRate('https://api.siascan.com', 'eur');
 
-		store.dispatch('setNetworkFees', {
-			sia: siaFees
+		store.dispatch('setExchangeRate', {
+			siacoin: {
+				usd: usd,
+				eur: eur
+			}
 		});
-		store.dispatch('setConsensusHeight', {
-			sia: siaBlock.height
-		});
-		store.dispatch('setExchangeRate', price);
-		store.dispatch('setFeeAddresses', addresses);
 	} catch (ex) {
 		console.error('updatingMeta', ex);
 	}

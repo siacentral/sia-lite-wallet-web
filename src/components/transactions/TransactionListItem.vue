@@ -14,7 +14,7 @@
 <script>
 import BigNumber from 'bignumber.js';
 import { mapState } from 'vuex';
-import { formatPriceString, formatSiafundString, formatExchangeRate } from '@/utils/format';
+import { formatPriceString, formatSiafundString } from '@/utils/format';
 
 export default {
 	props: {
@@ -22,36 +22,26 @@ export default {
 		transaction: Object
 	},
 	computed: {
-		...mapState(['currency', 'exchangeRateSC', 'exchangeRateSCP', 'useCostBasis']),
+		...mapState(['currency', 'exchangeRateSC', 'exchangeRateSCP']),
 		siacoinAmount() {
-			if (!this.transaction || !this.transaction.siacoin_value)
-				return new BigNumber(0);
+			const siacoinInput = new BigNumber(this.transaction?.siacoin_inputs || 0),
+				siacoinOutput = new BigNumber(this.transaction?.siacoin_outputs || 0);
 
-			let value = new BigNumber(this.transaction.siacoin_value.value);
-
-			if (value.isNaN() || !value.isFinite())
-				value = new BigNumber(0);
-
-			return value;
+			return siacoinOutput.minus(siacoinInput);
 		},
 		siafundAmount() {
-			if (!this.transaction || !this.transaction.siafund_value)
-				return new BigNumber(0);
+			const siafundInput = new BigNumber(this.transaction?.siafund_inputs || 0),
+				siafundOutput = new BigNumber(this.transaction?.siafund_outputs || 0);
 
-			let value = new BigNumber(this.transaction.siafund_value.value);
-
-			if (value.isNaN() || !value.isFinite())
-				value = new BigNumber(0);
-
-			return value;
+			return siafundOutput.minus(siafundInput);
 		},
 		showSiafunds() {
-			return this.transaction && Array.isArray(this.transaction.siafund_inputs) && this.transaction.siafund_inputs.length > 0;
+			return this.siafundAmount.gt(0);
 		},
 		displaySiacoins() {
-			const format = formatPriceString(this.siacoinAmount, 2, this.wallet.currency, 1, this.wallet.precision());
+			const format = formatPriceString(this.siacoinAmount.abs(), 2, this.wallet.currency, 1);
 
-			if (this.transaction.siacoin_value.direction === 'sent' && !new BigNumber(this.transaction.siacoin_value.value).eq(0))
+			if (this.siacoinAmount.lt(0))
 				return `-${format.value} <span class="currency-display">${this.translate(`currency.${format.label}`)}</span>`;
 
 			return `${format.value} <span class="currency-display">${this.translate(`currency.${format.label}`)}</span>`;
@@ -59,30 +49,20 @@ export default {
 		displaySiafunds() {
 			const format = formatSiafundString(this.siafundAmount, this.wallet.currency);
 
-			if (this.transaction.siafund_value.direction === 'sent' && !new BigNumber(this.transaction.siafund_value.value).eq(0))
+			if (this.siafundAmount.lt(0))
 				return `-${format.value} <span class="currency-display">${this.translate(`currency.${format.label}`)}</span>`;
 
 			return `${format.value} <span class="currency-display">${this.translate(`currency.${format.label}`)}</span>`;
 		},
 		displayCurrency() {
-			let exchangeRate = this.exchangeRateSC[this.currency],
+			const exchangeRate = this.exchangeRateSC[this.currency],
 				label = this.currency;
 
-			if (this.wallet.currency === 'sc' && this.useCostBasis && this.transaction.confirmations) {
-				exchangeRate = this.transaction.exchange_rate.rate;
-				label = this.transaction.exchange_rate.currency;
-			} else if (this.wallet.currency && this.wallet.currency === 'scp')
-				exchangeRate = this.exchangeRateSCP[this.currency];
+			const format = formatPriceString(this.siacoinAmount.abs(), 2, label, exchangeRate, this.wallet.precision());
+			let display = `${format.value} <span class="currency-display">${this.translate(`currency.${format.label}`)}</span>`;
 
-			const format = formatPriceString(this.siacoinAmount, 2, label, exchangeRate, this.wallet.precision());
-			let display = `${format.value} <span class="currency-display">${this.translate(`currency.${format.label}`)}`;
-
-			if (this.useCostBasis)
-				display += ` @ ${formatExchangeRate(exchangeRate, label, 'never')}`;
-
-			display += '</span>';
-
-			if (this.transaction.siacoin_value.direction === 'sent')
+			const neg = this.siacoinAmount.lt(0);
+			if (neg)
 				display = '-' + display;
 
 			return display;
@@ -144,19 +124,17 @@ export default {
 			return classes;
 		},
 		siacoinClass() {
-			const classes = {};
+			const classes = {},
+				direction = new BigNumber(this.transaction?.siacoin_outputs).gt(new BigNumber(this.transaction?.siacoin_inputs)) ? 'received' : 'send';
 
-			if (this.transaction && this.transaction.siacoin_value)
-				classes[`value-${this.transaction.siacoin_value.direction}`] = true;
-
+			classes[`value-${direction}`] = true;
 			return classes;
 		},
 		siafundClass() {
-			const classes = {};
+			const classes = {},
+				direction = this.transaction?.siafund_outputs > this.transaction?.siafund_inputs ? 'received' : 'send';
 
-			if (this.transaction && this.transaction.siafund_value)
-				classes[`value-${this.transaction.siafund_value.direction}`] = true;
-
+			classes[`value-${direction}`] = true;
 			return classes;
 		}
 	}

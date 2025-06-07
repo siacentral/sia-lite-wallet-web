@@ -27,6 +27,7 @@
 import { mapState } from 'vuex';
 import BigNumber from 'bignumber.js';
 import { verifyAddress } from '@/utils';
+import { getExchangeRate } from '@/api/siacentral';
 import { getTransactions, generateAddresses as generateSiaAddresses, encodeUnlockHash } from '@/sia';
 import { formatPriceString, formatSiafundString, formatNumber } from '@/utils/format';
 import { getWalletAddresses } from '@/store/db';
@@ -51,11 +52,12 @@ export default {
 			siafundBalance: new BigNumber(0),
 			ready: false,
 			connected: false,
+			exchangeRate: 0,
 			refreshTimeout: null
 		};
 	},
 	computed: {
-		...mapState(['currency', 'exchangeRateSC', 'exchangeRateSCP']),
+		...mapState(['currency']),
 		walletType() {
 			return this.wallet && typeof this.wallet.type === 'string' ? this.wallet.type : 'watch';
 		},
@@ -70,19 +72,13 @@ export default {
 			return `${format.value} <span class="currency-display">${this.translate(`currency.${format.label}`)}</span>`;
 		},
 		balanceCurrency() {
-			let balance = new BigNumber(this.siacoinBalance),
-				exchangeRate = this.exchangeRateSC,
-				precision = new BigNumber('1e24');
-
-			if (this.wallet.currency && this.wallet.currency === 'scp') {
-				exchangeRate = this.exchangeRateSCP;
-				precision = new BigNumber('1e27');
-			}
+			const precision = new BigNumber('1e24');
+			let balance = new BigNumber(this.siacoinBalance);
 
 			if (balance.isNaN() || !balance.isFinite())
 				balance = new BigNumber(0);
 
-			const format = formatPriceString(balance, 2, this.currency, exchangeRate[this.currency], precision);
+			const format = formatPriceString(balance, 2, this.currency, this.exchangeRate, precision);
 
 			return `${format.value} <span class="currency-display">${this.translate(`currency.${format.label}`)}</span>`;
 		},
@@ -105,6 +101,10 @@ export default {
 
 			return this.addresses.filter(a => !verifyAddress(a.address)).length === 0;
 		}
+	},
+	async beforeMount() {
+		const exchangeRate = await getExchangeRate(this.$store.state.apiBaseURL, this.currency);
+		this.exchangeRate = exchangeRate;
 	},
 	async mounted() {
 		try {
@@ -153,8 +153,8 @@ export default {
 				pubkey: publicKey.substr(8),
 				unlock_conditions: {
 					timelock: 0,
-					signaturesrequired: 1,
-					publickeys: [publicKey]
+					requiredSignatures: 1,
+					publicKeys: [publicKey]
 				},
 				index: nextIndex
 			};

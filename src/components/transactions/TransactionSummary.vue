@@ -24,12 +24,12 @@ export default {
 		transaction: Object
 	},
 	computed: {
-		...mapState(['currency', 'exchangeRateSC', 'feeAddresses']),
+		...mapState(['currency', 'exchangeRateSC']),
 		direction() {
 			return this.input.gt(this.output) ? 'send' : 'receive';
 		},
 		value() {
-			if (!this.transaction || !Array.isArray(this.transaction.siacoin_inputs))
+			if (!this.transaction || !Array.isArray(this.transaction.siacoinInputs))
 				return new BigNumber(0);
 
 			return this.transaction.siacoin_outputs.reduce((total, o) => {
@@ -40,10 +40,10 @@ export default {
 			}, new BigNumber(0));
 		},
 		input() {
-			if (!this.transaction || !Array.isArray(this.transaction.siacoin_inputs))
+			if (!this.transaction || !Array.isArray(this.transaction.siacoinInputs))
 				return new BigNumber(0);
 
-			return this.transaction.siacoin_inputs.reduce((total, o) => {
+			return this.transaction.siacoinInputs.reduce((total, o) => {
 				if (!o.owned)
 					return total;
 
@@ -51,10 +51,10 @@ export default {
 			}, new BigNumber(0));
 		},
 		output() {
-			if (!this.transaction || !Array.isArray(this.transaction.siacoin_outputs))
+			if (!this.transaction || !Array.isArray(this.transaction.siacoinOutputs))
 				return new BigNumber(0);
 
-			return this.transaction.siacoin_outputs.reduce((total, o) => {
+			return this.transaction.siacoinOutputs.reduce((total, o) => {
 				if (!o.owned)
 					return total;
 
@@ -62,14 +62,14 @@ export default {
 			}, new BigNumber(0));
 		},
 		recipients() {
-			if (!this.transaction || !Array.isArray(this.transaction.siacoin_outputs))
+			if (!this.transaction || !Array.isArray(this.transaction.siacoinOutputs))
 				return [];
 
-			return this.transaction.siacoin_outputs.reduce((outputs, o) => {
-				if (o.owned || this.feeAddresses.indexOf(o.unlock_hash) !== -1)
+			return this.transaction.siacoinOutputs.reduce((outputs, o) => {
+				if (o.owned)
 					return outputs;
 
-				const i = outputs.findIndex(a => a.unlock_hash === o.unlock_hash);
+				const i = outputs.findIndex(a => a.address === o.address);
 
 				if (i !== -1)
 					outputs[i].value = outputs[i].value.plus(o.value);
@@ -84,14 +84,14 @@ export default {
 			}, []);
 		},
 		received() {
-			if (!this.transaction || !Array.isArray(this.transaction.siacoin_outputs))
+			if (!this.transaction || !Array.isArray(this.transaction.siacoinOutputs))
 				return [];
 
-			return this.transaction.siacoin_outputs.reduce((outputs, o) => {
+			return this.transaction.siacoinOutputs.reduce((outputs, o) => {
 				if (!o.owned)
 					return outputs;
 
-				const i = outputs.findIndex(a => a.unlock_hash === o.unlock_hash);
+				const i = outputs.findIndex(a => a.address === o.address);
 
 				if (i !== -1)
 					outputs[i].value = outputs[i].value.plus(o.value);
@@ -111,17 +111,11 @@ export default {
 			if (output.owned)
 				return this.translate('outputTags.received');
 
-			if (this.feeAddresses.indexOf(output.unlock_hash) !== -1)
-				return this.translate('outputTags.apiFee');
-
 			return this.translate('outputTags.recipient');
 		},
 		getInputTag(output) {
 			if (output.owned)
 				return this.translate('outputTags.sent');
-
-			if (this.feeAddresses.indexOf(output.unlock_hash) !== -1)
-				return this.translate('outputTags.apiFee');
 
 			return this.translate('outputTags.sender');
 		}

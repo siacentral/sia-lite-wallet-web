@@ -2,23 +2,23 @@
 	<div class="transaction-outputs">
 		<div class="output-title">Inputs</div>
 		<template class="output" v-for="input in inputs" >
-			<identicon :value="input.unlock_hash"
-				:key="`identicon-${input.output_id}`" />
-			<input class="output-address" :key="`address-${input.output_id}`"
-				:value="input.unlock_hash" readonly />
-			<div :key="`tag-${input.output_id}`" />
+			<identicon :value="input.address"
+				:key="`identicon-${input.outputID}`" />
+			<input class="output-address" :key="`address-${input.outputID}`"
+				:value="input.address" readonly />
+			<div :key="`tag-${input.outputID}`" />
 			<div class="text-right" v-html="getOutputSC(input)"
-				:key="`sc-${input.output_id}`" />
+				:key="`sc-${input.outputID}`" />
 			<div class="text-right" v-html="getOutputCurrency(input)"
-				:key="`usd-${input.output_id}`" />
+				:key="`usd-${input.outputID}`" />
 		</template>
 		<div class="divider" />
 		<div class="output-title">Outputs</div>
 		<template class="output" v-for="(output, i) in outputs" >
-			<identicon :value="output.unlock_hash"
+			<identicon :value="output.address"
 				:key="`identicon-${i}`" />
 			<input class="output-address" :key="`address-${i}`"
-				:value="output.unlock_hash" readonly />
+				:value="output.address" readonly />
 			<div :key="`tag-${i}`" class="text-center">
 				<span class="tag">{{ output.tag }}</span>
 			</div>
@@ -46,13 +46,7 @@ export default {
 		wallet: Object
 	},
 	computed: {
-		...mapState(['currency', 'exchangeRateSC', 'exchangeRateSCP', 'siaNetworkFees', 'scprimeNetworkFees']),
-		networkFees() {
-			if (this.wallet && this.wallet.currency === 'scp')
-				return this.scprimeNetworkFees;
-
-			return this.siaNetworkFees;
-		},
+		...mapState(['currency', 'exchangeRateSC']),
 		outputs() {
 			if (!this.transaction || !Array.isArray(this.transaction.siacoin_outputs))
 				return [];

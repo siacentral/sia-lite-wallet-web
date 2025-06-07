@@ -108,8 +108,8 @@ export function getWalletChangeAddress(walletID) {
 	return db.getWalletChangeAddress(walletID);
 }
 
-export function getLastWalletAddresses(walletID, limit, offset) {
-	return db.getLastWalletAddresses(walletID, limit, offset);
+export function getFirstWalletAddresses(walletID) {
+	return db.getFirstWalletAddresses(walletID);
 }
 
 export function deleteWallet(walletID) {

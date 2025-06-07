@@ -25,19 +25,19 @@ export default {
 	computed: {
 		...mapState(['feeAddresses']),
 		outputs() {
-			if (!this.transaction || !Array.isArray(this.transaction.siacoin_outputs))
+			if (!this.transaction || !Array.isArray(this.transaction.siacoinOutputs))
 				return [];
 
-			return this.transaction.siacoin_outputs.map(o => ({
+			return this.transaction.siacoinOutputs.map(o => ({
 				...o,
 				tag: this.getOutputTag(o)
 			}));
 		},
 		inputs() {
-			if (!this.transaction || !Array.isArray(this.transaction.siacoin_inputs))
+			if (!this.transaction || !Array.isArray(this.transaction.siacoinInputs))
 				return [];
 
-			return this.transaction.siacoin_inputs.map(i => ({
+			return this.transaction.siacoinInputs.map(i => ({
 				...i,
 				tag: this.getInputTag(i)
 			}));
@@ -48,17 +48,11 @@ export default {
 			if (output.owned)
 				return this.translate('outputTags.received');
 
-			if (this.feeAddresses.indexOf(output.unlock_hash) !== -1)
-				return this.translate('outputTags.apiFee');
-
 			return this.translate('outputTags.recipient');
 		},
 		getInputTag(output) {
 			if (output.owned)
 				return this.translate('outputTags.sent');
-
-			if (this.feeAddresses.indexOf(output.unlock_hash) !== -1)
-				return this.translate('outputTags.apiFee');
 
 			return this.translate('outputTags.sender');
 		}

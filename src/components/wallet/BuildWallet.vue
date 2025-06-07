@@ -12,14 +12,6 @@
 			</select>
 		</div>
 		<template v-if="changeServerType">
-			<div class="control">
-				<label>{{ translate('createWalletModal.lblServerType') }}</label>
-				<select v-model="serverType">
-					<option value="siacentral">{{ translate('siacentral') }}</option>
-					<option value="narwal">{{ translate('narwal') }}</option>
-					<option value="walrus">{{ translate('walrus') }}</option>
-				</select>
-			</div>
 			<div class="control" v-if="showServerURL">
 				<label>{{ translate('createWalletModal.lblServerURL') }}</label>
 				<input v-model="serverURL" />
@@ -48,8 +40,6 @@ import { mapState } from 'vuex';
 import { generateSeed, generateAddresses } from '@/sia';
 import { randomBytes } from 'tweetnacl';
 import { encode } from '@stablelib/base64';
-import { hashString } from '@/utils/crypto';
-import WalrusClient from '@/api/walrus';
 
 import ImportSeedModal from '@/modal/ImportSeedModal';
 
@@ -83,9 +73,6 @@ export default {
 			}
 		},
 		showServerURL() {
-			if (this.serverType === 'walrus')
-				return true;
-
 			return false;
 		}
 	},
@@ -146,35 +133,6 @@ export default {
 						server_type: this.serverType,
 						server_url: this.serverURL
 					};
-
-				// narwal wallets are walrus
-				if (this.serverType === 'narwal') {
-					wallet.server_type = 'walrus';
-
-					// automatically generate a new narwal url
-					switch (this.createType) {
-					default:
-						wallet.server_url = `https://narwal.lukechampine.com/wallet/${hashString(seed)}`;
-						break;
-					}
-				}
-
-				// check the server connection
-				if (wallet.server_type === 'walrus') {
-					let addresses = [];
-					try {
-						const client = new WalrusClient(wallet.server_url);
-
-						addresses = await client.getAddresses();
-					} catch (ex) {
-						console.warn('BuildWallet.onCreateWallet', ex.message);
-						throw new Error('Unable to connect to Walrus server. Check your URL.');
-					}
-
-					if (this.createType === 'create' && addresses.length !== 0)
-						throw new Error('That walrus server is already in use. Choose "Recover Wallet" to import an existing seed');
-				}
-
 				this.$emit('created', wallet);
 			} catch (ex) {
 				console.error('onCreateWallet', ex);

@@ -1,6 +1,5 @@
 
 import defaultScanner from './default';
-import walrusScanner from './walrus';
 import Store from '@/store';
 
 const rescanTimeouts = {};
@@ -40,21 +39,11 @@ export async function scanner() {
 export async function scanWallet(walletID, full) {
 	clearTimeout(rescanTimeouts[walletID]);
 
-	const wallet = Store.state.wallets.find(w => w.id === walletID);
-	let scanner;
+	const wallet = Store.state.wallets.find(w => w.id === walletID),
+		scanner = defaultScanner;
 
 	if (!wallet)
 		return;
-
-	switch (wallet.server_type) {
-	case 'walrus':
-	case 'narwal':
-		scanner = walrusScanner;
-		break;
-	default:
-		scanner = defaultScanner;
-		break;
-	}
 
 	try {
 		switch (wallet.type) {
@@ -73,17 +62,10 @@ export async function scanWallet(walletID, full) {
 			throw new Error('unknown wallet type');
 		}
 
+		await scanner.scanTransactions(wallet);
 		Store.dispatch('setOffline', false);
 	} catch (ex) {
 		console.error('scanWallet', wallet.id, ex);
-		Store.dispatch('setOffline', true);
-	}
-
-	try {
-		await scanTransactions(wallet);
-		Store.dispatch('setOffline', false);
-	} catch (ex) {
-		console.error('scanTransactions', wallet.id, ex);
 		Store.dispatch('setOffline', true);
 	}
 
@@ -91,13 +73,6 @@ export async function scanWallet(walletID, full) {
 		Store.dispatch('queueWallet', { walletID: wallet.id, full: false });
 	}, 120000);
 }
-
 export async function scanTransactions(wallet) {
-	switch (wallet.server_type) {
-	case 'walrus':
-	case 'narwal':
-		return walrusScanner.scanTransactions(wallet);
-	default:
-		return defaultScanner.scanTransactions(wallet);
-	}
+	return defaultScanner.scanTransactions(wallet);
 }

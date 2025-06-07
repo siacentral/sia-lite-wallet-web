@@ -32,11 +32,8 @@ export default {
 		mode: String
 	},
 	computed: {
-		...mapState(['currency', 'exchangeRateSC', 'exchangeRateSCP', 'siaNetworkFees', 'scprimeNetworkFees']),
+		...mapState(['currency', 'exchangeRateSC', 'exchangeRateSCP']),
 		networkFees() {
-			if (this.wallet && this.wallet.currency === 'scp')
-				return this.scprimeNetworkFees;
-
 			return this.siaNetworkFees;
 		},
 		walletBalance() {
@@ -46,16 +43,16 @@ export default {
 			return this.wallet.unconfirmedSiacoinBalance().minus(this.inputAmount).plus(this.receiveAmount);
 		},
 		outputs() {
-			if (!this.transaction || !Array.isArray(this.transaction.siacoin_outputs))
+			if (!this.transaction || !Array.isArray(this.transaction.siacoinOutputs))
 				return [];
 
-			return this.transaction.siacoin_outputs;
+			return this.transaction.siacoinOutputs;
 		},
 		inputs() {
-			if (!this.transaction || !Array.isArray(this.transaction.siacoin_inputs))
+			if (!this.transaction || !Array.isArray(this.transaction.siacoinInputs))
 				return [];
 
-			return this.transaction.siacoin_inputs;
+			return this.transaction.siacoinInputs;
 		},
 		inputAmount() {
 			return this.inputs.reduce((total, o) => {
@@ -84,10 +81,10 @@ export default {
 			return this.inputAmount.minus(this.receiveAmount);
 		},
 		minerFees() {
-			if (!this.transaction || !Array.isArray(this.transaction.miner_fees))
+			if (!this.transaction || !Array.isArray(this.transaction.minerFees))
 				return new BigNumber(0);
 
-			return this.transaction.miner_fees.reduce((total, f) => {
+			return this.transaction.minerFees.reduce((total, f) => {
 				const value = total.plus(f);
 
 				if (value.isNaN() || !value.isFinite())
@@ -96,21 +93,8 @@ export default {
 				return value;
 			}, new BigNumber(0));
 		},
-		apiFee() {
-			return this.outputs.reduce((total, o) => {
-				if (o.tag !== 'Broadcast Fee')
-					return total;
-
-				const value = total.plus(o.value);
-
-				if (value.isNaN() || !value.isFinite())
-					return total;
-
-				return value;
-			}, new BigNumber(0));
-		},
 		fees() {
-			return this.apiFee.plus(this.minerFees);
+			return this.minerFees;
 		}
 	},
 	methods: {
