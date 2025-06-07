@@ -33,9 +33,6 @@ export default {
 	},
 	computed: {
 		...mapState(['currency', 'exchangeRateSC', 'exchangeRateSCP']),
-		networkFees() {
-			return this.siaNetworkFees;
-		},
 		walletBalance() {
 			if (!this.wallet || !this.transaction)
 				return new BigNumber(0);

@@ -3,14 +3,14 @@
 		<div class="output-title">Inputs</div>
 		<template class="output" v-for="input in inputs" >
 			<identicon :value="input.address"
-				:key="`identicon-${input.outputID}`" />
-			<input class="output-address" :key="`address-${input.outputID}`"
+				:key="`identicon-${input.output_id}`" />
+			<input class="output-address" :key="`address-${input.output_id}`"
 				:value="input.address" readonly />
-			<div :key="`tag-${input.outputID}`" />
+			<div :key="`tag-${input.output_id}`" />
 			<div class="text-right" v-html="getOutputSC(input)"
-				:key="`sc-${input.outputID}`" />
+				:key="`sc-${input.output_id}`" />
 			<div class="text-right" v-html="getOutputCurrency(input)"
-				:key="`usd-${input.outputID}`" />
+				:key="`usd-${input.output_id}`" />
 		</template>
 		<div class="divider" />
 		<div class="output-title">Outputs</div>
