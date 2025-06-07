@@ -62,11 +62,8 @@ export default class DexieStore {
 		return addr;
 	}
 
-	getLastWalletAddresses(walletID, limit, offset) {
-		offset = offset || 0;
-		limit = limit || 20;
-
-		return this._db.addresses.orderBy('index').reverse().filter(a => a.wallet_id === walletID).offset(offset).limit(limit).toArray();
+	getFirstWalletAddresses(walletID) {
+		return this._db.addresses.orderBy('index').filter(a => a.wallet_id === walletID).limit(100).toArray();
 	}
 
 	deleteWallet(walletID) {

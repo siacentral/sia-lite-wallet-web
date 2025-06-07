@@ -44,8 +44,7 @@ import { formatPriceString } from '@/utils/format';
 import { mapState } from 'vuex';
 import { signTransaction } from '@/sia';
 import { scanTransactions } from '@/sync/scanner';
-import { siaAPI } from '@/api/siacentral';
-import WalrusClient from '@/api/walrus';
+import { broadcastTransaction } from '@/api/siacentral';
 
 import SignLedgerTransaction from '@/components/ledger/SignLedgerTransaction';
 import TransactionSummary from '@/components/transactions/TransactionSummary';
@@ -73,26 +72,17 @@ export default {
 		},
 		siaTransaction() {
 			return {
-				minerfees: this.transaction.miner_fees,
-				siacoininputs: this.transaction.siacoin_inputs.map(i => ({
-					parentid: i.output_id,
-					unlockconditions: i.unlock_conditions
-				})),
-				siacoinoutputs: this.transaction.siacoin_outputs.map(o => ({
-					unlockhash: o.unlock_hash,
-					value: o.value
-				})),
-				transactionsignatures: this.transaction.siacoin_inputs.map(i => ({
-					parentid: i.output_id,
-					coveredfields: { wholetransaction: true }
+				minerFees: this.transaction.minerFees,
+				siacoinInputs: this.transaction.siacoinInputs,
+				siacoinOutputs: this.transaction.siacoinOutputs,
+				signatures: this.transaction.siacoinInputs.map(i => ({
+					parentID: i.parentID,
+					coveredFields: { wholeTransaction: true }
 				}))
 			};
 		},
 		changeIndex() {
-			if (!this.transaction.change_index || isNaN(this.transaction.change_index) || this.transaction.change_index < 0)
-				return 0;
-
-			return this.transaction.change_index;
+			return this.transaction?.changeIndex || 0;
 		},
 		remStr() {
 			const format = formatPriceString(this.remainder, 2);
@@ -100,10 +90,10 @@ export default {
 			return `${format.value} <span class="currency-display">${format.label}</div>`;
 		},
 		remainder() {
-			const input = this.transaction.siacoin_inputs.reduce((v, i) => v.plus(i.value), new BigNumber(0));
-			let output = this.transaction.siacoin_outputs.reduce((v, o) => v.plus(o.value), new BigNumber(0));
+			const input = this.transaction.siacoinInputs.reduce((v, i) => v.plus(i.value), new BigNumber(0));
+			let output = this.transaction.siacoinOutputs.reduce((v, o) => v.plus(o.value), new BigNumber(0));
 
-			output = output.plus(this.transaction.miner_fees.reduce((v, f) => v.plus(f), new BigNumber(0)));
+			output = output.plus(this.transaction.minerFees.reduce((v, f) => v.plus(f), new BigNumber(0)));
 
 			return output.minus(input).abs();
 		},
@@ -111,7 +101,7 @@ export default {
 			return this.remainder.eq(0);
 		},
 		requiredSignatures() {
-			return this.transaction.siacoin_inputs.map(i => i.index);
+			return this.transaction.siacoinInputs.map(i => i.index);
 		},
 		spentOutputs() {
 			if (!this.data || !this.transaction)
@@ -151,20 +141,7 @@ export default {
 			}
 		},
 		broadcastTxnset(txnset) {
-			switch (this.wallet.server_type) {
-			case 'walrus':
-				return new WalrusClient(this.wallet.server_url).broadcastTransaction(txnset.map(txn => ({
-					siacoinInputs: txn.siacoininputs,
-					siacoinOutputs: txn.siacoinoutputs,
-					minerFees: txn.minerfees,
-					transactionSignatures: txn.transactionsignatures
-				})));
-			default:
-				switch (this.wallet.currency) {
-				default:
-					return siaAPI.broadcastTransaction(txnset);
-				}
-			}
+			return broadcastTransaction(this.wallet.server_url || 'https://api.siascan.com/wallet', txnset, null);
 		},
 		async onVerifyTxn() {
 			if (this.sending)
@@ -191,10 +168,10 @@ export default {
 				this.status = this.translate('sendSiacoinsModal.statusBroadcasting', 0, 1);
 
 				await this.broadcastTxnset([{
-					siacoininputs: this.signed.siacoininputs,
-					siacoinoutputs: this.signed.siacoinoutputs,
-					minerfees: this.signed.minerfees,
-					transactionsignatures: this.signed.transactionsignatures
+					siacoinInputs: this.signed.siacoinInputs,
+					siacoinOutputs: this.signed.siacoinOutputs,
+					minerFees: this.signed.minerFees,
+					signatures: this.signed.signatures
 				}]);
 
 				this.status = 'Transaction sent! Updating balance...';

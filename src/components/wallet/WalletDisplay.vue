@@ -3,7 +3,7 @@
 		<div class="wallet-balance">
 			<div class="wallet-title">{{ name }} <button class="btn-select" @click="modal = 'wallet'"><icon icon="chevron-down" /></button>
 				<transition name="fade" mode="out-in">
-					<div class="wallet-scanning" v-if="wallet.scanning === 'full'" key="scanning">
+					<div class="wallet-scanning" v-if="wallet.scanning" key="scanning">
 						<icon icon="redo" /> {{ translate('walletStatus.scanning') }}
 					</div>
 					<div class="wallet-scanning" v-else-if="walletQueued" key="queued">
@@ -33,8 +33,6 @@
 									@click="onDefragWallet"
 									:disabled="walletQueued">
 									<icon icon="sitemap" />{{ translate('defragWallet') }}</button>
-								<button class="dropdown-item" @click="onDropdownModal('exportTransactions')" v-if="wallet.server_type === 'siacentral'">
-									<icon icon="file-export" />{{ translate('exportTransactions') }}</button>
 								<button class="dropdown-item" @click="onDropdownModal('export')" v-if="wallet.type === 'default'">
 									<icon icon="file-export" />{{ translate('exportSeed') }}</button>
 								<button class="dropdown-item" @click="onDropdownModal('delete')">
@@ -67,12 +65,10 @@
 				@close="modal = null" @selected="onDeleteWallet">
 				<p>{{ translate('deleteWalletModal.pDeleteConfirm', name) }}</p>
 			</confirm-modal>
-			<defrag-siacoin-modal v-else-if="modal === 'defrag'" :wallet="wallet" @close="modal = null" />
 			<send-siacoin-modal v-else-if="modal === 'send'" :wallet="wallet" @close="modal = null" />
 			<receive-siacoin-modal v-else-if="modal === 'receive'" :wallet="wallet" @close="modal = null" />
 			<transaction-detail-modal v-else-if="modal === 'transaction'" :transaction="walletTransactions[selectedTransaction]" :wallet="wallet" @close="modal = null" />
 			<export-seed-modal v-else-if="modal === 'export'" :wallet="wallet" @close="modal = null" />
-			<export-transactions-modal v-else-if="modal === 'exportTransactions'" :wallet="wallet" @close="modal = null" />
 			<select-wallet-modal
 				v-else-if="modal === 'wallet'"
 				:wallets="wallets"
@@ -90,9 +86,7 @@ import { formatPriceString, formatSiafundString, formatExchangeRate } from '@/ut
 
 import AddAddressesModal from '@/modal/AddAddressesModal';
 import ConfirmModal from '@/modal/ConfirmModal';
-import DefragSiacoinModal from '@/modal/DefragSiacoinModal';
 import ExportSeedModal from '@/modal/ExportSeedModal';
-import ExportTransactionsModal from '@/modal/ExportTransactionsModal';
 import ReceiveSiacoinModal from '@/modal/ReceiveSiacoinModal';
 import SendSiacoinModal from '@/modal/SendSiacoinModal';
 import SelectWalletModal from '@/modal/SelectWalletModal';
@@ -104,9 +98,7 @@ export default {
 	components: {
 		AddAddressesModal,
 		ConfirmModal,
-		DefragSiacoinModal,
 		ExportSeedModal,
-		ExportTransactionsModal,
 		ReceiveSiacoinModal,
 		SendSiacoinModal,
 		SelectWalletModal,
@@ -239,19 +231,6 @@ export default {
 	methods: {
 		...mapActions(['deleteWallet']),
 		onSelectTransaction(id) {
-			try {
-				if (!this.walletTransactions[id] || this.wallet.server_type === 'walrus')
-					return;
-
-				this.selectedTransaction = id;
-				this.modal = 'transaction';
-			} catch (ex) {
-				console.error(ex);
-				this.pushNotification({
-					severity: 'danger',
-					message: ex.message
-				});
-			}
 		},
 		onQueueWallet() {
 			try {

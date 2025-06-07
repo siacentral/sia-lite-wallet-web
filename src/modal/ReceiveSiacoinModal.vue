@@ -22,7 +22,7 @@
 import Modal from './Modal';
 import AddressQrCode from '@/components/AddressQRCode';
 import ConnectLedger from '@/components/ledger/ConnectLedger';
-import { getLastWalletAddresses } from '@/store/db';
+import { getFirstWalletAddresses } from '@/store/db';
 import { formatNumber } from '@/utils/format';
 
 export default {
@@ -33,7 +33,7 @@ export default {
 	},
 	async beforeMount() {
 		try {
-			const addresses = await this.loadWalletAddresses(0);
+			const addresses = await getFirstWalletAddresses(this.wallet.id);
 
 			addresses.sort((a, b) => {
 				if (a.index > b.index)
@@ -45,7 +45,7 @@ export default {
 				return 0;
 			});
 
-			this.addresses = addresses;
+			this.addresses = addresses.slice(0, 100);
 			setTimeout(() => {
 				this.loaded = true;
 			}, 300);
@@ -92,14 +92,6 @@ export default {
 		}
 	},
 	methods: {
-		loadWalletAddresses(page) {
-			if (!this.wallet || !this.wallet.id)
-				return;
-
-			const limit = 100;
-
-			return getLastWalletAddresses(this.wallet.id, limit, limit * page);
-		},
 		async onVerifyLedger() {
 			try {
 				if (!this.ledgerDevice)
