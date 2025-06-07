@@ -166,7 +166,6 @@ export default {
 			return 0;
 		});
 		this.unspent = unspent;
-		console.log(unspent.length, outputs.length);
 	},
 	async mounted() {
 		try {
