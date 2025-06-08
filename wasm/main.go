@@ -466,6 +466,29 @@ func getWalletTransactions(w *api.Client, addresses []types.Address) ([]processe
 				relevant = true
 				processed.SiafundOutputs += sfo.Value
 			}
+		case wallet.EventV1ContractResolution:
+			relevant = true
+			if data.Missed {
+				processed.Tags = append(processed.Tags, "contract_missed_output")
+			} else {
+				processed.Tags = append(processed.Tags, "contract_valid_output")
+			}
+			processed.SiacoinOutputs = data.SiacoinElement.SiacoinOutput.Value
+		case wallet.EventV2ContractResolution:
+			if data.SiacoinElement.SiacoinOutput.Value.IsZero() {
+				break
+			}
+			relevant = true
+			if data.Missed {
+				processed.Tags = append(processed.Tags, "contract_missed_output")
+			} else {
+				processed.Tags = append(processed.Tags, "contract_renewal")
+			}
+			processed.SiacoinOutputs = data.SiacoinElement.SiacoinOutput.Value
+		case wallet.EventPayout:
+			relevant = true
+			processed.Tags = append(processed.Tags, "payout")
+			processed.SiacoinOutputs = data.SiacoinElement.SiacoinOutput.Value
 		}
 		return processed, relevant
 	}
@@ -492,6 +515,7 @@ func getWalletTransactions(w *api.Client, addresses []types.Address) ([]processe
 		if err != nil {
 			return nil, fmt.Errorf("failed to get wallet events: %w", err)
 		}
+		log.Println("events for addresses", len(addressBatch), ":", len(events))
 
 		for _, event := range events {
 			if seen[event.ID] {
@@ -499,7 +523,10 @@ func getWalletTransactions(w *api.Client, addresses []types.Address) ([]processe
 			}
 			seen[event.ID] = true
 			processed, relevant := processEvent(event)
+			buf, _ := json.Marshal(event)
+			log.Println(string(buf))
 			if !relevant {
+				log.Println("returned event not relevant???")
 				continue // should never happen, but just in case
 			}
 			transactions = append(transactions, processed)

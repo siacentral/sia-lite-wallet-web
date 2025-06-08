@@ -81,6 +81,8 @@ export default {
 				return this.translate('transactionTypes.contractRevision');
 			else if (this.transaction.tags.indexOf('contract_formation') !== -1)
 				return this.translate('transactionTypes.contractFormation');
+			else if (this.transaction.tags.indexOf('contract_renewal') !== -1)
+				return 'Contract Renewal';
 			else if (this.transaction.tags.indexOf('storage_proof') !== -1)
 				return this.translate('transactionTypes.storageProof');
 			else if (this.transaction.tags.indexOf('host_announcement') !== -1)
