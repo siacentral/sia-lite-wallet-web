@@ -523,10 +523,7 @@ func getWalletTransactions(w *api.Client, addresses []types.Address) ([]processe
 			}
 			seen[event.ID] = true
 			processed, relevant := processEvent(event)
-			buf, _ := json.Marshal(event)
-			log.Println(string(buf))
 			if !relevant {
-				log.Println("returned event not relevant???")
 				continue // should never happen, but just in case
 			}
 			transactions = append(transactions, processed)
