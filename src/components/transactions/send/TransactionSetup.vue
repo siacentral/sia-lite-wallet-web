@@ -132,13 +132,20 @@ export default {
 					return this.translate('sendSiacoinsModal.errorGreaterThan0');
 				else if (this.sendAmount.lt(this.fees))
 					return this.translate('sendSiacoinsModal.errorHighFee');
-			}
+				else if (this.sendSFAmount !== 0)
+					return 'You cannot send Siafunds with a Siacoin transaction';
+			} else if (this.sendMode === 'sf') {
+				if (this.sendSFAmount <= 0)
+					return 'Send amount must be greater than 0';
+				else if (this.sendSFAmount > this.walletSFBalance)
+					return 'Not enough Siafunds to send';
+				else if (this.sendAmount.gt(0))
+					return 'You cannot send Siacoins with a Siafund transaction';
+			} else
+				return 'Invalid send mode';
 
 			if (this.sendAmount.plus(this.fees).gt(this.walletBalance))
 				return this.translate('sendSiacoinsModal.errorNotEnough');
-
-			if (this.sendAmount.gt(this.walletSFBalance))
-				return 'Not enough Siafunds to send';
 
 			if (!verifyAddress(this.recipientAddress))
 				return this.translate('sendSiacoinsModal.errorBadRecipient');

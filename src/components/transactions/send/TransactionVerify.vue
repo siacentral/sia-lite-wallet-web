@@ -78,7 +78,7 @@ export default {
 					parentID: i.parentID,
 					coveredFields: { wholeTransaction: true },
 					index: i.index
-				})).concat(this.transaction.siafundInputs.map(i => ({
+				})).concat((this.transaction?.siafundInputs || []).map(i => ({
 					parentID: i.parentID,
 					coveredFields: { wholeTransaction: true },
 					index: i.index

@@ -1,6 +1,6 @@
 import { sendJSONRequest } from './common';
 
-const WALLETD_BASE_URL = 'http://localhost:9980/api';
+const WALLETD_BASE_URL = 'https://api.siascan.com/wallet';
 
 export async function broadcastTransaction(txns, v2txns) {
 	const { statusCode, body } = await sendJSONRequest(`${WALLETD_BASE_URL}/txpool/broadcast`, {

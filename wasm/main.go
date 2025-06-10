@@ -18,7 +18,7 @@ import (
 	"go.sia.tech/walletd/v2/wallet"
 )
 
-const SIASCAN_ADDRESS = "http://localhost:9980/api"
+const SIASCAN_ADDRESS = "https://api.siascan.com/wallet"
 
 func main() {
 	log.Printf("starting sia wasm %s", build.Revision())
