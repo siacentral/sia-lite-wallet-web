@@ -1,7 +1,9 @@
 import { sendJSONRequest } from './common';
 
-export async function broadcastTransaction(baseURL, txns, v2txns) {
-	const { statusCode, body } = await sendJSONRequest(`${baseURL}/txpool/broadcast`, {
+const WALLETD_BASE_URL = 'http://localhost:9980/api';
+
+export async function broadcastTransaction(txns, v2txns) {
+	const { statusCode, body } = await sendJSONRequest(`${WALLETD_BASE_URL}/txpool/broadcast`, {
 		method: 'POST',
 		body: {
 			transactions: txns,
@@ -13,8 +15,8 @@ export async function broadcastTransaction(baseURL, txns, v2txns) {
 	return body;
 }
 
-export async function broadcastFee(baseURL) {
-	const { statusCode, body } = await sendJSONRequest(`${baseURL}/txpool/fee`, {
+export async function broadcastFee() {
+	const { statusCode, body } = await sendJSONRequest(`${WALLETD_BASE_URL}/txpool/fee`, {
 		method: 'GET'
 	});
 	if (statusCode !== 200)
@@ -22,8 +24,8 @@ export async function broadcastFee(baseURL) {
 	return body;
 }
 
-export async function getExchangeRate(baseURL, currency = 'usd') {
-	const { statusCode, body } = await sendJSONRequest(`${baseURL}/exchange-rate/siacoin/${currency}`, {
+export async function getExchangeRate(currency = 'usd') {
+	const { statusCode, body } = await sendJSONRequest(`https://api.siascan.com/exchange-rate/siacoin/${currency}`, {
 		method: 'GET'
 	});
 	if (statusCode !== 200)
@@ -31,8 +33,8 @@ export async function getExchangeRate(baseURL, currency = 'usd') {
 	return body;
 }
 
-export async function tpoolEvents(baseURL) {
-	const { statusCode, body } = await sendJSONRequest(`${baseURL}/txpool/events`, {
+export async function tpoolEvents() {
+	const { statusCode, body } = await sendJSONRequest(`${WALLETD_BASE_URL}/txpool/events`, {
 		method: 'GET'
 	});
 	if (statusCode !== 200)

@@ -103,7 +103,7 @@ export default {
 		}
 	},
 	async beforeMount() {
-		const exchangeRate = await getExchangeRate(this.$store.state.apiBaseURL, this.currency);
+		const exchangeRate = await getExchangeRate(this.currency);
 		this.exchangeRate = exchangeRate;
 	},
 	async mounted() {

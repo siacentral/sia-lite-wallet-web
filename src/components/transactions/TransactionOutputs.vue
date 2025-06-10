@@ -5,6 +5,10 @@
 			<siacoin-output-list v-if="inputs && inputs.length !== 0" :wallet="wallet" :outputs="inputs" />
 			<tr class="header" v-if="outputs && outputs.length !== 0"><td colspan="5">{{ translate('outputs') }}</td></tr>
 			<siacoin-output-list v-if="outputs && outputs.length !== 0" :wallet="wallet" :outputs="outputs" />
+			<tr class="header" v-if="sfInputs && sfInputs.length !== 0"><td colspan="5">Siafund Inputs</td></tr>
+			<siafund-output-list v-if="sfInputs && sfInputs.length !== 0" :wallet="wallet" :outputs="sfInputs" />
+			<tr class="header" v-if="sfOutputs && sfOutputs.length !== 0"><td colspan="5">Siafund Outputs</td></tr>
+			<siafund-output-list v-if="sfOutputs && sfOutputs.length !== 0" :wallet="wallet" :outputs="sfOutputs" />
 		</table>
 	</div>
 </template>
@@ -13,10 +17,12 @@
 import { mapState } from 'vuex';
 
 import SiacoinOutputList from '@/components/transactions/SiacoinOutputList';
+import SiafundOutputList from '@/components/transactions/SiafundOutputList';
 
 export default {
 	components: {
-		SiacoinOutputList
+		SiacoinOutputList,
+		SiafundOutputList
 	},
 	props: {
 		transaction: Object,
@@ -38,6 +44,24 @@ export default {
 				return [];
 
 			return this.transaction.siacoinInputs.map(i => ({
+				...i,
+				tag: this.getInputTag(i)
+			}));
+		},
+		sfOutputs() {
+			if (!this.transaction || !Array.isArray(this.transaction.siafundOutputs))
+				return [];
+
+			return this.transaction.siafundOutputs.map(o => ({
+				...o,
+				tag: this.getOutputTag(o)
+			}));
+		},
+		sfInputs() {
+			if (!this.transaction || !Array.isArray(this.transaction.siafundInputs))
+				return [];
+
+			return this.transaction.siafundInputs.map(i => ({
 				...i,
 				tag: this.getInputTag(i)
 			}));

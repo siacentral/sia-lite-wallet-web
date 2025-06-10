@@ -36,7 +36,7 @@ export default {
 			return siafundOutput.minus(siafundInput);
 		},
 		showSiafunds() {
-			return this.siafundAmount.gt(0);
+			return !this.siafundAmount.eq(0);
 		},
 		displaySiacoins() {
 			const format = formatPriceString(this.siacoinAmount.abs(), 2, this.wallet.currency, 1);
@@ -47,7 +47,7 @@ export default {
 			return `${format.value} <span class="currency-display">${this.translate(`currency.${format.label}`)}</span>`;
 		},
 		displaySiafunds() {
-			const format = formatSiafundString(this.siafundAmount, this.wallet.currency);
+			const format = formatSiafundString(this.siafundAmount.abs(), this.wallet.currency);
 
 			if (this.siafundAmount.lt(0))
 				return `-${format.value} <span class="currency-display">${this.translate(`currency.${format.label}`)}</span>`;

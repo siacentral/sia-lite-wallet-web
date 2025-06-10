@@ -18,6 +18,8 @@ import (
 	"go.sia.tech/walletd/v2/wallet"
 )
 
+const SIASCAN_ADDRESS = "http://localhost:9980/api"
+
 func main() {
 	log.Printf("starting sia wasm %s", build.Revision())
 	js.Global().Set("sia", map[string]any{
@@ -97,7 +99,7 @@ func signTransaction(this js.Value, args []js.Value) any {
 		return err.Error()
 	}
 
-	w := api.NewClient("https://api.siascan.com/wallet", "")
+	w := api.NewClient(SIASCAN_ADDRESS, "")
 
 	phrase := args[0].String()
 	jsonTxn := args[2].String()
@@ -249,7 +251,7 @@ func recoverAddresses(this js.Value, args []js.Value) any {
 	}
 
 	go func() {
-		w := api.NewClient("https://api.siascan.com/wallet", "")
+		w := api.NewClient(SIASCAN_ADDRESS, "")
 
 		var gap uint64
 		n := min(1000, lookahead)
@@ -583,6 +585,45 @@ func getWalletSiacoinOutputs(w *api.Client, addresses []types.Address) ([]siacoi
 	return utxos, nil
 }
 
+func getWalletSiafundOutputs(w *api.Client, addresses []types.Address) ([]siafundOutput, types.Currency, error) {
+	if len(addresses) == 0 {
+		return nil, types.ZeroCurrency, nil
+	}
+
+	cs, err := w.ConsensusTipState()
+	if err != nil {
+		return nil, types.ZeroCurrency, fmt.Errorf("failed to get consensus state: %w", err)
+	}
+	log.Println("tax revenue", cs.SiafundTaxRevenue)
+
+	relevantAddresses := make(map[types.Address]bool, len(addresses))
+	for _, addr := range addresses {
+		relevantAddresses[addr] = true
+	}
+
+	var claimBalance types.Currency
+	var utxos []siafundOutput
+	batch := min(1000, len(addresses))
+	for i := 0; i < len(addresses); i += batch {
+		addressBatch := addresses[i:][:batch]
+		sfes, _, err := w.BatchAddressSiafundOutputs(addressBatch, 0, 10000)
+		if err != nil {
+			return nil, types.ZeroCurrency, fmt.Errorf("failed to get wallet siafund outputs: %w", err)
+		}
+		for _, sfe := range sfes {
+			dividend := cs.SiafundTaxRevenue.Sub(sfe.ClaimStart).Div64(cs.SiafundCount()).Mul64(sfe.SiafundOutput.Value)
+			log.Println("siafund", sfe.ID, sfe.ClaimStart, dividend)
+			claimBalance = claimBalance.Add(dividend)
+			utxos = append(utxos, siafundOutput{
+				OutputID:   sfe.ID,
+				UnlockHash: sfe.SiafundOutput.Address,
+				Value:      sfe.SiafundOutput.Value,
+			})
+		}
+	}
+	return utxos, claimBalance, nil
+}
+
 func getTransactions(this js.Value, args []js.Value) any {
 	if err := checkArgs(args, js.TypeObject, js.TypeString, js.TypeString, js.TypeFunction); err != nil {
 		return err.Error()
@@ -599,7 +640,7 @@ func getTransactions(this js.Value, args []js.Value) any {
 	}
 
 	go func() {
-		w := api.NewClient("https://api.siascan.com/wallet", "")
+		w := api.NewClient(SIASCAN_ADDRESS, "")
 
 		var addresses []types.Address
 		for i := range count {
@@ -624,6 +665,12 @@ func getTransactions(this js.Value, args []js.Value) any {
 		walletResp.UnspentSiacoinOutputs, err = getWalletSiacoinOutputs(w, addresses)
 		if err != nil {
 			callback.Invoke(fmt.Sprintf("error getting wallet siacoin outputs: %s", err), js.Null())
+			return
+		}
+
+		walletResp.UnspentSiafundOutputs, walletResp.SiafundClaim, err = getWalletSiafundOutputs(w, addresses)
+		if err != nil {
+			callback.Invoke(fmt.Sprintf("error getting wallet siafund outputs: %s", err), js.Null())
 			return
 		}
 

@@ -296,8 +296,8 @@ const store = new Vuex.Store({
 
 async function updateMetadata() {
 	try {
-		const usd = await getExchangeRate('https://api.siascan.com', 'usd'),
-			eur = await getExchangeRate('https://api.siascan.com', 'eur');
+		const usd = await getExchangeRate('usd'),
+			eur = await getExchangeRate('eur');
 
 		store.dispatch('setExchangeRate', {
 			siacoin: {

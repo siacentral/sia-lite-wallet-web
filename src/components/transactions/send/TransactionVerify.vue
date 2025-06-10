@@ -63,11 +63,8 @@ export default {
 		transaction: Object
 	},
 	computed: {
-		...mapState(['currency', 'exchangeRateSC', 'siaNetworkFees', 'scprimeNetworkFees']),
+		...mapState(['currency', 'exchangeRateSC', 'siaNetworkFees']),
 		networkFees() {
-			if (this.wallet && this.wallet.currency === 'scp')
-				return this.scprimeNetworkFees;
-
 			return this.siaNetworkFees;
 		},
 		siaTransaction() {
@@ -75,10 +72,17 @@ export default {
 				minerFees: this.transaction.minerFees,
 				siacoinInputs: this.transaction.siacoinInputs,
 				siacoinOutputs: this.transaction.siacoinOutputs,
+				siafundInputs: this.transaction.siafundInputs,
+				siafundOutputs: this.transaction.siafundOutputs,
 				signatures: this.transaction.siacoinInputs.map(i => ({
 					parentID: i.parentID,
-					coveredFields: { wholeTransaction: true }
-				}))
+					coveredFields: { wholeTransaction: true },
+					index: i.index
+				})).concat(this.transaction.siafundInputs.map(i => ({
+					parentID: i.parentID,
+					coveredFields: { wholeTransaction: true },
+					index: i.index
+				})))
 			};
 		},
 		changeIndex() {
@@ -101,13 +105,19 @@ export default {
 			return this.remainder.eq(0);
 		},
 		requiredSignatures() {
-			return this.transaction.siacoinInputs.map(i => i.index);
+			return this.siaTransaction.signatures.map(i => i.index);
 		},
 		spentOutputs() {
 			if (!this.data || !this.transaction)
 				return [];
 
-			return this.transaction.siacoininputs.map(a => a.parentid);
+			return this.transaction.siacoinInputs.map(a => a.parentID);
+		},
+		spentSFOutputs() {
+			if (!this.data || !this.transaction)
+				return [];
+
+			return this.transaction.siafundInputs.map(a => a.parentID);
 		}
 	},
 	data() {
@@ -141,7 +151,7 @@ export default {
 			}
 		},
 		broadcastTxnset(txnset) {
-			return broadcastTransaction(this.wallet.server_url || 'https://api.siascan.com/wallet', txnset, null);
+			return broadcastTransaction(txnset, null);
 		},
 		async onVerifyTxn() {
 			if (this.sending)
@@ -167,12 +177,7 @@ export default {
 
 				this.status = this.translate('sendSiacoinsModal.statusBroadcasting', 0, 1);
 
-				await this.broadcastTxnset([{
-					siacoinInputs: this.signed.siacoinInputs,
-					siacoinOutputs: this.signed.siacoinOutputs,
-					minerFees: this.signed.minerFees,
-					signatures: this.signed.signatures
-				}]);
+				await this.broadcastTxnset([this.signed]);
 
 				this.status = 'Transaction sent! Updating balance...';
 				this.pushNotification({

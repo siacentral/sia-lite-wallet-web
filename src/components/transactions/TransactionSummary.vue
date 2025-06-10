@@ -4,6 +4,7 @@
 			<table>
 				<siacoin-output-list v-if="direction === 'send'" :wallet="wallet" :outputs="recipients" />
 				<siacoin-output-list v-else :wallet="wallet" :outputs="received" />
+				<siafund-output-list v-if="direction === 'send' && sfRecipients && sfRecipients.length !== 0" :wallet="wallet" :outputs="sfRecipients" />
 			</table>
 		</div>
 	</div>
@@ -14,10 +15,12 @@ import { mapState } from 'vuex';
 import BigNumber from 'bignumber.js';
 
 import SiacoinOutputList from '@/components/transactions/SiacoinOutputList';
+import SiafundOutputList from './SiafundOutputList.vue';
 
 export default {
 	components: {
-		SiacoinOutputList
+		SiacoinOutputList,
+		SiafundOutputList
 	},
 	props: {
 		wallet: Object,
@@ -60,6 +63,88 @@ export default {
 
 				return total.plus(o.value);
 			}, new BigNumber(0));
+		},
+		sfInput() {
+			if (!this.transaction || !Array.isArray(this.transaction.siafundInputs))
+				return [];
+
+			return this.transaction.siafundInputs.reduce((inputs, i) => {
+				const index = inputs.findIndex(a => a.address === i.address);
+
+				if (index !== -1)
+					inputs[index].value += i.value;
+				else {
+					inputs.push({
+						...i,
+						tag: this.getInputTag(i)
+					});
+				}
+
+				return inputs;
+			}, []);
+		},
+		sfOutputs() {
+			if (!this.transaction || !Array.isArray(this.transaction.siafundOutputs))
+				return [];
+
+			return this.transaction.siafundOutputs.reduce((outputs, o) => {
+				const index = outputs.findIndex(a => a.address === o.address);
+
+				if (index !== -1)
+					outputs[index].value += o.value;
+				else {
+					outputs.push({
+						...o,
+						tag: this.getOutputTag(o)
+					});
+				}
+
+				return outputs;
+			}, []);
+		},
+		sfRecipients() {
+			if (!this.transaction || !Array.isArray(this.transaction.siafundOutputs))
+				return [];
+
+			return this.transaction.siafundOutputs.reduce((outputs, o) => {
+				if (o.owned)
+					return outputs;
+
+				const i = outputs.findIndex(a => a.address === o.address);
+
+				if (i !== -1)
+					outputs[i].value += o.value;
+				else {
+					outputs.push({
+						...o,
+						tag: this.getOutputTag(o)
+					});
+				}
+
+				return outputs;
+			}, []);
+		},
+		sfReceived() {
+			if (!this.transaction || !Array.isArray(this.transaction.siafundOutputs))
+				return [];
+
+			return this.transaction.siafundOutputs.reduce((outputs, o) => {
+				if (!o.owned)
+					return outputs;
+
+				const i = outputs.findIndex(a => a.address === o.address);
+
+				if (i !== -1)
+					outputs[i].value += o.value;
+				else {
+					outputs.push({
+						...o,
+						tag: this.getOutputTag(o)
+					});
+				}
+
+				return outputs;
+			}, []);
 		},
 		recipients() {
 			if (!this.transaction || !Array.isArray(this.transaction.siacoinOutputs))
