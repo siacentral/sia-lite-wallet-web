@@ -560,13 +560,17 @@ func getWalletSiacoinOutputs(w *api.Client, addresses []types.Address) ([]siacoi
 		return nil, nil
 	}
 
+	tip, err := w.ConsensusTip()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get consensus state: %w", err)
+	}
+
 	relevantAddresses := make(map[types.Address]bool, len(addresses))
 	for _, addr := range addresses {
 		relevantAddresses[addr] = true
 	}
 
 	var utxos []siacoinOutput
-	//seen := make(map[types.Hash256]bool)
 	batch := min(1000, len(addresses))
 	for i := 0; i < len(addresses); i += batch {
 		addressBatch := addresses[i:][:batch]
@@ -575,6 +579,9 @@ func getWalletSiacoinOutputs(w *api.Client, addresses []types.Address) ([]siacoi
 			return nil, fmt.Errorf("failed to get wallet siacoin outputs: %w", err)
 		}
 		for _, sce := range sces {
+			if sce.MaturityHeight > tip.Height {
+				continue
+			}
 			utxos = append(utxos, siacoinOutput{
 				OutputID:   sce.ID,
 				UnlockHash: sce.SiacoinOutput.Address,
