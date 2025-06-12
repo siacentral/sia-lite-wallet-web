@@ -124,6 +124,7 @@ export default {
 			this.signing = true;
 
 			try {
+				console.log(this.signed);
 				if (!this.signed)
 					throw new Error('no transaction to sign');
 				else if (!this.ledgerDevice || !this.connected)
@@ -141,7 +142,7 @@ export default {
 					else
 						sig = await this.ledgerDevice.signTransaction(encoded, this.signatures, this.requiredSignatures[this.signatures], this.changeIndex);
 
-					this.signed.transactionsignatures[this.signatures].signature = sig;
+					this.signed.signatures[this.signatures].signature = sig;
 				}
 
 				this.$emit('signed', this.signed);

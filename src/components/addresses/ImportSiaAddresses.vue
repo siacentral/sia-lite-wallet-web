@@ -153,7 +153,7 @@ export default {
 				pubkey: publicKey.substr(8),
 				unlock_conditions: {
 					timelock: 0,
-					requiredSignatures: 1,
+					signaturesRequired: 1,
 					publicKeys: [publicKey]
 				},
 				index: nextIndex

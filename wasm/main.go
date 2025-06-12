@@ -89,7 +89,13 @@ func encodeTransaction(this js.Value, args []js.Value) any {
 		callback.Invoke(fmt.Sprintf("error encoding transaction: %s", err), js.Null())
 		return err.Error()
 	}
-	callback.Invoke(js.Null(), buf.Bytes())
+	// not sure why it's necessary to convert bytes
+	// to []any, but it is
+	bytes := make([]any, 0, buf.Len())
+	for _, b := range buf.Bytes() {
+		bytes = append(bytes, b)
+	}
+	callback.Invoke(js.Null(), bytes)
 
 	return nil
 }
