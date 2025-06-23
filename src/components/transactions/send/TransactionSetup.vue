@@ -172,8 +172,11 @@ export default {
 		};
 	},
 	async beforeMount() {
-		const fee = await broadcastFee();
+		const maxFee = new BigNumber(10).pow(24),
+			fee = await broadcastFee();
 		this.fees = new BigNumber(fee).multipliedBy(2000);
+		if (this.fees.gt(maxFee))
+			this.fees = maxFee;
 
 		const events = await tpoolEvents(),
 			spent = new Set();
