@@ -75,3 +75,12 @@ export function encodeUnlockHash(unlockconditions) {
 export async function recoverAddresses(seed, currency, i = 0, lookahead = 25000, last = 0, progress) {
 	return spawnWorker(['recoverAddresses', seed, currency, i, lookahead, last], 300000, progress);
 }
+
+export function v2TxnSigHash(txn) {
+	return spawnWorker(['v2TxnSigHash', JSON.stringify(txn)], 15000);
+}
+
+export function v2SignTransaction(seed, txn, indexes) {
+	const str = JSON.stringify(txn);
+	return spawnWorker(['v2SignTransaction', seed, str, indexes], 15000);
+}

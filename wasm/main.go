@@ -34,6 +34,8 @@ func main() {
 		"encodeTransaction": js.FuncOf(encodeTransaction),
 		"signTransaction":   js.FuncOf(signTransaction),
 		"encodeUnlockHash":  js.FuncOf(encodeUnlockHash),
+		"v2TxnSigHash":      js.FuncOf(v2TxnSigHash),
+		"v2SignTransaction": js.FuncOf(v2SignTransaction),
 	})
 
 	c := make(chan bool, 1)
@@ -239,6 +241,101 @@ func generateAddresses(this js.Value, args []js.Value) any {
 		addresses = append(addresses, obj)
 	}
 	callback.Invoke(js.Null(), addresses)
+	return nil
+}
+
+func v2TxnSigHash(this js.Value, args []js.Value) any {
+	if err := checkArgs(args, js.TypeString, js.TypeString, js.TypeNumber); err != nil {
+		return err.Error()
+	}
+
+	w := api.NewClient(SIASCAN_ADDRESS, "")
+	jsonTxn := args[0].String()
+
+	var txn types.V2Transaction
+	if err := json.Unmarshal([]byte(jsonTxn), &txn); err != nil {
+		return fmt.Sprintf("error parsing transaction: %s", err)
+	}
+
+	cs, err := w.ConsensusTipState()
+	if err != nil {
+		return fmt.Sprintf("error getting consensus state: %s", err)
+	}
+
+	sigHash := cs.InputSigHash(txn)
+	return sigHash.String()
+}
+
+func v2SignTransaction(this js.Value, args []js.Value) any {
+	if err := checkArgs(args, js.TypeString, js.TypeString, js.TypeObject, js.TypeFunction); err != nil {
+		return err.Error()
+	}
+
+	w := api.NewClient(SIASCAN_ADDRESS, "")
+
+	phrase := args[0].String()
+	jsonTxn := args[1].String()
+	sigIndices := make([]uint64, args[2].Length())
+	callback := args[3]
+
+	for i := range sigIndices {
+		sigIndices[i] = uint64(args[2].Index(i).Int())
+	}
+
+	var txn types.V2Transaction
+	if err := json.Unmarshal([]byte(jsonTxn), &txn); err != nil {
+		callback.Invoke(err.Error(), js.Null())
+		return err.Error()
+	}
+
+	if len(sigIndices) != len(txn.SiacoinInputs)+len(txn.SiafundInputs) {
+		err := fmt.Errorf("expected %d signatures, got %d", len(txn.SiacoinInputs)+len(txn.SiafundInputs), len(sigIndices))
+		callback.Invoke(err.Error(), js.Null())
+		return err.Error()
+	}
+
+	go func() {
+		cs, err := w.ConsensusTipState()
+		if err != nil {
+			callback.Invoke(fmt.Sprintf("error getting consensus state: %s", err), js.Null())
+			return
+		}
+		sigHash := cs.InputSigHash(txn)
+
+		var seed [32]byte
+		defer clear(seed[:])
+		if err := phraseToSeed(phrase, &seed); err != nil {
+			callback.Invoke(err.Error(), js.Null())
+			return
+		}
+
+		for i := range txn.SiacoinInputs {
+			// pop the first index from sigIndices
+			index := sigIndices[0]
+			sigIndices = sigIndices[1:]
+			// sign the input
+			sk := wallet.KeyFromSeed(&seed, index)
+			sig := sk.SignHash(sigHash)
+			txn.SiacoinInputs[i].SatisfiedPolicy.Signatures = []types.Signature{sig}
+		}
+
+		for i := range txn.SiafundInputs {
+			// pop the first index from sigIndices
+			index := sigIndices[0]
+			sigIndices = sigIndices[1:]
+			// sign the input
+			sk := wallet.KeyFromSeed(&seed, index)
+			sig := sk.SignHash(sigHash)
+			txn.SiafundInputs[i].SatisfiedPolicy.Signatures = []types.Signature{sig}
+		}
+
+		obj, err := interfaceToJSON(txn)
+		if err != nil {
+			callback.Invoke(fmt.Sprintf("error encoding signed transaction: %s", err), js.Null())
+			return
+		}
+		callback.Invoke(js.Null(), obj)
+	}()
 	return nil
 }
 

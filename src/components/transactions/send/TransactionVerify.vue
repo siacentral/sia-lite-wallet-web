@@ -42,7 +42,7 @@
 import BigNumber from 'bignumber.js';
 import { formatPriceString } from '@/utils/format';
 import { mapState } from 'vuex';
-import { signTransaction } from '@/sia';
+import { v2SignTransaction } from '@/sia';
 import { scanTransactions } from '@/sync/scanner';
 import { broadcastTransaction } from '@/api/siacentral';
 
@@ -69,20 +69,35 @@ export default {
 		},
 		siaTransaction() {
 			return {
-				minerFees: this.transaction.minerFees,
-				siacoinInputs: this.transaction.siacoinInputs,
+				minerFee: this.transaction.minerFees[0],
+				siacoinInputs: this.transaction.siacoinInputs.map(i => ({
+					parent: {
+						id: i.parentID
+					},
+					satisfiedPolicy: {
+						policy: {
+							type: 'uc',
+							policy: i.unlockConditions
+						}
+					},
+					value: i.value,
+					index: i.index
+				})),
 				siacoinOutputs: this.transaction.siacoinOutputs,
-				siafundInputs: this.transaction.siafundInputs,
-				siafundOutputs: this.transaction.siafundOutputs,
-				signatures: this.transaction.siacoinInputs.map(i => ({
-					parentID: i.parentID,
-					coveredFields: { wholeTransaction: true },
+				siafundInputs: (this.transaction.siafundInputs || []).map(i => ({
+					parent: {
+						id: i.parentID
+					},
+					satisfiedPolicy: {
+						policy: {
+							type: 'uc',
+							policy: i.unlockCondtions
+						}
+					},
+					value: i.value,
 					index: i.index
-				})).concat((this.transaction?.siafundInputs || []).map(i => ({
-					parentID: i.parentID,
-					coveredFields: { wholeTransaction: true },
-					index: i.index
-				})))
+				})),
+				siafundOutputs: this.transaction.siafundOutputs
 			};
 		},
 		changeIndex() {
@@ -105,19 +120,20 @@ export default {
 			return this.remainder.eq(0);
 		},
 		requiredSignatures() {
-			return this.siaTransaction.signatures.map(i => i.index);
+			return this.siaTransaction.siacoinInputs.map(i => i.index).concat(
+				(this.siaTransaction.siafundInputs || []).map(i => i.index));
 		},
 		spentOutputs() {
 			if (!this.data || !this.transaction)
 				return [];
 
-			return this.transaction.siacoinInputs.map(a => a.parentID);
+			return this.transaction.siacoinInputs.map(a => a.parent.id);
 		},
 		spentSFOutputs() {
 			if (!this.data || !this.transaction)
 				return [];
 
-			return this.transaction.siafundInputs.map(a => a.parentID);
+			return this.transaction.siafundInputs.map(a => a.parent.id);
 		}
 	},
 	data() {
@@ -151,7 +167,7 @@ export default {
 			}
 		},
 		broadcastTxnset(txnset) {
-			return broadcastTransaction(txnset, null);
+			return broadcastTransaction(null, txnset);
 		},
 		async onVerifyTxn() {
 			if (this.sending)
@@ -168,8 +184,8 @@ export default {
 						throw new Error('transaction not signed');
 					break;
 				case 'default':
-					this.signed = await signTransaction(this.wallet.seed, this.wallet.currency,
-						this.siaTransaction, this.requiredSignatures);
+					console.log(JSON.stringify(this.siaTransaction, null, 2));
+					this.signed = await v2SignTransaction(this.wallet.seed, this.siaTransaction, this.requiredSignatures);
 					break;
 				default:
 					throw new Error('unsupported wallet type');
