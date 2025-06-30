@@ -4,7 +4,7 @@
 			<tbody>
 				<tr v-for="(address, i) in addresses" :key="i">
 					<td class="text-right fit-text">{{ formatNumber(addresses[i].index) }}</td>
-					<td><input v-model="addresses[i].address" :placeholder="translate('importAddresses.addressPlaceholder')" @input="$emit('change', addresses)" :readonly="readonly" />
+					<td><input v-model="addresses[i].address" :placeholder="translate('importAddresses.addressPlaceholder')" @input="$emit('change', addresses)" :readonly="readonly" /></td>
 					<td class="fit-text" v-if="addresses.length > 1 && walletType === 'watch'">
 						<button class="delete-btn" @click="$emit('delete', i)">
 							<icon icon="times" />
@@ -51,6 +51,7 @@ export default {
 
 				const { address } = await this.ledgerDevice.verifyStandardAddress(i),
 					storedAddress = this.addresses.filter(a => a.index === i)[0];
+				console.log('ledger address', address, i, storedAddress.address);
 
 				if (storedAddress?.address !== address)
 					throw new Error('Address does not match device');

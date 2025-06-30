@@ -34,7 +34,7 @@ func main() {
 		"encodeTransaction": js.FuncOf(encodeTransaction),
 		"signTransaction":   js.FuncOf(signTransaction),
 		"encodeUnlockHash":  js.FuncOf(encodeUnlockHash),
-		"v2TxnSigHash":      js.FuncOf(v2TxnSigHash),
+		"v2InputSigHash":    js.FuncOf(v2InputSigHash),
 		"v2SignTransaction": js.FuncOf(v2SignTransaction),
 	})
 
@@ -69,6 +69,14 @@ func interfaceToJSON(obj any) (con map[string]any, err error) {
 	return
 }
 
+func jsArray[T any](b []T) any {
+	jsb := make([]any, 0, len(b))
+	for _, v := range b {
+		jsb = append(jsb, v)
+	}
+	return jsb
+}
+
 func encodeTransaction(this js.Value, args []js.Value) any {
 	if err := checkArgs(args, js.TypeString, js.TypeFunction); err != nil {
 		return err.Error()
@@ -93,11 +101,7 @@ func encodeTransaction(this js.Value, args []js.Value) any {
 	}
 	// not sure why it's necessary to convert bytes
 	// to []any, but it is
-	bytes := make([]any, 0, buf.Len())
-	for _, b := range buf.Bytes() {
-		bytes = append(bytes, b)
-	}
-	callback.Invoke(js.Null(), bytes)
+	callback.Invoke(js.Null(), jsArray(buf.Bytes()))
 
 	return nil
 }
@@ -244,26 +248,32 @@ func generateAddresses(this js.Value, args []js.Value) any {
 	return nil
 }
 
-func v2TxnSigHash(this js.Value, args []js.Value) any {
-	if err := checkArgs(args, js.TypeString, js.TypeString, js.TypeNumber); err != nil {
+func v2InputSigHash(this js.Value, args []js.Value) any {
+	log.Println(args)
+	if err := checkArgs(args, js.TypeString, js.TypeFunction); err != nil {
 		return err.Error()
 	}
 
 	w := api.NewClient(SIASCAN_ADDRESS, "")
 	jsonTxn := args[0].String()
+	callback := args[1]
 
 	var txn types.V2Transaction
 	if err := json.Unmarshal([]byte(jsonTxn), &txn); err != nil {
 		return fmt.Sprintf("error parsing transaction: %s", err)
 	}
 
-	cs, err := w.ConsensusTipState()
-	if err != nil {
-		return fmt.Sprintf("error getting consensus state: %s", err)
-	}
+	go func() {
+		cs, err := w.ConsensusTipState()
+		if err != nil {
+			callback.Invoke(fmt.Sprintf("error getting consensus state: %s", err), js.Null())
+			return
+		}
 
-	sigHash := cs.InputSigHash(txn)
-	return sigHash.String()
+		sigHash := cs.InputSigHash(txn)
+		callback.Invoke(js.Null(), jsArray(sigHash[:]))
+	}()
+	return nil
 }
 
 func v2SignTransaction(this js.Value, args []js.Value) any {

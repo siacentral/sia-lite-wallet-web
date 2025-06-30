@@ -15,7 +15,16 @@
 			<div>{{ translate('requiredSignatures') }}</div>
 			<div />
 			<div class="text-right">
-				{{ formatNumber(signatures) }} / {{ formatNumber(requiredSignatures.length) }}
+				{{ formatNumber(signatures) }} / {{ formatNumber(sigIndices.length) }}
+			</div>
+			<div />
+			<div class="text-right">
+				<div class="control">
+					<input type="checkbox" id="blindSign"
+						:disabled="signing"
+						v-model="blindSign" />
+					<label for="blindSign">Use Blind Signing</label>
+				</div>
 			</div>
 		</div>
 		<div class="buttons">
@@ -27,7 +36,7 @@
 </template>
 
 <script>
-import { encodeTransaction } from '@/sia';
+import { v2InputSigHash } from '@/sia'; // encodeTransaction
 import { formatNumber } from '@/utils/format';
 
 import ConnectLedger from './ConnectLedger';
@@ -47,6 +56,7 @@ export default {
 			ledgerDevice: null,
 			connected: false,
 			signing: false,
+			blindSign: false,
 			signed: null,
 			version: '',
 			signatures: 0
@@ -61,10 +71,15 @@ export default {
 				return true;
 
 			return false;
+		},
+		sigIndices() {
+			return Array.from(new Set(this.requiredSignatures));
 		}
 	},
 	beforeMount() {
 		this.signed = { ...this.transaction };
+		console.log(this.signed);
+		console.log(this.requiredSignatures);
 	},
 	beforeDestroy() {
 		if (this.ledgerDevice)
@@ -117,6 +132,27 @@ export default {
 				this.connected = false;
 			}
 		},
+		async blindSignTransaction() {
+			const sigHash = await v2InputSigHash(this.signed);
+			for (const index of this.sigIndices) {
+				const sig = await this.ledgerDevice.blindSign(sigHash, index);
+				for (const input of this.signed.siacoinInputs || []) {
+					if (input.index === index)
+						input.satisfiedPolicy.signatures = [sig];
+				}
+				for (const input of this.signed.siafundInputs || []) {
+					if (input.index === index)
+						input.satisfiedPolicy.signatures = [sig];
+				}
+			}
+		},
+		async signTransaction() {
+			throw new Error('blind signing is temporarily required until Ledger supports V2 transactions');
+			// const encoded = await encodeTransaction(this.signed);
+
+			// for (; this.signatures < this.requiredSignatures.length; this.signatures++)
+			//	this.signed.signatures[this.signatures].signature = await this.ledgerDevice.signTransaction(encoded, this.signatures, this.requiredSignatures[this.signatures], this.changeIndex);
+		},
 		async onSignTransaction() {
 			if (this.signing)
 				return;
@@ -130,20 +166,10 @@ export default {
 				else if (!this.ledgerDevice || !this.connected)
 					throw new Error('ledger not connected');
 
-				const encoded = await encodeTransaction(this.signed),
-					version = await this.ledgerDevice.getVersion(),
-					// compat: v0.4.5 introduces the change index to the sign txn ADPU
-					signCompat = this.versionCmp(version, '0.4.5') < 0;
-
-				for (; this.signatures < this.requiredSignatures.length; this.signatures++) {
-					let sig;
-					if (signCompat)
-						sig = await this.ledgerDevice.signTransactionV044(encoded, this.signatures, this.requiredSignatures[this.signatures]);
-					else
-						sig = await this.ledgerDevice.signTransaction(encoded, this.signatures, this.requiredSignatures[this.signatures], this.changeIndex);
-
-					this.signed.signatures[this.signatures].signature = sig;
-				}
+				if (this.blindSign)
+					await this.blindSignTransaction();
+				else
+					await this.signTransaction();
 
 				this.$emit('signed', this.signed);
 			} catch (ex) {

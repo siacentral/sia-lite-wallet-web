@@ -76,8 +76,8 @@ export async function recoverAddresses(seed, currency, i = 0, lookahead = 25000,
 	return spawnWorker(['recoverAddresses', seed, currency, i, lookahead, last], 300000, progress);
 }
 
-export function v2TxnSigHash(txn) {
-	return spawnWorker(['v2TxnSigHash', JSON.stringify(txn)], 15000);
+export function v2InputSigHash(txn) {
+	return spawnWorker(['v2InputSigHash', JSON.stringify(txn)], 15000);
 }
 
 export function v2SignTransaction(seed, txn, indexes) {
