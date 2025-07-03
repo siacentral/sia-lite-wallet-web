@@ -91,7 +91,7 @@ export default {
 					satisfiedPolicy: {
 						policy: {
 							type: 'uc',
-							policy: i.unlockCondtions
+							policy: i.unlockConditions
 						}
 					},
 					value: i.value,
