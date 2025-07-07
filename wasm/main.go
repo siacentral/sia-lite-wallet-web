@@ -611,7 +611,7 @@ func getWalletTransactions(w *api.Client, addresses []types.Address) ([]processe
 			if data.Missed {
 				processed.Tags = append(processed.Tags, "contract_missed_output")
 			} else {
-				processed.Tags = append(processed.Tags, "contract_renewal")
+				processed.Tags = append(processed.Tags, "contract_valid_output")
 			}
 			processed.SiacoinOutputs = data.SiacoinElement.SiacoinOutput.Value
 		case wallet.EventPayout:

@@ -51,8 +51,7 @@
 						<transaction-list-item v-for="(transaction, i) in group.transactions"
 							:key="`${group.date}-${i}`"
 							:transaction="transaction"
-							:wallet="wallet"
-							@click="onSelectTransaction(transaction.transaction_id)" />
+							:wallet="wallet" />
 					</template>
 				</tbody>
 			</table>
@@ -230,8 +229,6 @@ export default {
 	},
 	methods: {
 		...mapActions(['deleteWallet']),
-		onSelectTransaction(id) {
-		},
 		onQueueWallet() {
 			try {
 				this.queueWallet(this.wallet.id, true);

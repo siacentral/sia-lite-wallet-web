@@ -199,7 +199,7 @@
 			"contractExpiration": "Contract Expiration",
 			"contractResolution": "Contract Resolution",
 			"hostAnnouncement": "Host Announcement",
-			"contractCompleted": "Contract Completion",
+			"contractCompleted": "Contract Payout",
 			"blockReward": "Block Reward",
 			"siacoinTransaction": "Siacoin Transaction",
 			"siafundTransaction": "Siafund Transaction",

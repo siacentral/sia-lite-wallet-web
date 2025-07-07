@@ -1,5 +1,5 @@
 <template>
-	<tr :class="transactionClass" @click="$emit('click')">
+	<tr :class="transactionClass" @click="openSiaScan">
 		<td class="transaction-type fit-text">{{ displayType }}</td>
 		<td class="transaction-spacer" />
 		<td class="transaction-confirms fit-text"><span>{{ displayConfirmations }}</span></td>
@@ -15,6 +15,7 @@
 import BigNumber from 'bignumber.js';
 import { mapState } from 'vuex';
 import { formatPriceString, formatSiafundString } from '@/utils/format';
+import { search } from '@/api/siacentral';
 
 export default {
 	props: {
@@ -144,6 +145,22 @@ export default {
 
 			classes[`value-${direction}`] = true;
 			return classes;
+		}
+	},
+	methods: {
+		async openSiaScan() {
+			if (!this.transaction || !this.transaction.id)
+				return;
+
+			const res = await search(this.transaction.id);
+			switch (res) {
+			case 'siacoinElement':
+				window.open(`https://siascan.com/output/${this.transaction.id}`, '_blank');
+				break;
+			default:
+				window.open(`https://siascan.com/tx/${this.transaction.id}`, '_blank');
+				break;
+			}
 		}
 	}
 };
