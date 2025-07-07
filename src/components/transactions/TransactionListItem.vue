@@ -82,9 +82,15 @@ export default {
 			else if (this.transaction.tags.indexOf('contract_formation') !== -1)
 				return this.translate('transactionTypes.contractFormation');
 			else if (this.transaction.tags.indexOf('contract_renewal') !== -1)
-				return 'Contract Renewal';
+				return this.translate('transactionTypes.contractRenewal');
+			else if (this.transaction.tags.indexOf('contract_refresh') !== -1)
+				return this.translate('transactionTypes.contractRefresh');
+			else if (this.transaction.tags.indexOf('contract_expiration') !== -1)
+				return this.translate('transactionTypes.contractExpiration');
 			else if (this.transaction.tags.indexOf('storage_proof') !== -1)
 				return this.translate('transactionTypes.storageProof');
+			else if (this.transaction.tags.indexOf('contract_resolution') !== -1)
+				return this.translate('transactionTypes.contractResolution');
 			else if (this.transaction.tags.indexOf('host_announcement') !== -1)
 				return this.translate('transactionTypes.hostAnnouncement');
 			else if (this.transaction.tags.indexOf('contract_valid_output') !== -1 || this.transaction.tags.indexOf('contract_missed_output') !== -1)

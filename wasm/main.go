@@ -545,7 +545,21 @@ func getWalletTransactions(w *api.Client, addresses []types.Address) ([]processe
 			case len(data.FileContracts) > 0:
 				processed.Tags = append(processed.Tags, "contract_formation")
 			case len(data.FileContractResolutions) > 0:
-				processed.Tags = append(processed.Tags, "storage_proof")
+				fce := data.FileContractResolutions[0].Parent
+				switch res := data.FileContractResolutions[0].Resolution.(type) {
+				case *types.V2StorageProof:
+					processed.Tags = append(processed.Tags, "storage_proof")
+				case *types.V2FileContractRenewal:
+					if res.NewContract.ProofHeight == fce.V2FileContract.ProofHeight && res.NewContract.ExpirationHeight == fce.V2FileContract.ExpirationHeight {
+						processed.Tags = append(processed.Tags, "contract_refresh")
+					} else {
+						processed.Tags = append(processed.Tags, "contract_renewal")
+					}
+				case *types.V2FileContractExpiration:
+					processed.Tags = append(processed.Tags, "contract_expiration")
+				default:
+					processed.Tags = append(processed.Tags, "contract_resolution")
+				}
 			case hasV2Announcement(types.V2Transaction(data)):
 				processed.Tags = append(processed.Tags, "host_announcement")
 			case max(len(data.SiafundInputs), len(data.SiafundOutputs)) > 0:
@@ -753,11 +767,6 @@ func getTransactions(this js.Value, args []js.Value) any {
 	//walletCurrency := args[1].String()
 	// displayCurrency := args[2].String()
 	callback := args[3]
-
-	if count == 0 {
-		callback.Invoke("no addresses provided", js.Null())
-		return nil
-	}
 
 	go func() {
 		w := api.NewClient(SIASCAN_ADDRESS, "")
