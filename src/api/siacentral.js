@@ -1,6 +1,7 @@
 import { sendJSONRequest } from './common';
 
 const WALLETD_BASE_URL = 'https://api.siascan.com/wallet';
+const EXPLORED_BASE_URL = 'https://api.siascan.com';
 
 export async function broadcastTransaction(txns, v2txns) {
 	const { statusCode, body } = await sendJSONRequest(`${WALLETD_BASE_URL}/txpool/broadcast`, {
@@ -39,5 +40,15 @@ export async function tpoolEvents() {
 	});
 	if (statusCode !== 200)
 		throw new Error(body || 'Failed to get transaction pool');
+	return body;
+}
+
+export async function search(id) {
+	const { statusCode, body } = await sendJSONRequest(`${EXPLORED_BASE_URL}/search/${id}`, {
+		method: 'GET'
+	});
+	if (statusCode !== 200)
+		throw new Error(body || 'Failed to search for ID');
+
 	return body;
 }
