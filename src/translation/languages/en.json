@@ -122,7 +122,7 @@
 			"ledgerWallet": "Ledger Wallet",
 			"watchWallet": "Watch-Only Wallet",
 			"pNewWalletExplain": "Generates a new wallet seed in the browser. Transactions can be sent and received.",
-			"pRecoverWalletExplain": "Recovers an existing wallet from a {{0}} seed. Transactions can be sent and received.",
+			"pRecoverWalletExplain": "Recovers an existing wallet from a 12 word BIP-39 phrase or 28/29 word Sia phrase. Transactions can be sent and received.",
 			"pCreateLedgerExplain": "Connect a Ledger hardware wallet, all transactions must be signed by the Ledger device.",
 			"pLedgerUnsupportedExplain": "Ledger support is only available in the Chrome browser. Enable \"Experimental Web Platform Features\" in Chrome to connect to the Ledger device.",
 			"pWatchWalletExplain": "Creates a new watch-only wallet. Addresses must be added manually and transactions cannot be sent.",

@@ -9,7 +9,7 @@
 			<div class="create-wallet-button" @click="onClickWalletType('recover')">
 				<div class="button-icon"><icon icon="redo" /></div>
 				<div class="button-title">{{ translate('createWalletModal.recoverWallet') }}</div>
-				<p>{{ translate('createWalletModal.pRecoverWalletExplain', seedWordPhrase) }}</p>
+				<p>{{ translate('createWalletModal.pRecoverWalletExplain') }}</p>
 			</div>
 			<div :class="hardwareBtnClasses" @click="onClickLedger">
 				<div class="button-icon"><icon :icon="['fab', 'usb']" /></div>
@@ -83,9 +83,6 @@ export default {
 				'create-wallet-button': true,
 				'create-button-disabled': !this.ledgerSupported
 			};
-		},
-		seedWordPhrase() {
-			return this.changeSeedType ? '12 or 29 word' : '29 word';
 		}
 	},
 	data() {
