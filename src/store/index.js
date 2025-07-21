@@ -129,6 +129,8 @@ const store = new Vuex.Store({
 				return;
 
 			state.wallets.splice(idx, 1);
+			if (state.wallets.length === 0)
+				state.setup = false; // redo onboarding
 		},
 		setExchangeRate(state, { siacoin, siafund }) {
 			state.exchangeRateSC = siacoin;
