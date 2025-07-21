@@ -60,7 +60,7 @@ export function translate(id, language) {
 		const i = parseInt(s.substring(2, s.length - 2), 10),
 			sub = params[i];
 
-		return sub !== null && sub.toString ? sub.toString() : '';
+		return sub !== null && sub !== undefined && sub.toString ? sub.toString() : '';
 	});
 }
 
