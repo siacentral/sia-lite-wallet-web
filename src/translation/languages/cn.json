@@ -249,6 +249,12 @@
 			"header": "检测到旧版钱包",
 			"explain": "检测到旧版钱包。 这可能是由浏览器的缓存引起的。 尝试刷新您的浏览器。 继续可能会导致问题。",
 			"walletLabel": "钱包版本"
+		},
+		"language": {
+			"automatic": "自动",
+			"en": "English",
+			"cn": "中文",
+			"fr": "Français"
 		}
 	}
 }

@@ -249,6 +249,12 @@
 			"header": "Outdated Wallet Detected",
 			"explain": "An old version of the wallet has been detected. This can be caused by your browser's cache. Try refreshing your browser. Continuing may cause issues.",
 			"walletLabel": "Wallet Version"
+		},
+		"language": {
+			"automatic": "Automatique",
+			"en": "English",
+			"cn": "中文",
+			"fr": "Français"
 		}
 	}
 }
