@@ -36,7 +36,7 @@
 </template>
 
 <script>
-import { v2InputSigHash } from '@/sia'; // encodeTransaction
+import { v2InputSigHash, encodeTransaction } from '@/sia';
 import { formatNumber } from '@/utils/format';
 
 import ConnectLedger from './ConnectLedger';
@@ -147,11 +147,10 @@ export default {
 			}
 		},
 		async signTransaction() {
-			throw new Error('blind signing is temporarily required until Ledger supports V2 transactions');
-			// const encoded = await encodeTransaction(this.signed);
+			const encoded = await encodeTransaction(this.signed);
 
-			// for (; this.signatures < this.requiredSignatures.length; this.signatures++)
-			//	this.signed.signatures[this.signatures].signature = await this.ledgerDevice.signTransaction(encoded, this.signatures, this.requiredSignatures[this.signatures], this.changeIndex);
+			for (; this.signatures < this.requiredSignatures.length; this.signatures++)
+				this.signed.signatures[this.signatures].signature = await this.ledgerDevice.signTransaction(encoded, this.signatures, this.requiredSignatures[this.signatures], this.changeIndex);
 		},
 		async onSignTransaction() {
 			if (this.signing)
