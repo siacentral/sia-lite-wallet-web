@@ -656,9 +656,9 @@ func getWalletTransactions(w *api.Client, addresses []types.Address) ([]processe
 				continue // should never happen, but just in case
 			}
 			transactions = append(transactions, processed)
-			sort.Slice(transactions, func(i, j int) bool {
-				// sort by timestamp, oldest first
-				return transactions[i].Timestamp.Before(transactions[j].Timestamp)
+			sort.SliceStable(transactions, func(i, j int) bool {
+				// sort by timestamp, newest first
+				return transactions[i].Timestamp.After(transactions[j].Timestamp)
 			})
 			if len(transactions) >= 100 {
 				transactions = transactions[:100]
