@@ -298,14 +298,18 @@ const store = new Vuex.Store({
 
 async function updateMetadata() {
 	try {
-		const usd = await getExchangeRate('usd'),
-			eur = await getExchangeRate('eur');
-
+		const [usd, eur, jpy, cny, btc, eth] = await Promise.all([
+			getExchangeRate('usd'),
+			getExchangeRate('eur'),
+			getExchangeRate('cad'),
+			getExchangeRate('gbp'),
+			getExchangeRate('jpy'),
+			getExchangeRate('cny'),
+			getExchangeRate('btc'),
+			getExchangeRate('eth')
+		]);
 		store.dispatch('setExchangeRate', {
-			siacoin: {
-				usd: usd,
-				eur: eur
-			}
+			usd, eur, jpy, cny, btc, eth
 		});
 	} catch (ex) {
 		console.error('updatingMeta', ex);

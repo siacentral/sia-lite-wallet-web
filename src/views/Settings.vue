@@ -10,20 +10,15 @@
 					<select v-model="newCurrency" @change="setCurrency(newCurrency)">
 						<optgroup :label="translate('currency.fiat')">
 							<option value="usd">{{ translate('currency.usd') }}</option>
-							<option value="jpy">{{ translate('currency.jpy') }}</option>
 							<option value="eur">{{ translate('currency.eur') }}</option>
 							<option value="gbp">{{ translate('currency.gbp') }}</option>
-							<option value="aus">{{ translate('currency.aus') }}</option>
+							<option value="jpy">{{ translate('currency.jpy') }}</option>
 							<option value="cad">{{ translate('currency.cad') }}</option>
-							<option value="rub">{{ translate('currency.rub') }}</option>
 							<option value="cny">{{ translate('currency.cny') }}</option>
 						</optgroup>
 						<optgroup :label="translate('currency.crypto')">
 							<option value="btc">{{ translate('currency.btc') }}</option>
-							<option value="bch">{{ translate('currency.bch') }}</option>
 							<option value="eth">{{ translate('currency.eth') }}</option>
-							<option value="xrp">{{ translate('currency.xrp') }}</option>
-							<option value="ltc">{{ translate('currency.ltc') }}</option>
 						</optgroup>
 					</select>
 				</div>
