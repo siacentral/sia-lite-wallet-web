@@ -132,7 +132,7 @@ const store = new Vuex.Store({
 			if (state.wallets.length === 0)
 				state.setup = false; // redo onboarding
 		},
-		setExchangeRate(state, { siacoin, siafund }) {
+		setExchangeRate(state, { siacoin, siafund = {} }) {
 			state.exchangeRateSC = siacoin;
 			state.exchangeRateSF = siafund;
 		},
@@ -302,8 +302,6 @@ async function updateMetadata() {
 		const [usd, eur, jpy, cny, btc, eth] = await Promise.all([
 			getExchangeRate('usd'),
 			getExchangeRate('eur'),
-			getExchangeRate('cad'),
-			getExchangeRate('gbp'),
 			getExchangeRate('jpy'),
 			getExchangeRate('cny'),
 			getExchangeRate('btc'),

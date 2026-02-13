@@ -44,8 +44,8 @@ export async function saveWallet(wallet, password) {
 
 	let confirmedSiafundBalance = new BigNumber(wallet.confirmed_siafund_balance),
 		confirmedSiacoinBalance = new BigNumber(wallet.confirmed_siacoin_balance),
-		unconfirmedSiafundDelta = new BigNumber(wallet.unconfirmed_siacoin_delta),
-		unconfirmedSiacoinDelta = new BigNumber(wallet.unconfirmed_siafund_delta),
+		unconfirmedSiacoinDelta = new BigNumber(wallet.unconfirmed_siacoin_delta),
+		unconfirmedSiafundDelta = new BigNumber(wallet.unconfirmed_siafund_delta),
 		siafundClaim = new BigNumber(wallet.siafund_claim);
 
 	if (siafundClaim.isNaN() || !siafundClaim.isFinite())
@@ -72,8 +72,8 @@ export async function saveWallet(wallet, password) {
 		seed: encrypt(wallet.seed, key.hash),
 		confirmed_siafund_balance: confirmedSiafundBalance.toString(10),
 		confirmed_siacoin_balance: confirmedSiacoinBalance.toString(10),
-		unconfirmed_siacoin_delta: unconfirmedSiafundDelta.toString(10),
-		unconfirmed_siafund_delta: unconfirmedSiacoinDelta.toString(10),
+		unconfirmed_siacoin_delta: unconfirmedSiacoinDelta.toString(10),
+		unconfirmed_siafund_delta: unconfirmedSiafundDelta.toString(10),
 		siafund_claim: siafundClaim.toString(10)
 	});
 

@@ -47,11 +47,14 @@ export default class MemoryStore {
 	}
 
 	async getAddresses(walletID, addresses) {
+		if (!Array.isArray(addresses))
+			addresses = [addresses];
+
 		return Object.keys(this._addresses).reduce((v, a) => {
 			const r = this._addresses[a];
 
-			if (r.wallet_id === walletID && addresses.indexOf(a))
-				v.push(a);
+			if (r.wallet_id === walletID && addresses.indexOf(a) !== -1)
+				v.push(r);
 
 			return v;
 		}, []);
@@ -60,9 +63,17 @@ export default class MemoryStore {
 	async getWalletChangeAddress(walletID) {
 		const addresses = await this.getWalletAddresses(walletID);
 
-		addresses.sort((a, b) => a.index > b.index ? -1 : a.index < b.index ? 1 : 0);
+		addresses.sort((a, b) => a.index > b.index ? 1 : a.index < b.index ? -1 : 0);
 
 		return addresses[0];
+	}
+
+	async getFirstWalletAddresses(walletID) {
+		const addresses = await this.getWalletAddresses(walletID);
+
+		addresses.sort((a, b) => a.index > b.index ? 1 : a.index < b.index ? -1 : 0);
+
+		return addresses.slice(0, 100);
 	}
 
 	async getLastWalletAddresses(walletID, limit, offset) {
