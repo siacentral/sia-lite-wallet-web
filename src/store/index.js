@@ -268,7 +268,8 @@ const store = new Vuex.Store({
 			commit('deleteWallet', walletID);
 		},
 		setExchangeRate({ commit }, rates) {
-			commit('setExchangeRate', rates);
+			console.log('setting exchange rates', rates);
+			commit('setExchangeRate', { siacoin: rates });
 		},
 		setNetworkFees({ commit }, fees) {
 			commit('setNetworkFees', fees);
