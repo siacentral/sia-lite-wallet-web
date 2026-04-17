@@ -367,7 +367,7 @@ func recoverAddresses(this js.Value, args []js.Value) any {
 		w := api.NewClient(SIASCAN_ADDRESS, "")
 
 		var gap uint64
-		n := min(1000, lookahead)
+		n := min(500, lookahead)
 		addresses := make([]types.Address, 0, n)
 		var lastSeenIndex uint64
 		for i := uint64(0); gap < uint64(lookahead); i += n {
