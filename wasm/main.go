@@ -637,7 +637,7 @@ func getWalletTransactions(w *api.Client, addresses []types.Address) ([]processe
 
 	var transactions []processedTransaction
 	seen := make(map[types.Hash256]bool)
-	batch := min(1000, len(addresses))
+	batch := min(100, len(addresses))
 	for i := 0; i < len(addresses); i += batch {
 		addressBatch := addresses[i:][:batch]
 		events, err := w.BatchAddressEvents(addressBatch, 0, 100)
@@ -697,23 +697,30 @@ func getWalletSiacoinOutputs(w *api.Client, addresses []types.Address) ([]siacoi
 		relevantAddresses[addr] = true
 	}
 
+	const addressBatchSize = 100
+	const outputPageSize = 100
+
 	var utxos []siacoinOutput
-	batch := min(1000, len(addresses))
-	for i := 0; i < len(addresses); i += batch {
-		addressBatch := addresses[i:][:batch]
-		sces, _, err := w.BatchAddressSiacoinOutputs(addressBatch, 0, 10000)
-		if err != nil {
-			return nil, fmt.Errorf("failed to get wallet siacoin outputs: %w", err)
-		}
-		for _, sce := range sces {
-			if sce.MaturityHeight > tip.Height {
-				continue
+	for i := 0; i < len(addresses); i += addressBatchSize {
+		addressBatch := addresses[i:min(i+addressBatchSize, len(addresses))]
+		for offset := 0; ; offset += outputPageSize {
+			sces, _, err := w.BatchAddressSiacoinOutputs(addressBatch, offset, outputPageSize)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get wallet siacoin outputs: %w", err)
 			}
-			utxos = append(utxos, siacoinOutput{
-				OutputID:   sce.ID,
-				UnlockHash: sce.SiacoinOutput.Address,
-				Value:      sce.SiacoinOutput.Value,
-			})
+			for _, sce := range sces {
+				if sce.MaturityHeight > tip.Height {
+					continue
+				}
+				utxos = append(utxos, siacoinOutput{
+					OutputID:   sce.ID,
+					UnlockHash: sce.SiacoinOutput.Address,
+					Value:      sce.SiacoinOutput.Value,
+				})
+			}
+			if len(sces) < outputPageSize {
+				break
+			}
 		}
 	}
 	return utxos, nil
@@ -735,24 +742,31 @@ func getWalletSiafundOutputs(w *api.Client, addresses []types.Address) ([]siafun
 		relevantAddresses[addr] = true
 	}
 
+	const addressBatchSize = 100
+	const outputPageSize = 100
+
 	var claimBalance types.Currency
 	var utxos []siafundOutput
-	batch := min(1000, len(addresses))
-	for i := 0; i < len(addresses); i += batch {
-		addressBatch := addresses[i:][:batch]
-		sfes, _, err := w.BatchAddressSiafundOutputs(addressBatch, 0, 10000)
-		if err != nil {
-			return nil, types.ZeroCurrency, fmt.Errorf("failed to get wallet siafund outputs: %w", err)
-		}
-		for _, sfe := range sfes {
-			dividend := cs.SiafundTaxRevenue.Sub(sfe.ClaimStart).Div64(cs.SiafundCount()).Mul64(sfe.SiafundOutput.Value)
-			log.Println("siafund", sfe.ID, sfe.ClaimStart, dividend)
-			claimBalance = claimBalance.Add(dividend)
-			utxos = append(utxos, siafundOutput{
-				OutputID:   sfe.ID,
-				UnlockHash: sfe.SiafundOutput.Address,
-				Value:      sfe.SiafundOutput.Value,
-			})
+	for i := 0; i < len(addresses); i += addressBatchSize {
+		addressBatch := addresses[i:min(i+addressBatchSize, len(addresses))]
+		for offset := 0; ; offset += outputPageSize {
+			sfes, _, err := w.BatchAddressSiafundOutputs(addressBatch, offset, outputPageSize)
+			if err != nil {
+				return nil, types.ZeroCurrency, fmt.Errorf("failed to get wallet siafund outputs: %w", err)
+			}
+			for _, sfe := range sfes {
+				dividend := cs.SiafundTaxRevenue.Sub(sfe.ClaimStart).Div64(cs.SiafundCount()).Mul64(sfe.SiafundOutput.Value)
+				log.Println("siafund", sfe.ID, sfe.ClaimStart, dividend)
+				claimBalance = claimBalance.Add(dividend)
+				utxos = append(utxos, siafundOutput{
+					OutputID:   sfe.ID,
+					UnlockHash: sfe.SiafundOutput.Address,
+					Value:      sfe.SiafundOutput.Value,
+				})
+			}
+			if len(sfes) < outputPageSize {
+				break
+			}
 		}
 	}
 	return utxos, claimBalance, nil
