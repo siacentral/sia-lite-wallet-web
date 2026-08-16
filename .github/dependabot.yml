@@ -1,0 +1,22 @@
+version: 2
+
+multi-ecosystem-groups:
+  all-dependencies:
+    schedule:
+      interval: "weekly"
+
+updates:
+  - package-ecosystem: "gomod"
+    directory: "/"
+    multi-ecosystem-group: "all-dependencies"
+    patterns:
+      - "*"
+    cooldown:
+      default-days: 7
+  - package-ecosystem: "npm"
+    directory: "/"
+    multi-ecosystem-group: "all-dependencies"
+    patterns:
+      - "*"
+    cooldown:
+      default-days: 7

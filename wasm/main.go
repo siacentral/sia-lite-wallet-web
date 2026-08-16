@@ -382,7 +382,9 @@ func recoverAddresses(this js.Value, args []js.Value) any {
 	}
 
 	phrase := args[0].String()
+	startIndex := uint64(args[1].Int())
 	lookahead := uint64(args[2].Int())
+	lastKnownIndex := uint64(args[3].Int())
 	callback := args[4]
 
 	var seed [32]byte
@@ -396,8 +398,8 @@ func recoverAddresses(this js.Value, args []js.Value) any {
 		var gap uint64
 		n := min(500, lookahead)
 		addresses := make([]types.Address, 0, n)
-		var lastSeenIndex uint64
-		for i := uint64(0); gap < uint64(lookahead); i += n {
+		lastSeenIndex := lastKnownIndex
+		for i := startIndex; gap < lookahead; i += n {
 			addresses = addresses[:0] // reset addresses slice
 			recovered := make([]map[string]any, 0, n)
 			start, end := i, i+n
