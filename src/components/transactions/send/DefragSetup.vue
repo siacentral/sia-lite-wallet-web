@@ -351,7 +351,6 @@ export default {
 					severity: 'danger',
 					message: 'Unable to defragment wallet'
 				});
-				this.sending = true;
 			}
 		},
 		onDefrag() {
