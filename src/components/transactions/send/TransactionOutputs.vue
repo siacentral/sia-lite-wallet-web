@@ -52,7 +52,7 @@ export default {
 		wallet: Object
 	},
 	computed: {
-		...mapState(['currency', 'exchangeRateSC']),
+		...mapState(['currency', 'exchangeRateSC', 'exchangeRateSCP']),
 		outputs() {
 			console.log('transaction', this.transaction);
 			if (!this.transaction || !Array.isArray(this.transaction.siacoin_outputs))

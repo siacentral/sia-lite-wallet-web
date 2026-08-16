@@ -17,6 +17,6 @@ self.addEventListener('activate', (event) => {
 		await self.registration.unregister();
 
 		const clients = await self.clients.matchAll({ type: 'window' });
-		clients.forEach(client => client.navigate(client.url));
+		await Promise.all(clients.map(client => client.navigate(client.url)));
 	})());
 });
