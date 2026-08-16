@@ -1,21 +1,20 @@
 <template>
-	<modal @close="$emit('close')">
-		<p class="text-warning">{{ translate('defragModal.defragExplain') }}</p>
-		<transition name="fade-top" mode="out-in">
-			<defrag-setup :wallet="wallet" v-if="step === 'setup'" key="setup" @built="onTransactionsBuilt" />
-			<div v-else-if="step === 'signing'" key="signing">
-				<div class="text-center defrag-progress">{{ translate('sendSiacoinsModal.statusBroadcasting', currentIndex + 1, transactions.length) }}</div>
-				<sign-ledger-transaction
-					:key="currentIndex"
-					:currency="wallet.currency"
-					:transaction="currentSiaTransaction"
-					:requiredSignatures="currentRequiredSignatures"
-					:changeIndex="currentChangeIndex"
-					@signed="onLedgerSigned" />
-			</div>
-			<div v-else-if="step === 'sending'" class="text-center" :key="status">{{ status }}</div>
-		</transition>
-	</modal>
+		<modal @close="$emit('close')">
+			<p class="text-warning">{{ translate('defragModal.defragExplain') }}</p>
+			<transition name="fade-top" mode="out-in">
+				<defrag-setup :wallet="wallet" v-if="step === 'setup'" key="setup" @built="onTransactionsBuilt" />
+				<div v-else-if="wallet.type === 'ledger'" key="ledger">
+					<div class="text-center defrag-progress" v-if="step === 'sending'">{{ status }}</div>
+					<sign-ledger-transaction
+						:currency="wallet.currency"
+						:transaction="currentSiaTransaction"
+						:requiredSignatures="currentRequiredSignatures"
+						:changeIndex="currentChangeIndex"
+						@signed="onLedgerSigned" />
+				</div>
+				<div v-else class="text-center" :key="status">{{ status }}</div>
+			</transition>
+		</modal>
 </template>
 
 <script>

@@ -81,6 +81,12 @@ export default {
 		console.log(this.signed);
 		console.log(this.requiredSignatures);
 	},
+	watch: {
+		transaction() {
+			this.signed = { ...this.transaction };
+			this.signatures = 0;
+		}
+	},
 	beforeUnmount() {
 		if (this.ledgerDevice)
 			this.ledgerDevice.close();
