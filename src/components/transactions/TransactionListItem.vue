@@ -23,7 +23,7 @@ export default {
 		transaction: Object
 	},
 	computed: {
-		...mapState(['currency', 'exchangeRateSC', 'exchangeRateSCP']),
+		...mapState(['currency', 'exchangeRateSC']),
 		siacoinAmount() {
 			const siacoinInput = new BigNumber(this.transaction?.siacoin_inputs || 0),
 				siacoinOutput = new BigNumber(this.transaction?.siacoin_outputs || 0);
@@ -48,7 +48,7 @@ export default {
 			return `${format.value} <span class="currency-display">${this.translate(`currency.${format.label}`)}</span>`;
 		},
 		displaySiafunds() {
-			const format = formatSiafundString(this.siafundAmount.abs(), this.wallet.currency);
+			const format = formatSiafundString(this.siafundAmount.abs());
 
 			if (this.siafundAmount.lt(0))
 				return `-${format.value} <span class="currency-display">${this.translate(`currency.${format.label}`)}</span>`;
@@ -69,12 +69,8 @@ export default {
 			return display;
 		},
 		displayType() {
-			if (!this.transaction || !Array.isArray(this.transaction.tags)) {
-				if (this.wallet.currency === 'scp')
-					return this.translate('transactionTypes.scprimeTransaction');
-
+			if (!this.transaction || !Array.isArray(this.transaction.tags))
 				return this.translate('transactionTypes.siacoinTransaction');
-			}
 
 			if (this.transaction.tags.indexOf('contract_renewal') !== -1)
 				return this.translate('transactionTypes.contractRenewal');
@@ -102,12 +98,9 @@ export default {
 				return this.translate('transactionTypes.siafundClaim');
 			else if (this.transaction.tags.indexOf('defrag') !== -1)
 				return this.translate('transactionTypes.defrag');
-			else if (this.transaction.tags.indexOf('siacoin_transaction') !== -1) {
-				if (this.wallet.currency === 'scp')
-					return this.translate('transactionTypes.scprimeTransaction');
-
+			else if (this.transaction.tags.indexOf('siacoin_transaction') !== -1)
 				return this.translate('transactionTypes.siacoinTransaction');
-			} else if (this.transaction.tags.indexOf('siafund_transaction') !== -1)
+			else if (this.transaction.tags.indexOf('siafund_transaction') !== -1)
 				return this.translate('transactionTypes.siafundTransaction');
 
 			return this.transaction.tags[0];

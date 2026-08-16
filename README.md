@@ -1,4 +1,4 @@
-Sia Central's Lite Wallet is a secure cryptocurrency wallet web app with support for Siacoin (SC) and ScPrimeCoin (SCP). This wallet has been tested and works with modern evergreen browsers: Chromium based browsers on Desktop, Safari on iOS, and Chrome on Android. Sensitive data, such as wallet seeds, is stored encrypted using a user-set passphrase and never leaves the device.
+Sia Central's Lite Wallet is a secure Siacoin (SC) wallet web app. This wallet has been tested and works with modern evergreen browsers: Chromium based browsers on Desktop, Safari on iOS, and Chrome on Android. Sensitive data, such as wallet seeds, is stored encrypted using a user-set passphrase and never leaves the device.
 
 **[Sia Central Lite Wallet](https://wallet.siacentral.com)** | **[GitHub](https://github.com/siacentral/sia-lite-wallet-web)** | **[Docker](https://hub.docker.com/r/siacentral/sia-lite-wallet-web)**
 
@@ -15,7 +15,7 @@ Sia Central's Lite Wallet is a secure cryptocurrency wallet web app with support
 ### Supported Wallet Types
 
 #### Seed Wallets
-Seed wallets are created or recovered from a 29-word recovery phrase. These wallets are fully compatible with the official Sia and ScPrime wallets. The seed is encrypted and stored locally with a user provided unlock password. The seed never leaves the device, removing any risk of exposure.
+Seed wallets are created or recovered from a 29-word recovery phrase. These wallets are fully compatible with the official Sia wallet. The seed is encrypted and stored locally with a user provided unlock password. The seed never leaves the device, removing any risk of exposure.
 
 #### Ledger Hardware Wallets
 Ledger hardware wallets communicate using Ledger's secure transport. The seed cannot be retrieved from the Ledger device. Addresses are imported from the device to view balance and build transactions. The Ledger device is required to sign and confirm any transactions before being broadcast to the Sia network.

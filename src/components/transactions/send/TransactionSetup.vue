@@ -68,7 +68,7 @@ export default {
 		wallet: Object
 	},
 	computed: {
-		...mapState(['currency', 'exchangeRateSC', 'exchangeRateSCP']),
+		...mapState(['currency', 'exchangeRateSC']),
 		baseCurrencyLabel() {
 			return this.translate('currency.sc');
 		},
@@ -116,13 +116,8 @@ export default {
 			return `${siafunds.value} <span class="currency-display">SF</span>`;
 		},
 		remainingBalanceCurrency() {
-			let exchangeRate = this.exchangeRateSC;
-
-			if (this.wallet.currency && this.wallet.currency === 'scp')
-				exchangeRate = this.exchangeRateSCP;
-
 			const rem = this.walletBalance.minus(this.calculatedAmount).minus(this.fees),
-				currency = formatPriceString(rem, 2, this.currency, exchangeRate[this.currency], this.wallet.precision());
+				currency = formatPriceString(rem, 2, this.currency, this.exchangeRateSC[this.currency], this.wallet.precision());
 
 			return `${currency.value} <span class="currency-display">${this.translate(`currency.${currency.label}`)}</span>`;
 		},
@@ -371,12 +366,7 @@ export default {
 			return txn;
 		},
 		formatCurrencyString(value) {
-			let exchangeRate = this.exchangeRateSC;
-
-			if (this.wallet.currency && this.wallet.currency === 'scp')
-				exchangeRate = this.exchangeRateSCP;
-
-			return formatPriceString(value, 2, this.currency, exchangeRate[this.currency], this.wallet.precision()).value;
+			return formatPriceString(value, 2, this.currency, this.exchangeRateSC[this.currency], this.wallet.precision()).value;
 		},
 		onChangeSendMode(mode) {
 			this.sendAmount = new BigNumber(0);
@@ -495,13 +485,8 @@ export default {
 		},
 		onChangeCurrency() {
 			try {
-				let exchangeRate = this.exchangeRateSC;
-
-				if (this.wallet.currency && this.wallet.currency === 'scp')
-					exchangeRate = this.exchangeRateSCP;
-
 				const value = this.$refs.txtCurrency.value,
-					parsed = parseCurrencyString(value, exchangeRate[this.currency], this.wallet.precision()),
+					parsed = parseCurrencyString(value, this.exchangeRateSC[this.currency], this.wallet.precision()),
 					siacoins = formatPriceString(parsed, 2, this.wallet.currency, 1, this.wallet.precision());
 
 				this.sendAmount = parsed;

@@ -61,8 +61,6 @@ export default {
 			switch (currency) {
 			case 'sc':
 				return 'Siacoin (SC)';
-			case 'scp':
-				return 'ScPrimeCoin (SCP)';
 			default:
 				return currency;
 			}

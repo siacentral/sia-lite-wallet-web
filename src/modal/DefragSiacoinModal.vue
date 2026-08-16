@@ -6,7 +6,6 @@
 				<div v-else-if="wallet.type === 'ledger'" key="ledger">
 					<div class="text-center defrag-progress" v-if="step === 'sending'">{{ status }}</div>
 					<sign-ledger-transaction
-						:currency="wallet.currency"
 						:transaction="currentSiaTransaction"
 						:requiredSignatures="currentRequiredSignatures"
 						:changeIndex="currentChangeIndex"

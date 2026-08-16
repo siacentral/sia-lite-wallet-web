@@ -88,7 +88,7 @@ export default {
 			if (balance.isNaN() || !balance.isFinite())
 				balance = new BigNumber(0);
 
-			const format = formatSiafundString(balance, this.wallet.currency);
+			const format = formatSiafundString(balance);
 
 			return `${format.value} <span class="currency-display">${this.translate(`currency.${format.label}`)}</span>`;
 		},
@@ -175,7 +175,7 @@ export default {
 				addr = await this.generateLedgerAddr(nextIndex);
 				break;
 			default:
-				addr = await generateSiaAddresses(this.wallet.seed, this.wallet.currency, nextIndex, 1);
+				addr = await generateSiaAddresses(this.wallet.seed, nextIndex, 1);
 			}
 
 			return addr;
@@ -186,7 +186,7 @@ export default {
 					addrs.push(a.address);
 
 				return addrs;
-			}, []), this.wallet.currency, this.currency);
+			}, []));
 
 			let deltaSC = new BigNumber(balance.unconfirmed_siacoin_delta),
 				deltaSF = new BigNumber(balance.unconfirmed_siafund_delta);

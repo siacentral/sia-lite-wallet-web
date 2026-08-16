@@ -82,7 +82,6 @@ export default {
 			importSeed: false,
 			walletName: '',
 			recoverySeed: '',
-			currencyType: 'sc',
 			seedType: 'walrus',
 			serverType: 'siacentral',
 			serverURL: null
@@ -106,12 +105,12 @@ export default {
 				seed = encode(randomBytes(64));
 				break;
 			case 'recover':
-				await generateAddresses(this.recoverySeed, this.currencyType, 0, 1);
+				await generateAddresses(this.recoverySeed, 0, 1);
 				seed = this.recoverySeed;
 				break;
 			default:
 				seed = await generateSeed(this.seedType);
-				await generateAddresses(seed, this.currencyType, 0, 1);
+				await generateAddresses(seed, 0, 1);
 				break;
 			}
 
@@ -128,7 +127,7 @@ export default {
 					wallet = {
 						seed,
 						title: this.walletName,
-						currency: this.currencyType,
+						currency: 'sc',
 						type: this.walletType,
 						server_type: this.serverType,
 						server_url: this.serverURL

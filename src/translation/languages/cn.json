@@ -3,7 +3,6 @@
 	"translations": {
 		"getStarted": "继续",
 		"siacoin": "Siacoin",
-		"scprimecoin": "SCPrimeCoin",
 		"addWallet": "增加钱包",
 		"buySiacoin": "购买SC (预览)",
 		"rescanWallet": "重新扫描钱包",
@@ -21,8 +20,6 @@
 		"total": "共计",
 		"siacoinTotal": "Siacoin 总计",
 		"siafundTotal": "Siafund 总计",
-		"scpTotal": "SCP 总计",
-		"spfTotal": "SPF 总计",
 		"minerFee": "矿工费",
 		"address": "地址",
 		"amount": "金额",
@@ -57,7 +54,6 @@
 		"siacentral": "Sia Central",
 		"walrus": "Walrus",
 		"narwal": "Narwal",
-		"ledgerSCPWarning": "Sia Ledger Nano S 应用程序不能与ScPrime一起使用，为了发送资金，您需要从以下位置加载ScPrime应用程序",
 		"walletStatus": {
 			"scanning": "扫描中...",
 			"queued": "等待扫描..."
@@ -100,7 +96,6 @@
 			"chkShowAdvanced": "高级选项",
 			"chkWalrusSeeds": "生成12字种子",
 			"chkChangeWalletServer": "启用第三方钱包服务",
-			"chkCurrency": "Enable SCPrime",
 			"pChangeSeedType": "12字种子与官方Sia钱包不兼容。它们通常与Walrus钱包一起使用。启用此设置将在创建新钱包时显示一个下拉列表，允许您生成新的Sia种子或12字种子。",
 			"pChangeServerType": "[实验性]允许使用第三方钱包服务器，例如Walrus。 第三方服务器有助于降低集中度，并允许在信任Sia Central或另一方之间进行选择。 某些钱包功能可能已损坏或不受支持。",
 			"pExplainLookahead": "钱包由多个地址组成，前缀窗口是两个未使用的地址之间的最大间隔，在钱包可能不再有已使用的地址之前。 Sia的房东和房客会产生大量未使用的地址，因此某些钱包可能需要增加此值才能找到他们的所有资金。"
@@ -133,7 +128,6 @@
 			"lblSeedType": "种子类型",
 			"lblServerType": "服务类型",
 			"lblServerURL": "服务网址",
-			"lblCurrencyType": "货币",
 			"seedExported": "我的恢复种子保存在安全的位置",
 			"siaSeed": "Sia种子",
 			"walrusSeed": "Walrus种子"
@@ -196,7 +190,6 @@
 			"hostAnnouncement": "主机宣布",
 			"contractCompleted": "合同完成",
 			"blockReward": "区块奖励",
-			"scprimeTransaction": "SCPrime Transaction",
 			"siacoinTransaction": "Siacoin交易",
 			"siafundTransaction": "Siafund交易",
 			"siafundClaim": "Siafund Claim",
@@ -214,7 +207,6 @@
 			"crypto": "加密货币",
 			"sc": "SC",
 			"sf": "SF",
-			"spf": "SPF",
 			"usd": "美元",
 			"jpy": "日元",
 			"eur": "欧元",

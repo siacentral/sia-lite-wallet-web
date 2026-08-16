@@ -134,16 +134,16 @@ func encodeV2Transaction(this js.Value, args []js.Value) any {
 }
 
 func signTransaction(this js.Value, args []js.Value) any {
-	if err := checkArgs(args, js.TypeString, js.TypeString, js.TypeString, js.TypeObject, js.TypeFunction); err != nil {
+	if err := checkArgs(args, js.TypeString, js.TypeString, js.TypeObject, js.TypeFunction); err != nil {
 		return err.Error()
 	}
 
 	w := api.NewClient(SIASCAN_ADDRESS, "")
 
 	phrase := args[0].String()
-	jsonTxn := args[2].String()
-	sigIndicesLen := args[3].Length()
-	callback := args[4]
+	jsonTxn := args[1].String()
+	sigIndicesLen := args[2].Length()
+	callback := args[3]
 
 	var txn types.Transaction
 	if err := json.Unmarshal([]byte(jsonTxn), &txn); err != nil {
@@ -166,7 +166,7 @@ func signTransaction(this js.Value, args []js.Value) any {
 		}
 
 		for i := range sigIndicesLen {
-			index := uint64(args[3].Index(i).Int())
+			index := uint64(args[2].Index(i).Int())
 
 			sigHash := cs.WholeSigHash(txn, txn.Signatures[i].ParentID, 0, 0, nil)
 			sk := wallet.KeyFromSeed(&seed, index)
@@ -247,14 +247,14 @@ func generateAddress(seed *[32]byte, i uint64) map[string]any {
 }
 
 func generateAddresses(this js.Value, args []js.Value) any {
-	if err := checkArgs(args, js.TypeString, js.TypeString, js.TypeNumber, js.TypeNumber, js.TypeFunction); err != nil {
+	if err := checkArgs(args, js.TypeString, js.TypeNumber, js.TypeNumber, js.TypeFunction); err != nil {
 		return err.Error()
 	}
 
 	phrase := args[0].String()
-	i := uint64(args[2].Int())
-	n := args[3].Int()
-	callback := args[4]
+	i := uint64(args[1].Int())
+	n := args[2].Int()
+	callback := args[3]
 
 	var seed [32]byte
 	defer clear(seed[:])
@@ -377,13 +377,13 @@ func v2SignTransaction(this js.Value, args []js.Value) any {
 }
 
 func recoverAddresses(this js.Value, args []js.Value) any {
-	if err := checkArgs(args, js.TypeString, js.TypeString, js.TypeNumber, js.TypeNumber, js.TypeNumber, js.TypeFunction); err != nil {
+	if err := checkArgs(args, js.TypeString, js.TypeNumber, js.TypeNumber, js.TypeNumber, js.TypeFunction); err != nil {
 		return err.Error()
 	}
 
 	phrase := args[0].String()
-	lookahead := uint64(args[3].Int())
-	callback := args[5]
+	lookahead := uint64(args[2].Int())
+	callback := args[4]
 
 	var seed [32]byte
 	if err := phraseToSeed(phrase, &seed); err != nil {
@@ -800,14 +800,12 @@ func getWalletSiafundOutputs(w *api.Client, addresses []types.Address) ([]siafun
 }
 
 func getTransactions(this js.Value, args []js.Value) any {
-	if err := checkArgs(args, js.TypeObject, js.TypeString, js.TypeString, js.TypeFunction); err != nil {
+	if err := checkArgs(args, js.TypeObject, js.TypeFunction); err != nil {
 		return err.Error()
 	}
 
 	count := args[0].Length()
-	//walletCurrency := args[1].String()
-	// displayCurrency := args[2].String()
-	callback := args[3]
+	callback := args[1]
 
 	go func() {
 		w := api.NewClient(SIASCAN_ADDRESS, "")

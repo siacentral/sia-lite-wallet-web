@@ -121,7 +121,7 @@ export default {
 		};
 	},
 	computed: {
-		...mapState(['currency', 'exchangeRateSC', 'exchangeRateSCP', 'scanQueue']),
+		...mapState(['currency', 'exchangeRateSC', 'scanQueue']),
 		walletQueued() {
 			return this.wallet.scanning === 'full' || this.scanQueue.filter(s => s.walletID === this.wallet.id && s.full).length !== 0;
 		},
@@ -300,17 +300,13 @@ export default {
 			return `${format.value} <span class="currency-display">${this.translate(`currency.${format.label}`)}</span>`;
 		},
 		formatSiafundString(val) {
-			const format = formatSiafundString(val, this.wallet.currency);
+			const format = formatSiafundString(val);
 
 			return `${format.value} <span class="currency-display">${this.translate(`currency.${format.label}`)}</span>`;
 		},
 		formatCurrencyString(val) {
-			let exchangeRate = this.exchangeRateSC;
-
-			if (this.wallet.currency && this.wallet.currency === 'scp')
-				exchangeRate = this.exchangeRateSCP;
-
-			const format = formatPriceString(val, 2, this.currency, exchangeRate[this.currency], this.wallet.precision());
+			const exchangeRate = this.exchangeRateSC,
+				format = formatPriceString(val, 2, this.currency, exchangeRate[this.currency], this.wallet.precision());
 
 			return `${format.value} <span class="currency-display">${this.translate(`currency.${format.label}`)} @ ${formatExchangeRate(exchangeRate[this.currency], this.currency, 'never')}</span>`;
 		}

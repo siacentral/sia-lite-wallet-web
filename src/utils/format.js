@@ -224,7 +224,7 @@ function formatCurrencyString(val, currency, rate, precision = new BigNumber(1e2
 	};
 };
 
-export function formatSiafundString(val, currency = 'sc') {
+export function formatSiafundString(val) {
 	const label = 'sf';
 
 	if (!val || val.isEqualTo(0)) {

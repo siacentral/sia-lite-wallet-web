@@ -20,7 +20,7 @@ export default {
 	},
 	computed: {
 		formattedSiafunds() {
-			return formatSiafundString(this.siafunds, this.wallet.currency);
+			return formatSiafundString(this.siafunds);
 		},
 		formattedClaim() {
 			return formatPriceString(this.claim, 2, this.wallet.currency, 1, this.wallet.precision());

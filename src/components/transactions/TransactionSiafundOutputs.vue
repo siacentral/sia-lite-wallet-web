@@ -2,9 +2,9 @@
 	<div class="transaction-outputs">
 		<table>
 			<tr class="header" v-if="inputs && inputs.length !== 0"><td colspan="5">{{ translate('inputs') }}</td></tr>
-			<siafund-output-list v-if="inputs && inputs.length !== 0" :outputs="inputs" :walletCurrency="wallet.currency" />
+			<siafund-output-list v-if="inputs && inputs.length !== 0" :outputs="inputs" />
 			<tr class="header" v-if="outputs && outputs.length !== 0"><td colspan="5">{{ translate('outputs') }}</td></tr>
-			<siafund-output-list v-if="outputs && outputs.length !== 0" :outputs="outputs" :walletCurrency="wallet.currency" />
+			<siafund-output-list v-if="outputs && outputs.length !== 0" :outputs="outputs" />
 		</table>
 	</div>
 </template>
@@ -19,8 +19,7 @@ export default {
 		SiafundOutputList
 	},
 	props: {
-		transaction: Object,
-		wallet: Object
+		transaction: Object
 	},
 	computed: {
 		...mapState(['feeAddresses']),
