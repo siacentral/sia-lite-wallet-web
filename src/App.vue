@@ -1,14 +1,16 @@
 <template>
-	<div id="app">
+	<div id="app-root">
 		<div class="titlebar"></div>
 		<primary-nav />
 		<div class="page-wrapper">
-			<transition name="fade" mode="out-in" appear>
-				<unavailable v-if="typeof unavailable === 'string'" />
-				<router-view v-if="insecureRoute || (setup && unlocked)" />
-				<setup v-else-if="!setup" />
-				<unlock-wallet v-else />
-			</transition>
+			<router-view v-slot="{ Component }">
+				<transition name="fade" mode="out-in" appear>
+					<unavailable v-if="typeof unavailable === 'string'" />
+					<component :is="Component" v-else-if="insecureRoute || (setup && unlocked)" />
+					<setup v-else-if="!setup" />
+					<unlock-wallet v-else />
+				</transition>
+			</router-view>
 		</div>
 		<notification-queue />
 	</div>
@@ -47,7 +49,7 @@ export default {
 	mounted() {
 		window.addEventListener('mousemove', this.resetAutoLock);
 	},
-	beforeDestroy() {
+	beforeUnmount() {
 		window.removeEventListener('mousemove', this.resetAutoLock);
 	},
 	methods: {
@@ -93,6 +95,11 @@ export default {
 }
 
 #app {
+	width: 100%;
+	height: 100%;
+}
+
+#app-root {
 	width: 100%;
 	height: 100%;
 

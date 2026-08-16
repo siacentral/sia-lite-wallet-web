@@ -1,5 +1,5 @@
 async function spawnWorker(params, timeout, progress) {
-	let worker = new Worker('./sia.worker.js', { type: 'module' });
+	let worker = new Worker(new URL('./sia.worker.js', import.meta.url), { type: 'module' });
 
 	const work = new Promise((resolve, reject) => {
 		const workerDeadline = setTimeout(() => {
@@ -66,6 +66,10 @@ export function signTransaction(seed, currency, txn, indexes) {
 
 export function encodeTransaction(txn) {
 	return spawnWorker(['encodeTransaction', JSON.stringify(txn)], 15000);
+}
+
+export function encodeV2Transaction(txn) {
+	return spawnWorker(['encodeV2Transaction', JSON.stringify(txn)], 15000);
 }
 
 export function encodeUnlockHash(unlockconditions) {

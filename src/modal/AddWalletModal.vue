@@ -9,6 +9,7 @@ import Modal from './Modal';
 import CreateWallet from '@/components/wallet/CreateWallet';
 
 export default {
+	emits: ['close'],
 	components: {
 		CreateWallet,
 		Modal

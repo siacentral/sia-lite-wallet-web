@@ -36,7 +36,7 @@
 </template>
 
 <script>
-import { v2InputSigHash, encodeTransaction } from '@/sia';
+import { v2InputSigHash, encodeV2Transaction } from '@/sia';
 import { formatNumber } from '@/utils/format';
 
 import ConnectLedger from './ConnectLedger';
@@ -81,7 +81,7 @@ export default {
 		console.log(this.signed);
 		console.log(this.requiredSignatures);
 	},
-	beforeDestroy() {
+	beforeUnmount() {
 		if (this.ledgerDevice)
 			this.ledgerDevice.close();
 	},
@@ -117,6 +117,12 @@ export default {
 			return 0;
 		},
 		async onConnected(device) {
+			if (!device) {
+				this.ledgerDevice = null;
+				this.connected = false;
+				return;
+			}
+
 			try {
 				this.ledgerDevice = device;
 				this.connected = true;
@@ -135,7 +141,7 @@ export default {
 		async blindSignTransaction() {
 			const sigHash = await v2InputSigHash(this.signed);
 			for (const index of this.sigIndices) {
-				const sig = await this.ledgerDevice.blindSign(sigHash, index);
+				const sig = await this.ledgerDevice.signHash(sigHash, index);
 				for (const input of this.signed.siacoinInputs || []) {
 					if (input.index === index)
 						input.satisfiedPolicy.signatures = [sig];
@@ -147,10 +153,25 @@ export default {
 			}
 		},
 		async signTransaction() {
-			const encoded = await encodeTransaction(this.signed);
+			const encoded = await encodeV2Transaction(this.signed);
 
-			for (; this.signatures < this.requiredSignatures.length; this.signatures++)
-				this.signed.signatures[this.signatures].signature = await this.ledgerDevice.signTransaction(encoded, this.signatures, this.requiredSignatures[this.signatures], this.changeIndex);
+			// the v2 input sig hash covers the whole transaction, so each key
+			// only needs to sign once even when it controls multiple inputs
+			for (const index of this.sigIndices) {
+				const sigIndex = this.requiredSignatures.indexOf(index),
+					sig = await this.ledgerDevice.signV2Transaction(encoded, sigIndex, index, this.changeIndex);
+
+				for (const input of this.signed.siacoinInputs || []) {
+					if (input.index === index)
+						input.satisfiedPolicy.signatures = [sig];
+				}
+				for (const input of this.signed.siafundInputs || []) {
+					if (input.index === index)
+						input.satisfiedPolicy.signatures = [sig];
+				}
+
+				this.signatures++;
+			}
 		},
 		async onSignTransaction() {
 			if (this.signing)
@@ -164,6 +185,9 @@ export default {
 					throw new Error('no transaction to sign');
 				else if (!this.ledgerDevice || !this.connected)
 					throw new Error('ledger not connected');
+
+				// a retry re-signs every key from the start
+				this.signatures = 0;
 
 				if (this.blindSign)
 					await this.blindSignTransaction();

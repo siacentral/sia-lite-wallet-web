@@ -1,4 +1,4 @@
-Sia Central's Lite Wallet is a secure cryptocurrency wallet web app with support for Siacoin (SC) and ScPrimeCoin (SCP). This wallet has been tested and works with Chromium based browsers on Desktop, iOS 11, and Chrome on Android. Sensitive data, such as wallet seeds, is stored encrypted using a user-set passphrase and never leaves the device.
+Sia Central's Lite Wallet is a secure cryptocurrency wallet web app with support for Siacoin (SC) and ScPrimeCoin (SCP). This wallet has been tested and works with modern evergreen browsers: Chromium based browsers on Desktop, Safari on iOS, and Chrome on Android. Sensitive data, such as wallet seeds, is stored encrypted using a user-set passphrase and never leaves the device.
 
 **[Sia Central Lite Wallet](https://wallet.siacentral.com)** | **[GitHub](https://github.com/siacentral/sia-lite-wallet-web)** | **[Docker](https://hub.docker.com/r/siacentral/sia-lite-wallet-web)**
 
@@ -38,9 +38,9 @@ docker run -p 80:80 -d siacentral/sia-lite-wallet-web
 ## Build Locally
 
 ### Prerequisites
-+ Node v12.10.X
-+ NPM 6.14.X
-+ Go 1.16.X
++ Node v20.19+ or v22.12+
++ NPM 10+
++ Go 1.26+
 
 ### Compiles and hot-reloads for development
 ```

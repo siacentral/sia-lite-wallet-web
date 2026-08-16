@@ -134,7 +134,7 @@ export default {
 		},
 		siacoinClass() {
 			const classes = {},
-				direction = new BigNumber(this.transaction?.siacoin_outputs).gt(new BigNumber(this.transaction?.siacoin_inputs)) ? 'received' : 'send';
+				direction = new BigNumber(this.transaction?.siacoin_outputs || 0).gt(new BigNumber(this.transaction?.siacoin_inputs || 0)) ? 'received' : 'send';
 
 			classes[`value-${direction}`] = true;
 			return classes;

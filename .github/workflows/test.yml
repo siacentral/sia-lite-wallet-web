@@ -8,11 +8,13 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@master
-      - uses: actions/setup-node@master
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
-          node-version: 12
-      - uses: actions/setup-go@v3
+          node-version: 24
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
       - name: Install Dependencies
         run: npm i
 
@@ -21,10 +23,12 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@master
-      - uses: actions/setup-node@master
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
-          node-version: 12
-      - uses: actions/setup-go@v3
+          node-version: 24
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
       - name: Build
         run: make build

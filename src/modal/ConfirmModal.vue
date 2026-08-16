@@ -17,6 +17,7 @@
 import Modal from './Modal';
 
 export default {
+	emits: ['close', 'selected'],
 	components: {
 		Modal
 	},

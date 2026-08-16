@@ -1,0 +1,13 @@
+{
+	"name": "Sia Lite Wallet",
+	"short_name": "Sia Wallet",
+	"start_url": "/",
+	"display": "standalone",
+	"theme_color": "#19cf86",
+	"background_color": "#1d1e21",
+	"icons": [
+		{ "src": "/img/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+		{ "src": "/img/icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+		{ "src": "/img/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+	]
+}

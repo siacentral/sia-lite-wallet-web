@@ -114,7 +114,7 @@ export default {
 	transition: transform .5s ease, opacity .5s ease;
 }
 
-.slide-left-enter, .slide-left-leave-to {
+.slide-left-enter-from, .slide-left-leave-to {
 	transform: translateX(-100%);
 	opacity: 0;
 }

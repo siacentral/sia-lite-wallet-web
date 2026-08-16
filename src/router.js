@@ -1,7 +1,4 @@
-import Vue from 'vue';
-import VueRouter from 'vue-router';
-
-Vue.use(VueRouter);
+import { createRouter, createWebHistory } from 'vue-router';
 
 const routes = [
 	{
@@ -12,21 +9,20 @@ const routes = [
 	{
 		path: '/settings',
 		name: 'settings',
-		component: () => import(/* webpackChunkName: "settings" */ '@/views/Settings.vue')
+		component: () => import('@/views/Settings.vue')
 	},
 	{
 		path: '/about',
 		name: 'about',
-		component: () => import(/* webpackChunkName: "about" */ '@/views/About.vue'),
+		component: () => import('@/views/About.vue'),
 		meta: {
 			insecure: true
 		}
 	}
 ];
 
-const router = new VueRouter({
-	mode: 'history',
-	base: process.env.BASE_URL,
+const router = createRouter({
+	history: createWebHistory(import.meta.env.BASE_URL),
 	routes
 });
 

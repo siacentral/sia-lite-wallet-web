@@ -27,15 +27,16 @@ func main() {
 			"revision":  build.Revision(),
 			"timestamp": build.Time().Format(time.UnixDate),
 		},
-		"generateSeed":      js.FuncOf(generateSeed),
-		"generateAddresses": js.FuncOf(generateAddresses),
-		"recoverAddresses":  js.FuncOf(recoverAddresses),
-		"getTransactions":   js.FuncOf(getTransactions),
-		"encodeTransaction": js.FuncOf(encodeTransaction),
-		"signTransaction":   js.FuncOf(signTransaction),
-		"encodeUnlockHash":  js.FuncOf(encodeUnlockHash),
-		"v2InputSigHash":    js.FuncOf(v2InputSigHash),
-		"v2SignTransaction": js.FuncOf(v2SignTransaction),
+		"generateSeed":        js.FuncOf(generateSeed),
+		"generateAddresses":   js.FuncOf(generateAddresses),
+		"recoverAddresses":    js.FuncOf(recoverAddresses),
+		"getTransactions":     js.FuncOf(getTransactions),
+		"encodeTransaction":   js.FuncOf(encodeTransaction),
+		"encodeV2Transaction": js.FuncOf(encodeV2Transaction),
+		"signTransaction":     js.FuncOf(signTransaction),
+		"encodeUnlockHash":    js.FuncOf(encodeUnlockHash),
+		"v2InputSigHash":      js.FuncOf(v2InputSigHash),
+		"v2SignTransaction":   js.FuncOf(v2SignTransaction),
 	})
 
 	c := make(chan bool, 1)
@@ -101,6 +102,32 @@ func encodeTransaction(this js.Value, args []js.Value) any {
 	}
 	// not sure why it's necessary to convert bytes
 	// to []any, but it is
+	callback.Invoke(js.Null(), jsArray(buf.Bytes()))
+
+	return nil
+}
+
+func encodeV2Transaction(this js.Value, args []js.Value) any {
+	if err := checkArgs(args, js.TypeString, js.TypeFunction); err != nil {
+		return err.Error()
+	}
+
+	jsonTxn := args[0].String()
+	callback := args[1]
+
+	var txn types.V2Transaction
+	if err := json.Unmarshal([]byte(jsonTxn), &txn); err != nil {
+		callback.Invoke(err.Error(), js.Null())
+		return err.Error()
+	}
+
+	buf := bytes.NewBuffer(nil)
+	enc := types.NewEncoder(buf)
+	types.V2TransactionSemantics(txn).EncodeTo(enc)
+	if err := enc.Flush(); err != nil {
+		callback.Invoke(fmt.Sprintf("error encoding transaction: %s", err), js.Null())
+		return err.Error()
+	}
 	callback.Invoke(js.Null(), jsArray(buf.Bytes()))
 
 	return nil
@@ -639,7 +666,7 @@ func getWalletTransactions(w *api.Client, addresses []types.Address) ([]processe
 	seen := make(map[types.Hash256]bool)
 	batch := min(100, len(addresses))
 	for i := 0; i < len(addresses); i += batch {
-		addressBatch := addresses[i:][:batch]
+		addressBatch := addresses[i:min(i+batch, len(addresses))]
 		events, err := w.BatchAddressEvents(addressBatch, 0, 100)
 		if err != nil {
 			return nil, fmt.Errorf("failed to get wallet events: %w", err)
@@ -671,7 +698,7 @@ func getWalletTransactions(w *api.Client, addresses []types.Address) ([]processe
 func getWalletBalance(w *api.Client, addresses []types.Address) (wb walletBalance, err error) {
 	batch := min(1000, len(addresses))
 	for i := 0; i < len(addresses); i += batch {
-		addressBatch := addresses[i:][:batch]
+		addressBatch := addresses[i:min(i+batch, len(addresses))]
 		balance, err := w.BatchAddressBalance(addressBatch)
 		if err != nil {
 			return walletBalance{}, fmt.Errorf("failed to get wallet balance: %w", err)

@@ -4,7 +4,7 @@
 			<tbody>
 				<tr v-for="(address, i) in addresses" :key="i">
 					<td class="text-right fit-text">{{ formatNumber(addresses[i].index) }}</td>
-					<td><input v-model="addresses[i].address" :placeholder="translate('importAddresses.addressPlaceholder')" @input="$emit('change', addresses)" :readonly="readonly" /></td>
+					<td><input v-model="addresses[i].address" :placeholder="translate('importAddresses.addressPlaceholder')" @input="onChange" :readonly="readonly" /></td>
 					<td class="fit-text" v-if="addresses.length > 1 && walletType === 'watch'">
 						<button class="delete-btn" @click="$emit('delete', i)">
 							<icon icon="times" />
@@ -23,9 +23,10 @@
 import { formatNumber } from '@/utils/format';
 
 export default {
+	emits: ['update:modelValue', 'change', 'delete'],
 	props: {
 		wallet: Object,
-		value: Array,
+		modelValue: Array,
 		readonly: Boolean,
 		ledgerDevice: Object
 	},
@@ -35,7 +36,7 @@ export default {
 		};
 	},
 	mounted() {
-		this.addresses = this.value;
+		this.addresses = this.modelValue;
 	},
 	computed: {
 		walletType() {
@@ -44,12 +45,16 @@ export default {
 	},
 	methods: {
 		formatNumber,
+		onChange() {
+			this.$emit('update:modelValue', this.addresses);
+			this.$emit('change', this.addresses);
+		},
 		async onVerifyLedger(i) {
 			try {
 				if (!this.ledgerDevice)
 					throw new Error('No ledger device');
 
-				const { address } = await this.ledgerDevice.verifyStandardAddress(i),
+				const { address } = await this.ledgerDevice.getAddress(i),
 					storedAddress = this.addresses.filter(a => a.index === i)[0];
 				console.log('ledger address', address, i, storedAddress.address);
 
@@ -70,7 +75,7 @@ export default {
 		}
 	},
 	watch: {
-		value: {
+		modelValue: {
 			deep: true,
 			handler(addresses) {
 				this.addresses = addresses;

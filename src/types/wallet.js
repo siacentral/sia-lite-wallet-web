@@ -17,10 +17,10 @@ export default class Wallet {
 		this.unspent_siafund_outputs = Array.isArray(data.unspent_siafund_outputs) ? data.unspent_siafund_outputs : [];
 		this.spent_siacoin_outputs = Array.isArray(data.spent_siacoin_outputs) ? data.spent_siacoin_outputs : [];
 		this.spent_siafund_outputs = Array.isArray(data.spent_siafund_outputs) ? data.spent_siafund_outputs : [];
-		this.confirmed_siafund_balance = new BigNumber(data.confirmed_siafund_balance);
-		this.confirmed_siacoin_balance = new BigNumber(data.confirmed_siacoin_balance);
-		this.unconfirmed_siacoin_delta = new BigNumber(data.unconfirmed_siacoin_delta);
-		this.unconfirmed_siafund_delta = new BigNumber(data.unconfirmed_siafund_delta);
+		this.confirmed_siafund_balance = new BigNumber(data.confirmed_siafund_balance || 0);
+		this.confirmed_siacoin_balance = new BigNumber(data.confirmed_siacoin_balance || 0);
+		this.unconfirmed_siacoin_delta = new BigNumber(data.unconfirmed_siacoin_delta || 0);
+		this.unconfirmed_siafund_delta = new BigNumber(data.unconfirmed_siafund_delta || 0);
 	}
 
 	precision() {

@@ -69,6 +69,7 @@ export default {
 		ExportSeedModal,
 		ImportSiaAddresses
 	},
+	emits: ['created'],
 	computed: {
 		...mapState(['password', 'changeSeedType']),
 		walletType() {

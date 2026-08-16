@@ -11,7 +11,7 @@
 	-webkit-border-radius: 100px;
 
 	&:hover {
-		background-color: darken(bg-dark-accent, 8);	
+		background-color: darken(bg-dark-accent, 8);
 	}
 }
 
@@ -33,7 +33,7 @@ a {
 	text-decoration: none;
 
 	&:hover, &:active, &:focus {
-		text-decoration: underline;	
+		text-decoration: underline;
 	}
 }
 
@@ -74,14 +74,14 @@ html, body {
 	overflow-y: auto;
 
 	@media screen and (min-width: 767px) {
-		padding-top: 0;	
+		padding-top: 0;
 	}
 }
 
 body.win32 {
 	.page {
 		padding-top: 32px;
-	}	
+	}
 }
 
 .buttons {
@@ -89,7 +89,7 @@ body.win32 {
 
 	> button:last-child, > a:last-child {
 		margin-right: 0;
-	}	
+	}
 }
 
 .panel.icon-panel {
@@ -159,7 +159,7 @@ body.win32 {
 
 	&.btn-warning {
 		background: warning-accent;
-		color: rgba(255, 255, 255, 0.84);	
+		color: rgba(255, 255, 255, 0.84);
 	}
 
 	&.btn-danger {
@@ -181,7 +181,7 @@ body.win32 {
 	transition: transform .5s ease, opacity .5s ease;
 }
 
-.fade-enter, .fade-leave-to {
+.fade-enter-from, .fade-leave-to {
 	transform: translateY(30px);
 	opacity: 0;
 }
@@ -194,7 +194,7 @@ body.win32 {
 	transition: transform .5s ease, opacity .5s ease;
 }
 
-.fade-top-enter, .fade-top-leave-to {
+.fade-top-enter-from, .fade-top-leave-to {
 	transform: translateY(-30px);
 	opacity: 0;
 }
@@ -207,7 +207,7 @@ body.win32 {
 	transition: all 0.5s ease;
 }
 
-.fade-slow-enter, .fade-slow-leave-to {
+.fade-slow-enter-from, .fade-slow-leave-to {
 	transform: translateY(30px);
 	opacity: 0;
 }
@@ -266,8 +266,8 @@ body.dark {
 
 	.btn {
 		background: #383838;
-    	color: rgba(255, 255, 255, 0.84);
-    	border-color: #191919;
+		color: rgba(255, 255, 255, 0.84);
+		border-color: #191919;
 
 		&.btn-success {
 			background: primary;
@@ -276,7 +276,7 @@ body.dark {
 
 		&.btn-warning {
 			background: warning-accent;
-			color: rgba(255, 255, 255, 0.84);	
+			color: rgba(255, 255, 255, 0.84);
 		}
 
 		&.btn-danger {

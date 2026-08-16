@@ -14,6 +14,7 @@ import Modal from './Modal';
 import WalletList from '@/components/wallet/WalletList';
 
 export default {
+	emits: ['close', 'selected'],
 	components: {
 		Modal,
 		WalletList

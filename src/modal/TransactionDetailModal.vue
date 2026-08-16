@@ -107,6 +107,7 @@ import TransactionSiafundOutputs from '@/components/transactions/TransactionSiaf
 import TransactionSummary from '@/components/transactions/TransactionSummary';
 
 export default {
+	emits: ['close'],
 	components: {
 		Modal,
 		TransactionOutputs,

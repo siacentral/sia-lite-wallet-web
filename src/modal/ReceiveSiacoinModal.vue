@@ -26,6 +26,7 @@ import { getFirstWalletAddresses } from '@/store/db';
 import { formatNumber } from '@/utils/format';
 
 export default {
+	emits: ['close'],
 	components: {
 		AddressQrCode,
 		ConnectLedger,
@@ -69,7 +70,7 @@ export default {
 			addresses: []
 		};
 	},
-	beforeDestroy() {
+	beforeUnmount() {
 		// Close the ledger device when we're done
 		if (this.ledgerDevice)
 			this.ledgerDevice.close();
@@ -97,7 +98,7 @@ export default {
 				if (!this.ledgerDevice)
 					throw new Error('No ledger device');
 
-				const { address } = await this.ledgerDevice.verifyStandardAddress(this.current);
+				const { address } = await this.ledgerDevice.getAddress(this.current);
 				if (this.currentAddress !== address)
 					throw new Error('Address does not match device');
 			} catch (ex) {
@@ -129,6 +130,12 @@ export default {
 			}
 		},
 		async onConnected(device) {
+			if (!device) {
+				this.ledgerDevice = null;
+				this.connected = false;
+				return;
+			}
+
 			try {
 				this.ledgerVersion = await device.getVersion();
 				this.ledgerDevice = device;
