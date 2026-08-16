@@ -12,7 +12,7 @@ import { nodePolyfills } from 'vite-plugin-node-polyfills';
 function gitRevision() {
 	try {
 		const rev = execSync('git rev-parse --short HEAD').toString().trim(),
-			dirty = execSync('git status --porcelain').toString().trim().length > 0;
+			dirty = execSync('git status --porcelain -uno').toString().trim().length > 0;
 
 		return dirty ? `${rev}-devel` : rev;
 	} catch {
