@@ -24,7 +24,7 @@ function toPlain(value) {
 
 	const out = {};
 
-	for (const key in value)
+	for (const key of Object.keys(value))
 		out[key] = toPlain(value[key]);
 
 	return out;

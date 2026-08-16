@@ -156,6 +156,8 @@ export default {
 					if (input.index === index)
 						input.satisfiedPolicy.signatures = [sig];
 				}
+
+				this.signatures++;
 			}
 		},
 		async signTransaction() {

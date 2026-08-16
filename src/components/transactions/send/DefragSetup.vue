@@ -54,7 +54,8 @@ import { getWalletAddresses } from '@/store/db';
 
 import Identicon from '@/components/Identicon';
 
-const outputsPerTxn = 90;
+const outputsPerTxn = 90,
+	maxTxnFee = new BigNumber(10).pow(24);
 
 export default {
 	components: {
@@ -206,7 +207,12 @@ export default {
 	},
 	async beforeMount() {
 		try {
-			this.feePerByte = new BigNumber(await broadcastFee());
+			const feePerByte = new BigNumber(await broadcastFee());
+
+			if (!feePerByte.isFinite() || feePerByte.lte(0))
+				throw new Error('invalid network fee');
+
+			this.feePerByte = feePerByte;
 
 			await this.loadPoolSpent();
 			await this.loadAddresses();
@@ -279,7 +285,13 @@ export default {
 			if (inputs.length === 0)
 				throw new Error('no inputs to send');
 
-			const fee = calculateFee(inputs.length, 1, this.feePerByte);
+			let fee = calculateFee(inputs.length, 1, this.feePerByte);
+
+			if (!fee.isFinite() || fee.lte(0))
+				throw new Error('invalid network fee');
+
+			if (fee.gt(maxTxnFee))
+				fee = maxTxnFee;
 
 			if (sendAmount.minus(fee).lte(0))
 				throw new Error('not enough siacoins to defrag');
