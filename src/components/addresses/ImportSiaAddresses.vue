@@ -135,7 +135,7 @@ export default {
 			console.error('ImportSiaAddressesMounted', ex);
 		}
 	},
-	beforeDestroy() {
+	beforeUnmount() {
 		// Close the ledger device when we're done
 		if (this.ledgerDevice)
 			this.ledgerDevice.close();
@@ -146,7 +146,7 @@ export default {
 			if (!this.ledgerDevice || !this.connected)
 				throw new Error('Ledger not connected');
 
-			const { publicKey, address } = await this.ledgerDevice.verifyStandardAddress(nextIndex);
+			const { publicKey, address } = await this.ledgerDevice.getAddress(nextIndex);
 
 			return {
 				address: address,
@@ -201,6 +201,12 @@ export default {
 			this.siafundBalance = new BigNumber(balance.confirmed_siafund_balance).plus(deltaSF);
 		},
 		async onConnected(device) {
+			if (!device) {
+				this.ledgerDevice = null;
+				this.connected = false;
+				return;
+			}
+
 			try {
 				this.ledgerVersion = await device.getVersion();
 				this.ledgerDevice = device;

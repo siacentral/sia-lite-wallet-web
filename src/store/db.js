@@ -9,6 +9,27 @@ import BigNumber from 'bignumber.js';
 
 let db;
 
+// IndexedDB's structured-clone algorithm can't clone Vue 3 reactive Proxies, so
+// take a plain, cloneable snapshot before persisting (preserving binary fields
+// like the pbkdf2 salt).
+function toPlain(value) {
+	if (value === null || typeof value !== 'object')
+		return value;
+
+	if (value instanceof Uint8Array)
+		return new Uint8Array(value);
+
+	if (Array.isArray(value))
+		return value.map(toPlain);
+
+	const out = {};
+
+	for (const key in value)
+		out[key] = toPlain(value[key]);
+
+	return out;
+}
+
 export async function connect() {
 	try {
 		const dexie = new DexieStore();
@@ -42,11 +63,11 @@ export async function saveWallet(wallet, password) {
 	const walletID = encodeB64(hash(encodeUTF8(id))),
 		key = await pbkdf2(password, wallet.salt);
 
-	let confirmedSiafundBalance = new BigNumber(wallet.confirmed_siafund_balance),
-		confirmedSiacoinBalance = new BigNumber(wallet.confirmed_siacoin_balance),
-		unconfirmedSiacoinDelta = new BigNumber(wallet.unconfirmed_siacoin_delta),
-		unconfirmedSiafundDelta = new BigNumber(wallet.unconfirmed_siafund_delta),
-		siafundClaim = new BigNumber(wallet.siafund_claim);
+	let confirmedSiafundBalance = new BigNumber(wallet.confirmed_siafund_balance || 0),
+		confirmedSiacoinBalance = new BigNumber(wallet.confirmed_siacoin_balance || 0),
+		unconfirmedSiacoinDelta = new BigNumber(wallet.unconfirmed_siacoin_delta || 0),
+		unconfirmedSiafundDelta = new BigNumber(wallet.unconfirmed_siafund_delta || 0),
+		siafundClaim = new BigNumber(wallet.siafund_claim || 0);
 
 	if (siafundClaim.isNaN() || !siafundClaim.isFinite())
 		siafundClaim = new BigNumber(0);
@@ -63,7 +84,7 @@ export async function saveWallet(wallet, password) {
 	if (unconfirmedSiacoinDelta.isNaN() || !unconfirmedSiacoinDelta.isFinite())
 		unconfirmedSiacoinDelta = new BigNumber(0);
 
-	await db.saveWallet({
+	await db.saveWallet(toPlain({
 		...wallet,
 		id: walletID,
 		salt: key.salt,
@@ -75,7 +96,7 @@ export async function saveWallet(wallet, password) {
 		unconfirmed_siacoin_delta: unconfirmedSiacoinDelta.toString(10),
 		unconfirmed_siafund_delta: unconfirmedSiafundDelta.toString(10),
 		siafund_claim: siafundClaim.toString(10)
-	});
+	}));
 
 	return walletID;
 }
@@ -89,7 +110,7 @@ export function walletCount() {
 }
 
 export function saveAddresses(addresses) {
-	return db.saveAddresses(addresses);
+	return db.saveAddresses(toPlain(addresses));
 }
 
 export function getWalletAddresses(walletID) {

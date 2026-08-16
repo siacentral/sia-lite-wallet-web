@@ -13,7 +13,6 @@ export function parseNumberString(str, precision = new BigNumber(1)) {
 };
 
 export function parseBlockTimeString(str) {
-	/* eslint-disable object-property-newline */
 	const multipliers = {
 		m: 4320, w: 1008, d: 144, h: 6,
 		mth: 4320, mths: 4320,

@@ -11,6 +11,7 @@ import ImportSiaAddresses from '@/components/addresses/ImportSiaAddresses';
 import Modal from './Modal';
 
 export default {
+	emits: ['close'],
 	components: {
 		ImportSiaAddresses,
 		Modal

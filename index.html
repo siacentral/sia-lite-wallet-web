@@ -5,16 +5,15 @@
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width,initial-scale=1.0">
-	<link rel="icon" type="image/png" sizes="32x32"
-		href="<%= htmlWebpackPlugin.files.publicPath %>img/icons/icon-32.png">
-	<link rel="icon" type="image/png" sizes="16x16"
-		href="<%= htmlWebpackPlugin.files.publicPath %>img/icons/icon-16.png">
+	<link rel="icon" type="image/png" sizes="32x32" href="/img/icons/icon-32.png">
+	<link rel="icon" type="image/png" sizes="16x16" href="/img/icons/icon-16.png">
+	<link rel="manifest" href="/manifest.webmanifest">
 	<meta property="og:title" content="Sia Central Wallet" />
 	<meta property="og:description"
 		content="Secure, open source, non-custodial Sia wallet. The easiest and quickest way to safely store Siacoin (SC). Supports Ledger Nano S and Ledger Nano X hardware wallets for additional security." />
 	<meta property="og:type" content="website" />
-	<meta property="og:url" content="<%= BASE_URL %>" />
-	<meta property="og:image" content="<%= BASE_URL%>img/icons/icon-152.png" />
+	<meta property="og:url" content="/" />
+	<meta property="og:image" content="/img/icons/icon-152.png" />
 	<meta property="og:image_width" content="152" />
 	<meta property="og:image_height" content="152" />
 	<meta name="theme-color" content="#19cf86">
@@ -22,11 +21,11 @@
 	<!-- Add to home screen for Safari on iOS -->
 	<meta name="apple-mobile-web-app-capable" content="yes">
 	<meta name="apple-mobile-web-app-status-bar-style" content="black">
-	<meta name="apple-mobile-web-app-title" content="{{ name }}">
-	<link rel="apple-touch-icon" href="<%= htmlWebpackPlugin.files.publicPath %>img/icons/icon-152.png">
-	<link rel="mask-icon" href="<%= htmlWebpackPlugin.files.publicPath %>img/icons/siacentral.svg" color="#19cf86">
+	<meta name="apple-mobile-web-app-title" content="Sia Central Wallet">
+	<link rel="apple-touch-icon" href="/img/icons/icon-152.png">
+	<link rel="mask-icon" href="/img/icons/siacentral.svg" color="#19cf86">
 	<!-- Add to home screen for Windows -->
-	<meta name="msapplication-TileImage" content="<%= htmlWebpackPlugin.files.publicPath %>img/icons/icon-144.png">
+	<meta name="msapplication-TileImage" content="/img/icons/icon-144.png">
 	<meta name="msapplication-TileColor" content="#19cf86">
 	<title>Sia Central Wallet</title>
 	<meta name="description" content="Secure, open source, non-custodial Sia wallet. The easiest and quickest way to safely store Siacoin (SC). Supports Ledger Nano S and Ledger Nano X hardware wallet for additional security." />
@@ -38,7 +37,7 @@
 			continue.</strong>
 	</noscript>
 	<div id="app"></div>
-	<!-- built files will be auto injected -->
+	<script type="module" src="/src/main.js"></script>
 </body>
 
 </html>

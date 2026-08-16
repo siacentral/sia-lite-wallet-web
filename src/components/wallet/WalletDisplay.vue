@@ -29,7 +29,7 @@
 									v-if="wallet.server_type === 'walrus' || wallet.type === 'watch' || wallet.type === 'ledger'"
 									@click="onDropdownModal('add')">
 									<icon icon="plus" />{{ translate('addAddresses') }}</button>
-								<button class="dropdown-item" v-if="wallet.type !== 'watch' && wallet.type !== 'ledger' && outputsLen > 90"
+								<button class="dropdown-item" v-if="wallet.type !== 'watch' && outputsLen > 90"
 									@click="onDefragWallet"
 									:disabled="walletQueued">
 									<icon icon="sitemap" />{{ translate('defragWallet') }}</button>
@@ -46,8 +46,8 @@
 		<div class="wallet-transactions">
 			<table class="transactions-grid">
 				<tbody>
-					<template v-for="group in transactions">
-						<tr class="group-date" :key="group.date"><td colspan="4">{{ group.date }}</td></tr>
+					<template v-for="group in transactions" :key="group.date">
+						<tr class="group-date"><td colspan="4">{{ group.date }}</td></tr>
 						<transaction-list-item v-for="(transaction, i) in group.transactions"
 							:key="`${group.date}-${i}`"
 							:transaction="transaction"
@@ -65,6 +65,7 @@
 				<p>{{ translate('deleteWalletModal.pDeleteConfirm', name) }}</p>
 			</confirm-modal>
 			<send-siacoin-modal v-else-if="modal === 'send'" :wallet="wallet" @close="modal = null" />
+			<defrag-siacoin-modal v-else-if="modal === 'defrag'" :wallet="wallet" @close="modal = null" />
 			<receive-siacoin-modal v-else-if="modal === 'receive'" :wallet="wallet" @close="modal = null" />
 			<transaction-detail-modal v-else-if="modal === 'transaction'" :transaction="walletTransactions[selectedTransaction]" :wallet="wallet" @close="modal = null" />
 			<export-seed-modal v-else-if="modal === 'export'" :wallet="wallet" @close="modal = null" />
@@ -85,6 +86,7 @@ import { formatPriceString, formatSiafundString, formatExchangeRate } from '@/ut
 
 import AddAddressesModal from '@/modal/AddAddressesModal';
 import ConfirmModal from '@/modal/ConfirmModal';
+import DefragSiacoinModal from '@/modal/DefragSiacoinModal';
 import ExportSeedModal from '@/modal/ExportSeedModal';
 import ReceiveSiacoinModal from '@/modal/ReceiveSiacoinModal';
 import SendSiacoinModal from '@/modal/SendSiacoinModal';
@@ -97,6 +99,7 @@ export default {
 	components: {
 		AddAddressesModal,
 		ConfirmModal,
+		DefragSiacoinModal,
 		ExportSeedModal,
 		ReceiveSiacoinModal,
 		SendSiacoinModal,

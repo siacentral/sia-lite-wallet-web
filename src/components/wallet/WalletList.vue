@@ -7,7 +7,7 @@
 				v-for="wallet in walletGroups[group]" :key="wallet.id"
 				:wallet="wallet"
 				:active="wallet.id === active"
-				@click.native="$emit('selected', wallet.id)" />
+				@click="$emit('selected', wallet.id)" />
 			</div>
 		</div>
 		<div class="wallet-buttons">

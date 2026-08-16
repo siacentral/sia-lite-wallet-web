@@ -25,6 +25,7 @@ import { importSeed } from '@/utils/export';
 import Modal from './Modal';
 
 export default {
+	emits: ['close', 'import'],
 	components: {
 		Modal
 	},

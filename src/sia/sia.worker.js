@@ -1,6 +1,6 @@
 /* global sia, Go */
 import '@/sia/wasm_exec.js';
-import Sia from '@/sia/sia.wasm';
+import Sia from '@/sia/sia.wasm?url';
 
 if (!WebAssembly.instantiateStreaming) { // polyfill
 	WebAssembly.instantiateStreaming = async(resp, importObject) => {

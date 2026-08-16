@@ -1,6 +1,6 @@
 <template>
 	<transition name="qr-fade" mode="out-in" appear>
-		<div class="code-wrapper" v-html="qrCode"><svg></svg></div>
+		<div class="code-wrapper" v-html="qrCode"></div>
 	</transition>
 </template>
 
@@ -45,7 +45,7 @@ export default {
 	display: inline-block;
 
 	/* deep-scope selector for v-html renderer */
-	>>> svg {
+	:deep(svg) {
 		margin: auto;
 		width: 100%;
 		height: 100%;
@@ -60,7 +60,7 @@ export default {
 	transition: transform .5s ease, opacity .5s ease;
 }
 
-.qr-fade-enter, .qr-fade-leave-to {
+.qr-fade-enter-from, .qr-fade-leave-to {
 	opacity: 0;
 }
 </style>

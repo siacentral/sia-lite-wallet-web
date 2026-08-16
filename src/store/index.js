@@ -1,5 +1,4 @@
-import Vue from 'vue';
-import Vuex from 'vuex';
+import { createStore } from 'vuex';
 import { hash } from 'tweetnacl';
 import { encode as encodeB64 } from '@stablelib/base64';
 import { encode as encodeUTF8 } from '@stablelib/utf8';
@@ -7,8 +6,6 @@ import { saveWallet, loadWallets, deleteWallet } from './db';
 import { scanner } from '@/sync/scanner';
 import { getExchangeRate } from '@/api/siacentral';
 import Wallet from '@/types/wallet';
-
-Vue.use(Vuex);
 
 function getLocalStorageNumeric(key, def) {
 	const v = localStorage.getItem(key);
@@ -31,7 +28,7 @@ function migrateRoundsToLookahead() {
 }
 migrateRoundsToLookahead();
 
-const store = new Vuex.Store({
+const store = createStore({
 	state: {
 		dbType: 'memory',
 		setup: false,
@@ -120,7 +117,7 @@ const store = new Vuex.Store({
 				return;
 			}
 
-			Vue.set(state.wallets, idx, new Wallet(wallet));
+			state.wallets[idx] = new Wallet(wallet);
 		},
 		deleteWallet(state, id) {
 			const idx = state.wallets.findIndex(w => w.id === id);

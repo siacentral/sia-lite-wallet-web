@@ -13,6 +13,7 @@ import TransactionSetup from '@/components/transactions/send/TransactionSetup';
 import TransactionVerify from '@/components/transactions/send/TransactionVerify';
 
 export default {
+	emits: ['close'],
 	components: {
 		Modal,
 		TransactionSetup,

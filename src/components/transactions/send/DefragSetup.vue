@@ -48,10 +48,13 @@
 import BigNumber from 'bignumber.js';
 import { mapState } from 'vuex';
 import { calculateFee, verifyAddress } from '@/utils';
+import { broadcastFee, tpoolEvents } from '@/api/siacentral';
 import { formatPriceString, formatNumber } from '@/utils/format';
 import { getWalletAddresses } from '@/store/db';
 
 import Identicon from '@/components/Identicon';
+
+const outputsPerTxn = 90;
 
 export default {
 	components: {
@@ -61,13 +64,7 @@ export default {
 		wallet: Object
 	},
 	computed: {
-		...mapState(['currency', 'exchangeRateSC', 'exchangeRateSCP', 'siaNetworkFees', 'scprimeNetworkFees']),
-		networkFees() {
-			if (this.wallet && this.wallet.currency === 'scp')
-				return this.scprimeNetworkFees;
-
-			return this.siaNetworkFees;
-		},
+		...mapState(['currency', 'exchangeRateSC', 'exchangeRateSCP']),
 		sendTextKey() {
 			return this.sendOther ? 'sendSiacoinsModal.recipientAddress' : 'sendSiacoinsModal.receiveAddress';
 		},
@@ -75,12 +72,7 @@ export default {
 			return this.sendOther ? 'defragModal.sendAmount' : 'sendSiacoinsModal.remainingBalance';
 		},
 		changeAddress() {
-			let addr = this.ownedAddresses.find(a => a.usage_type !== 'sent');
-
-			if (!addr)
-				addr = this.ownedAddresses[this.ownedAddresses.length - 1];
-
-			return addr;
+			return this.ownedAddresses[0];
 		},
 		unspent() {
 			const outputs = this.wallet && Array.isArray(this.wallet.unspent_siacoin_outputs) ? this.wallet.unspent_siacoin_outputs : [],
@@ -89,9 +81,9 @@ export default {
 					v[a.address] = a.index;
 
 					return v;
-				}, []),
+				}, {}),
 				unspent = outputs.reduce((a, o) => {
-					if (addrMap[o.unlock_hash] === undefined || spent.indexOf(o.output_id) !== -1)
+					if (addrMap[o.unlock_hash] === undefined || spent.indexOf(o.output_id) !== -1 || this.poolSpent.has(o.output_id))
 						return a;
 
 					o.index = addrMap[o.unlock_hash];
@@ -99,7 +91,7 @@ export default {
 
 					return a;
 				}, []),
-				txnCount = Math.ceil(unspent.length / this.outputsPerTxn),
+				txnCount = Math.ceil(unspent.length / outputsPerTxn),
 				ordered = [];
 
 			if (!Array.isArray(unspent) || unspent.length === 0)
@@ -118,7 +110,7 @@ export default {
 				return 0;
 			});
 
-			// take one output from the top for each transaction so each will transaction will have one of the largest outputs
+			// take one output from the top for each transaction so each transaction will have one of the largest outputs
 			for (let i = 0; i < txnCount; i++)
 				ordered.push([unspent.shift()]);
 
@@ -126,7 +118,7 @@ export default {
 			for (let i = unspent.length - 1, j = 0; i >= 0; i--) {
 				ordered[j].push(unspent[i]);
 
-				if (ordered[j].length >= this.outputsPerTxn)
+				if (ordered[j].length >= outputsPerTxn)
 					j++;
 			}
 
@@ -181,7 +173,7 @@ export default {
 			return `${currency.value} <span class="currency-display">${this.translate(`currency.${currency.label}`)}</span>`;
 		},
 		transactionCount() {
-			return Math.ceil(this.unspent.length / this.outputsPerTxn);
+			return Math.ceil(this.unspent.length / outputsPerTxn);
 		},
 		transactionError() {
 			if (this.unspent.length < 90)
@@ -201,18 +193,22 @@ export default {
 	},
 	data() {
 		return {
-			outputsPerTxn: 90,
 			recipientAddress: '',
 			sendOther: false,
 			sending: false,
 			sendAmount: new BigNumber(0),
 			fees: new BigNumber(0),
+			feePerByte: new BigNumber(0),
 			ownedAddresses: [],
+			poolSpent: new Set(),
 			transactions: []
 		};
 	},
 	async beforeMount() {
 		try {
+			this.feePerByte = new BigNumber(await broadcastFee());
+
+			await this.loadPoolSpent();
 			await this.loadAddresses();
 			this.recipientAddress = this.changeAddress.address;
 
@@ -227,6 +223,24 @@ export default {
 	},
 	methods: {
 		formatNumber,
+		// outputs already spent by transactions waiting in the pool cannot be
+		// defragged again; the wallet's cached spent list does not include them
+		async loadPoolSpent() {
+			const events = await tpoolEvents(),
+				spent = new Set();
+
+			for (const event of events) {
+				if (event.type === 'v1Transaction') {
+					for (const input of event.data?.transaction?.siacoinInputs || [])
+						spent.add(input.parentID);
+				} else if (event.type === 'v2Transaction') {
+					for (const input of event.data?.siacoinInputs || [])
+						spent.add(input.parent.id);
+				}
+			}
+
+			this.poolSpent = spent;
+		},
 		async loadAddresses() {
 			this.ownedAddresses = await getWalletAddresses(this.wallet.id);
 
@@ -236,15 +250,14 @@ export default {
 		ownsAddress(address) {
 			return this.ownedAddresses.findIndex(a => a.address === address && a.unlock_conditions) !== -1;
 		},
-		buildTransaction(i, offset) {
-			const feeAddress = this.networkFees.api.address,
-				inputs = [];
+		buildTransaction(start, end) {
+			const inputs = [];
 			let sendAmount = new BigNumber(0);
 
-			if (offset > this.unspent.length)
-				offset = this.unspent.length;
+			if (end > this.unspent.length)
+				end = this.unspent.length;
 
-			for (; i < offset; i++) {
+			for (let i = start; i < end; i++) {
 				const output = this.unspent[i],
 					addr = this.ownedAddresses.find(a => output.unlock_hash === a.address && a.unlock_conditions);
 
@@ -254,57 +267,42 @@ export default {
 				sendAmount = sendAmount.plus(output.value);
 
 				inputs.push({
-					...output,
-					...addr,
-					owned: true
+					parentID: output.output_id,
+					unlockConditions: addr.unlock_conditions,
+					address: output.unlock_hash,
+					value: output.value,
+					owned: true,
+					index: addr.index
 				});
 			}
 
 			if (inputs.length === 0)
 				throw new Error('no inputs to send');
 
-			const apiFee = calculateFee(
-					inputs.length,
-					2,
-					new BigNumber(this.networkFees.api.fee)),
-				siaFee = calculateFee(
-					inputs.length,
-					2,
-					new BigNumber(this.networkFees.minimum));
+			const fee = calculateFee(inputs.length, 1, this.feePerByte);
 
-			if (sendAmount.minus(apiFee).minus(siaFee).lte(0))
+			if (sendAmount.minus(fee).lte(0))
 				throw new Error('not enough siacoins to defrag');
+
+			const recipient = this.ownedAddresses.find(a => a.address === this.recipientAddress);
 
 			return {
 				txn: {
-					miner_fees: [siaFee.toString(10)],
-					siacoin_inputs: inputs,
-					siacoin_outputs: [
+					changeIndex: recipient ? recipient.index : 0,
+					minerFees: [fee.toString(10)],
+					siacoinInputs: inputs,
+					siacoinOutputs: [
 						{
-							unlock_hash: this.recipientAddress,
-							value: sendAmount.minus(siaFee).minus(apiFee).toString(10),
+							address: this.recipientAddress,
+							value: sendAmount.minus(fee).toString(10),
 							tag: 'Recipient',
 							owned: this.ownsAddress(this.recipientAddress)
-						},
-						{
-							unlock_hash: feeAddress,
-							value: apiFee.toString(10),
-							tag: 'Broadcast Fee',
-							owned: false
 						}
 					]
 				},
-				sent: sendAmount.minus(apiFee).minus(siaFee),
-				fees: apiFee.plus(siaFee)
+				sent: sendAmount.minus(fee),
+				fees: fee
 			};
-		},
-		formatCurrencyString(value) {
-			let exchangeRate = this.exchangeRateSC;
-
-			if (this.wallet.currency && this.wallet.currency === 'scp')
-				exchangeRate = this.exchangeRateSCP;
-
-			return formatPriceString(value, 2, this.currency, exchangeRate[this.currency], this.wallet.precision()).value;
 		},
 		onChangeSendOther() {
 			try {
@@ -325,7 +323,7 @@ export default {
 
 				for (let i = 0; i < this.transactionCount; i++) {
 					try {
-						const { txn, sent, fees } = this.buildTransaction(i * this.outputsPerTxn, (i + 1) * this.outputsPerTxn);
+						const { txn, sent, fees } = this.buildTransaction(i * outputsPerTxn, (i + 1) * outputsPerTxn);
 
 						totalSent = totalSent.plus(sent);
 						totalFees = totalFees.plus(fees);
@@ -389,60 +387,6 @@ export default {
 <style lang="stylus" scoped>
 p {
 	margin-bottom: 30px;
-}
-
-.currency-control {
-	display: grid;
-	grid-template-columns: minmax(0, 1fr) auto;
-	margin-bottom: 15px;
-
-	input, label {
-		height: 36px;
-		line-height: 36px;
-		padding: 0 5px;
-	}
-
-	label {
-		display: inline-block;
-		color: rgba(255, 255, 255, 0.54);
-		text-transform: uppercase;
-		margin: 0;
-	}
-
-	input {
-		display: block;
-		width: 100%;
-		font-size: 1.2rem;
-		background: transparent;
-		border: 1px solid dark-gray;
-		color: rgba(255, 255, 255, 0.84);
-		outline: none;
-		text-align: right;
-
-		&:first-of-type {
-			border-top-left-radius: 4px;
-			border-top-right-radius: 4px;
-		}
-
-		&:last-of-type {
-			border-bottom-left-radius: 4px;
-			border-bottom-right-radius: 4px;
-			border-top: none;
-		}
-	}
-}
-
-.transaction-buttons {
-	margin-top: 5px;
-	text-align: right;
-
-	.btn.btn-small {
-		font-size: 0.8rem;
-
-		&:last-child {
-			margin-right: 0;
-		}
-	}
 }
 
 .extras-info {

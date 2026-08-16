@@ -1,28 +1,20 @@
-import TransportWebBLE from '@ledgerhq/hw-transport-web-ble';
-import TransportWebHID from '@ledgerhq/hw-transport-webhid';
-import Sia from '@siacentral/ledgerjs-sia';
+import SiaModule from '@siacentral/ledgerjs-sia';
+
+// ledgerjs-sia ships plain CJS; rolldown-vite doesn't unwrap `exports.default`
+// on a default import, in dev or prod, so unwrap manually
+const Sia = SiaModule.default ?? SiaModule;
 
 export async function connect(method) {
-	let transport;
 	switch (method) {
 	case 'hid':
-		transport = await TransportWebHID.create();
-		break;
+		return Sia.connectWebHID();
 	case 'ble':
-		transport = await TransportWebBLE.create();
-		break;
+		return Sia.connectBLE();
 	default:
 		throw new Error(`Unsupported transport method: ${method}`);
 	}
-
-	return new Sia(transport);
 }
 
-export async function supportedTransports() {
-	const support = await Promise.all([
-		TransportWebHID.isSupported().then(supported => supported ? 'hid' : null),
-		TransportWebBLE.isSupported().then(async(supported) => supported && !(navigator.brave && await navigator.brave.isBrave()) ? 'ble' : null)
-	]);
-
-	return support.filter(t => t);
+export function supportedTransports() {
+	return Sia.supportedTransports();
 }
