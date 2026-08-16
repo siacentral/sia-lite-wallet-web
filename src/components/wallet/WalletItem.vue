@@ -17,7 +17,7 @@ export default {
 		active: Boolean
 	},
 	computed: {
-		...mapState(['currency', 'exchangeRateSC', 'exchangeRateSCP']),
+		...mapState(['currency', 'exchangeRateSC']),
 		walletBalance() {
 			let value = new BigNumber(0);
 
@@ -40,17 +40,12 @@ export default {
 			return `${siacoins.value} <span class="currency-display">${this.translate(`currency.${siacoins.label}`)}</span>`;
 		},
 		displaySiafunds() {
-			const { value, label } = formatSiafundString(new BigNumber(this.walletSiafundBalance), this.wallet.currency);
+			const { value, label } = formatSiafundString(new BigNumber(this.walletSiafundBalance));
 
 			return `${value} <span class="currency-display">${this.translate(`currency.${label}`)}</span>`;
 		},
 		displayCurrency() {
-			let exchangeRate = this.exchangeRateSC;
-
-			if (this.wallet.currency && this.wallet.currency === 'scp')
-				exchangeRate = this.exchangeRateSCP;
-
-			const currency = formatPriceString(new BigNumber(this.walletBalance), 2, this.currency, exchangeRate[this.currency], this.wallet.precision());
+			const currency = formatPriceString(new BigNumber(this.walletBalance), 2, this.currency, this.exchangeRateSC[this.currency], this.wallet.precision());
 
 			return `${currency.value} <span class="currency-display">${this.translate(`currency.${currency.label}`)}</span>`;
 		}

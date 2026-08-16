@@ -65,7 +65,7 @@ export default {
 		wallet: Object
 	},
 	computed: {
-		...mapState(['currency', 'exchangeRateSC', 'exchangeRateSCP']),
+		...mapState(['currency', 'exchangeRateSC']),
 		sendTextKey() {
 			return this.sendOther ? 'sendSiacoinsModal.recipientAddress' : 'sendSiacoinsModal.receiveAddress';
 		},
@@ -134,12 +134,7 @@ export default {
 			return `${siacoins.value} <span class="currency-display">${this.translate('currency.sc')}</span>`;
 		},
 		balanceCurrency() {
-			let exchangeRate = this.exchangeRateSC;
-
-			if (this.wallet.currency && this.wallet.currency === 'scp')
-				exchangeRate = this.exchangeRateSCP;
-
-			const currency = formatPriceString(this.balance, 2, this.currency, exchangeRate[this.currency]);
+			const currency = formatPriceString(this.balance, 2, this.currency, this.exchangeRateSC[this.currency]);
 
 			return `${currency.value} <span class="currency-display">${this.translate(`currency.${currency.label}`)}</span>`;
 		},
@@ -149,12 +144,7 @@ export default {
 			return `${siacoins.value} <span class="currency-display">${this.translate('currency.sc')}</span>`;
 		},
 		sendAmountCurrency() {
-			let exchangeRate = this.exchangeRateSC;
-
-			if (this.wallet.currency && this.wallet.currency === 'scp')
-				exchangeRate = this.exchangeRateSCP;
-
-			const currency = formatPriceString(this.sendAmount, 2, this.currency, exchangeRate[this.currency], this.wallet.precision());
+			const currency = formatPriceString(this.sendAmount, 2, this.currency, this.exchangeRateSC[this.currency], this.wallet.precision());
 
 			return `${currency.value} <span class="currency-display">${this.translate(`currency.${currency.label}`)}</span>`;
 		},
@@ -164,12 +154,7 @@ export default {
 			return `${siacoins.value} <span class="currency-display">${this.translate('currency.sc')}</span>`;
 		},
 		transactionFeeCurrency() {
-			let exchangeRate = this.exchangeRateSC;
-
-			if (this.wallet.currency && this.wallet.currency === 'scp')
-				exchangeRate = this.exchangeRateSCP;
-
-			const currency = formatPriceString(this.fees, 2, this.currency, exchangeRate[this.currency], this.wallet.precision());
+			const currency = formatPriceString(this.fees, 2, this.currency, this.exchangeRateSC[this.currency], this.wallet.precision());
 
 			return `${currency.value} <span class="currency-display">${this.translate(`currency.${currency.label}`)}</span>`;
 		},

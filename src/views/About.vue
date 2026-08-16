@@ -3,10 +3,9 @@
     <div class="about">
       <h1 class="text-primary text-center">About</h1>
       <p>
-        Sia Central's Lite Wallet is a secure non-custodial cryptocurrency
-        wallet with support for Siacoin (SC) and ScPrimeCoin (SCP). Sensitive data, like your wallet keys,
-		are encrypted and never leave your device. This wallet has been tested and supports
-		Chromium based browsers on Desktop, iOS 11, and Chrome on Android.
+		Sia Central's Lite Wallet is a secure non-custodial Siacoin (SC) wallet.
+		Sensitive data, like your wallet keys, is encrypted and never leaves your
+		device. This wallet supports modern desktop and mobile browsers.
       </p>
       <h3>Features</h3>
       <ul>
@@ -41,11 +40,10 @@
       <h3>Supported Wallet Types</h3>
       <h4>Seed Wallets</h4>
       <p>
-        Seed wallets are created or recovered from a 29-word recovery phrase.
-        These wallets are fully compatible with the official Sia and ScPrime
-        wallets. The seed is encrypted and stored locally with a user provided
-        unlock password. The seed never leaves the device, removing any risk of
-        exposure.
+		Seed wallets are created or recovered from a 29-word recovery phrase.
+		These wallets are fully compatible with the official Sia wallet. The seed
+		is encrypted and stored locally with a user-provided unlock password. The
+		seed never leaves the device, removing any risk of exposure.
       </p>
       <h4>Ledger Hardware Wallets</h4>
       <p>

@@ -24,7 +24,6 @@
 			<sign-ledger-transaction
 				v-if="wallet.type === 'ledger' && !transactionSigned"
 				class="ledger-sign"
-				:currency="wallet.currency"
 				:transaction="siaTransaction"
 				:requiredSignatures="requiredSignatures"
 				:changeIndex="changeIndex"

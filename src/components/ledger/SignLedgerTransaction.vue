@@ -46,7 +46,6 @@ export default {
 		ConnectLedger
 	},
 	props: {
-		currency: String,
 		transaction: Object,
 		changeIndex: Number,
 		requiredSignatures: Array

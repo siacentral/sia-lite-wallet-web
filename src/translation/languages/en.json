@@ -3,7 +3,6 @@
 	"translations": {
 		"getStarted": "Get Started",
 		"siacoin": "Siacoin",
-		"scprimecoin": "SCPrimeCoin",
 		"addWallet": "Add Wallet",
 		"buySiacoin": "Buy Siacoin (PREVIEW)",
 		"rescanWallet": "Rescan Wallet",
@@ -21,8 +20,6 @@
 		"total": "Total",
 		"siacoinTotal": "Siacoin Total",
 		"siafundTotal": "Siafund Total",
-		"scpTotal": "SCP Total",
-		"spfTotal": "SPF Total",
 		"minerFee": "Miner Fee",
 		"address": "Address",
 		"amount": "Amount",
@@ -57,7 +54,6 @@
 		"siacentral": "Sia Central",
 		"walrus": "Walrus",
 		"narwal": "Narwal",
-		"ledgerSCPWarning": "The Sia Ledger Nano S App will not work with ScPrime, in order to send funds you need to side-load the ScPrime App from ",
 		"walletStatus": {
 			"scanning": "Scanning...",
 			"queued": "Scan Queued..."
@@ -101,7 +97,6 @@
 			"chkShowAdvanced": "Show Advanced",
 			"chkWalrusSeeds": "Enable 12 word seeds",
 			"chkChangeWalletServer": "Enable 3rd-party wallet servers",
-			"chkCurrency": "Enable SCPrime",
 			"pChangeSeedType": "12 word seeds are not compatible with the official Sia wallets. They are commonly used with Walrus wallets. Enabling this setting will show a dropdown when creating a new wallet allowing you to generate either a new Sia seed or a 12 word seed.",
 			"pChangeServerType": "[EXPERIMENTAL] Allows the usage of 3rd-party wallet servers, like Walrus. 3rd-party servers help reduce centralization and allow for choice between trusting Sia Central or another party. Some wallet features may be broken or unsupported.",
 			"pExplainLookahead": "Wallets are composed of multiple addresses, the lookahead window is the maximum gap between two unused addresses before the wallet expects no more used addresses. Sia hosts and renters generate a lot of unused addresses, so some wallets may need to increase this value to find all of their funds.",
@@ -135,7 +130,6 @@
 			"lblSeedType": "Seed Type",
 			"lblServerType": "Server Type",
 			"lblServerURL": "Server URL",
-			"lblCurrencyType": "Currency",
 			"seedExported": "My recovery seed is saved in a secure location",
 			"siaSeed": "Sia Seed",
 			"walrusSeed": "Walrus Seed"
@@ -218,7 +212,6 @@
 			"crypto": "Crypto",
 			"sc": "SC",
 			"sf": "SF",
-			"spf": "SPF",
 			"usd": "USD",
 			"jpy": "JPY",
 			"eur": "EUR",

@@ -21,7 +21,7 @@ export default {
 
 		console.log(`starting quick scan of ${wallet.title} starting at ${startIndex}/${lastKnownIndex} with ${maxLookahead} lookahead`);
 
-		await recoverAddresses(wallet.seed, wallet.currency, startIndex, maxLookahead, lastKnownIndex, async(progress) => {
+		await recoverAddresses(wallet.seed, startIndex, maxLookahead, lastKnownIndex, async(progress) => {
 			if (!progress || !Array.isArray(progress.addresses))
 				return;
 
@@ -41,7 +41,7 @@ export default {
 
 		console.log(`starting full scan of ${wallet.title} with ${maxLookahead} lookahead`);
 
-		await recoverAddresses(wallet.seed, wallet.currency, 0, maxLookahead, 0, async(progress) => {
+		await recoverAddresses(wallet.seed, 0, maxLookahead, 0, async(progress) => {
 			if (!progress || !Array.isArray(progress.addresses))
 				return;
 
@@ -57,7 +57,7 @@ export default {
 		if (!Array.isArray(addresses) || addresses.length === 0)
 			throw new Error('wallet has no addresses');
 
-		const balance = await getTransactions(addresses.map(a => a.address), wallet.currency, Store.state.currency);
+		const balance = await getTransactions(addresses.map(a => a.address));
 
 		wallet = new Wallet({
 			...wallet,

@@ -3,7 +3,6 @@
 	"translations": {
 		"getStarted": "Commencer",
 		"siacoin": "Siacoin",
-		"scprimecoin": "SCPrimeCoin",
 		"addWallet": "Ajouter un portefeuille",
 		"buySiacoin": "Acheter des Siacoin (PRÉVISUALISATION)",
 		"rescanWallet": "Rafraîchir le portefeuille",
@@ -21,8 +20,6 @@
 		"total": "Total",
 		"siacoinTotal": "Total de Siacoin",
 		"siafundTotal": "Total de Siafund",
-		"scpTotal": "SCP Total",
-		"spfTotal": "SPF Total",
 		"minerFee": "Frais des mineurs",
 		"address": "Adresse",
 		"amount": "Quantité",
@@ -57,7 +54,6 @@
 		"siacentral": "Sia Central",
 		"walrus": "Walrus",
 		"narwal": "Narwal",
-		"ledgerSCPWarning": "The Sia Ledger Nano S App will not work with ScPrime, in order to send funds you need to side-load the ScPrime App from ",
 		"walletStatus": {
 			"scanning": "Rafraîchissement...",
 			"queued": "Rafraîchissement en attente..."
@@ -100,7 +96,6 @@
 			"chkShowAdvanced": "Afficher les paramètres avancés",
 			"chkWalrusSeeds": "Autoriser les seeds à 12 mots",
 			"chkChangeWalletServer": "Autoriser les serveurs de portefeuilles tierces",
-			"chkCurrency": "Activer SCPrime",
 			"pChangeSeedType": "Les seeds à 12 mots sont incompatibles avec les portefeuilles Sia officiels. Elles sont généralement utilisées par les portefeuilles Walrus. Activer cette fonctionnalité fera apparaître une liste déroulante lors de la création d'un nouveau portefeuille, permettant d'utiliser au choix les seeds Sia ou les seeds à 12 mots.",
 			"pChangeServerType": "[EXPERIMENTAL] Permet l'utilisation de serveurs de portefeuilles tierces, comme Walrus. Les serveurs de portefeuilles tierces permettent de réduire la centralisation et permettent de choisir entre Sia Central ou toute autre partie. Certaines fonctionnalités peuvent ne pas être supportées ou fonctionner de manière hasardeuse.",
 			"pExplainLookahead": "Wallets are composed of multiple addresses, the lookahead window is the maximum gap between two unused addresses before the wallet expects no more used addresses. Sia hosts and renters generate a lot of unused addresses, so some wallets may need to increase this value to find all of their funds."
@@ -133,7 +128,6 @@
 			"lblSeedType": "Type de la seed",
 			"lblServerType": "Type du serveur",
 			"lblServerURL": "URL du serveur",
-			"lblCurrencyType": "Devise",
 			"seedExported": "Ma seed de récupération est stockée en lieu sûr.",
 			"siaSeed": "Seed Sia",
 			"walrusSeed": "Seed Walrus"
@@ -196,7 +190,6 @@
 			"hostAnnouncement": "Annonce de l'hôte",
 			"contractCompleted": "Achèvement du contrat",
 			"blockReward": "Récompense de bloc",
-			"scprimeTransaction": "Transaction de SCPrime",
 			"siacoinTransaction": "Transaction de Siacoins",
 			"siafundTransaction": "Transaction de Siafunds",
 			"siafundClaim": "Réclamation de Siafunds",
@@ -214,7 +207,6 @@
 			"crypto": "Crypto",
 			"sc": "SC",
 			"sf": "SF",
-			"spf": "SPF",
 			"usd": "USD",
 			"jpy": "JPY",
 			"eur": "EUR",

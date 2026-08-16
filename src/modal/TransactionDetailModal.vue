@@ -34,7 +34,6 @@
         <transition name="fade-top" mode="out-in">
           <transaction-siafund-outputs
             :transaction="transaction"
-            :wallet="wallet"
             key="siafundOutputs"
             v-if="mode === 'siafundOutputs'"
           />
@@ -61,10 +60,7 @@
           <div class="transaction-data" v-html="siacoinDisplay(fees)" />
           <div class="transaction-data" v-html="currencyDisplay(fees)" />
         </template>
-        <div v-if="wallet.currency === 'scp'" class="transaction-data-label">
-          {{ translate("scpTotal") }}
-        </div>
-        <div v-else class="transaction-data-label">
+        <div class="transaction-data-label">
           {{ translate("siacoinTotal") }}
         </div>
         <div
@@ -76,10 +72,7 @@
           v-html="currencyDisplay(transaction.siacoin_value.value)"
         />
         <template v-if="showSiafunds">
-          <div v-if="wallet.currency === 'scp'" class="transaction-data-label">
-            {{ translate("spfTotal") }}
-          </div>
-          <div v-else class="transaction-data-label">
+          <div class="transaction-data-label">
             {{ translate("siafundTotal") }}
           </div>
           <div
@@ -122,7 +115,6 @@ export default {
 		...mapState([
 			'currency',
 			'exchangeRateSC',
-			'exchangeRateSCP',
 			'exchangeRateSF',
 			'feeAddresses'
 		]),
@@ -194,8 +186,7 @@ export default {
 		},
 		siafundDisplay(amt) {
 			const { value, label } = formatSiafundString(
-				new BigNumber(amt),
-				this.wallet.currency
+				new BigNumber(amt)
 			);
 
 			return `${value} <span class="currency-display">${this.translate(
@@ -203,15 +194,11 @@ export default {
 			)}</span>`;
 		},
 		currencyDisplay(value) {
-			let exchangeRate = this.exchangeRateSC;
-
-			if (this.wallet?.currency === 'scp') exchangeRate = this.exchangeRateSCP;
-
 			const currency = formatPriceString(
 				new BigNumber(value),
 				2,
 				this.currency,
-				exchangeRate[this.currency],
+				this.exchangeRateSC[this.currency],
 				this.wallet.precision()
 			);
 
@@ -220,18 +207,11 @@ export default {
 			)}</span>`;
 		},
 		siafundCurrencyDisplay(value) {
-			let exchangeRate = this.exchangeRateSF;
-
-			if (this.wallet?.currency === 'scp') {
-				exchangeRate = {};
-				exchangeRate[this.currency] = '0';
-			}
-
 			const currency = formatPriceString(
 				new BigNumber(value).times(1e24),
 				2,
 				this.currency,
-				exchangeRate[this.currency]
+				this.exchangeRateSF[this.currency]
 			);
 
 			return `${currency.value} <span class="currency-display">${this.translate(
@@ -246,12 +226,8 @@ export default {
 			};
 		},
 		friendlyType() {
-			if (!this.transaction || !Array.isArray(this.transaction.tags)) {
-				if (this.wallet.currency === 'scp')
-					return this.translate('transactionTypes.scprimeTransaction');
-
+			if (!this.transaction || !Array.isArray(this.transaction.tags))
 				return this.translate('transactionTypes.siacoinTransaction');
-			}
 
 			if (this.transaction.tags.indexOf('contract_renewal') !== -1)
 				return this.translate('transactionTypes.contractRenewal');
@@ -271,12 +247,9 @@ export default {
 				return this.translate('transactionTypes.siafundClaim');
 			else if (this.transaction.tags.indexOf('defrag') !== -1)
 				return this.translate('transactionTypes.defrag');
-			else if (this.transaction.tags.indexOf('siacoin_transaction') !== -1) {
-				if (this.wallet.currency === 'scp')
-					return this.translate('transactionTypes.scprimeTransaction');
-
+			else if (this.transaction.tags.indexOf('siacoin_transaction') !== -1)
 				return this.translate('transactionTypes.siacoinTransaction');
-			} else if (this.transaction.tags.indexOf('siafund_transaction') !== -1)
+			else if (this.transaction.tags.indexOf('siafund_transaction') !== -1)
 				return this.translate('transactionTypes.siafundTransaction');
 
 			return this.transaction.tags[0];
