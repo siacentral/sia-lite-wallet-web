@@ -133,13 +133,27 @@ body.win32 {
 	font-size: 1rem;
 	border-radius: 4px;
 	box-shadow: 0 1px 2px 1px rgba(0, 0, 0, 0.14);
-	transition: all 0.3s linear;
+	transform: translateY(0);
+	transition: background-color 0.15s linear, box-shadow 0.15s linear, filter 0.15s linear, transform 0.1s linear;
 	text-decoration: none;
 	-webkit-user-select: none;
 
-	&:focus, &:active, &:hover {
+	&:not(:disabled):hover, &:not(:disabled):focus-visible {
 		cursor: pointer;
-		box-shadow: 0 1px 2px 1px rgba(0, 0, 0, 0.28);
+		filter: brightness(1.1);
+		transform: translateY(-1px);
+		box-shadow: 0 3px 7px 1px rgba(0, 0, 0, 0.32);
+	}
+
+	&:not(:disabled):active {
+		filter: brightness(0.92);
+		transform: translateY(1px);
+		box-shadow: 0 1px 1px rgba(0, 0, 0, 0.24);
+	}
+
+	&:focus-visible {
+		outline: 2px solid primary;
+		outline-offset: 2px;
 	}
 
 	> svg {
@@ -170,6 +184,9 @@ body.win32 {
 	&:disabled {
 		opacity: 0.54;
 		cursor: default;
+		filter: none;
+		transform: none;
+		box-shadow: 0 1px 2px 1px rgba(0, 0, 0, 0.14);
 	}
 }
 

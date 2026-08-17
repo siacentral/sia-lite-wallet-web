@@ -131,8 +131,20 @@
 			"lblServerType": "Server Type",
 			"lblServerURL": "Server URL",
 			"seedExported": "My recovery seed is saved in a secure location",
-			"siaSeed": "Sia Seed",
-			"walrusSeed": "Walrus Seed"
+			"siaSeed": "Sia Recovery Phrase (Deprecated)",
+			"walrusSeed": "BIP-39 Recovery Phrase",
+			"recoverySeed": "Recovery Seed",
+			"revealSeed": "Write down these words. They are your only way to recover your wallet. You will be asked to confirm them next.",
+			"iHaveWrittenDown": "I have written these words down",
+			"confirmSeed": "Re-enter your recovery seed",
+			"confirmNew": "Enter the 12 words you wrote down, in order, to confirm your new wallet.",
+			"confirmRecover": "Enter the words from your recovery phrase, in order.",
+			"validating": "Validating seed...",
+			"savingWallet": "Saving wallet...",
+			"seedInvalid": "That recovery seed does not match this wallet.",
+			"seedConfirmed": "Recovery seed confirmed.",
+			"confirmProgress": "{{0}} of {{1}} words entered",
+			"copy": "Copy"
 		},
 		"importAddresses": {
 			"importedHeader": "Imported Addresses",

@@ -28,27 +28,49 @@
 		<div class="wallet-step" v-else-if="step === 'review'">
 			<p v-if="walletType === 'ledger'">{{ translate('createWalletModal.pReviewLedger') }}</p>
 			<p v-else-if="walletType === 'watch'">{{ translate('createWalletModal.pReviewWatch') }}</p>
-			<p v-else-if="createType === 'recover'">{{ translate('createWalletModal.pReviewRecover') }}</p>
-			<p v-else>{{ translate('createWalletModal.pReviewNew') }}</p>
-				<template v-if="walletType === 'default'">
-					<div class="buttons text-right">
-					<button class="btn btn-inline" @click="exportSeed = true">{{ translate('export') }}</button>
-				</div>
-				<div class="control">
-					<label>{{ translate('createWalletModal.lblRecoverySeed') }}</label>
-					<textarea v-model="wallet.seed" readonly/>
-				</div>
-				<div class="control">
-					<input type="checkbox" id="chkSeedExported" v-model="exported" />
-					<label for="chkSeedExported">{{ translate('createWalletModal.seedExported') }}</label>
-				</div>
-			</template>
 			<div class="controls">
-				<button class="btn btn-success btn-inline" @click="onComplete" :disabled="doneDisabled">{{ translate('done') }}</button>
+				<button class="btn btn-success btn-inline" @click="onComplete" :disabled="saving">{{ translate('done') }}</button>
+			</div>
+		</div>
+		<div class="wallet-step wallet-seed-step" v-else-if="step === 'reveal'">
+			<p v-if="createType === 'recover'">{{ translate('createWalletModal.pReviewRecover') }}</p>
+			<p v-else>{{ translate('createWalletModal.pReviewNew') }}</p>
+			<h3 class="text-warning">{{ translate('createWalletModal.revealSeed') }}</h3>
+			<seed-phrase-input :words="revealWords" :count="revealWords.length" readonly />
+			<div class="controls text-right">
+				<button class="btn btn-inline" @click="exportSeed = true">{{ translate('export') }}</button>
+			</div>
+			<div class="control">
+				<input type="checkbox" id="chkSeedExported" v-model="exported" />
+				<label for="chkSeedExported">{{ translate('createWalletModal.iHaveWrittenDown') }}</label>
+			</div>
+			<div class="controls">
+				<button class="btn btn-success btn-inline" @click="onToConfirm" :disabled="!exported || saving">{{ translate('confirm') }}</button>
 			</div>
 			<transition name="fade" mode="out-in" appear>
 				<export-seed-modal v-if="exportSeed" :wallet="wallet" @close="exportSeed = false" />
 			</transition>
+		</div>
+		<div class="wallet-step wallet-seed-step" v-else-if="step === 'confirm'">
+			<p>{{ translate('createWalletModal.' + (createType === 'recover' ? 'confirmRecover' : 'confirmNew')) }}</p>
+			<seed-phrase-input v-if="seedWordCount === 12" :count="seedWordCount" @editing="onConfirmEditing" @input="onConfirmInput" />
+			<textarea
+				v-else
+				v-model="confirmPhrase"
+				:aria-label="translate('createWalletModal.confirmSeed')"
+				@input="onConfirmEditing(confirmPhrase)"
+				@change="onConfirmInput(confirmPhrase)"
+			/>
+			<div class="confirm-feedback" role="status" aria-live="polite">
+				<span v-if="saving" class="text-warning">{{ translate('createWalletModal.savingWallet') }}</span>
+				<span v-else-if="confirmValidating" class="text-warning">{{ translate('createWalletModal.validating') }}</span>
+				<span v-else-if="confirmValid" class="text-success">{{ translate('createWalletModal.seedConfirmed') }}</span>
+				<span v-else-if="confirmError" class="text-error">{{ translate('createWalletModal.seedInvalid') }}</span>
+				<span v-else>{{ translate('createWalletModal.confirmProgress', confirmWordCount, seedWordCount) }}</span>
+			</div>
+			<div class="controls">
+				<button class="btn btn-success btn-inline" @click="onComplete" :disabled="!confirmValid || saving || confirmValidating">{{ saving ? translate('createWalletModal.savingWallet') : translate('done') }}</button>
+			</div>
 		</div>
 	</transition>
 </template>
@@ -62,12 +84,15 @@ import { supportedTransports } from '@/ledger/sia';
 import BuildWallet from '@/components/wallet/BuildWallet';
 import ExportSeedModal from '@/modal/ExportSeedModal';
 import ImportSiaAddresses from '@/components/addresses/ImportSiaAddresses';
+import SeedPhraseInput from '@/components/wallet/SeedPhraseInput';
+import { WORD_MAP } from '@/sia/bip39';
 
 export default {
 	components: {
 		BuildWallet,
 		ExportSeedModal,
-		ImportSiaAddresses
+		ImportSiaAddresses,
+		SeedPhraseInput
 	},
 	emits: ['created'],
 	computed: {
@@ -75,9 +100,24 @@ export default {
 		walletType() {
 			return this.wallet && typeof this.wallet.type === 'string' ? this.wallet.type : 'watch';
 		},
-		doneDisabled() {
-			// disable the done button if the wallet is being saved, or has not been exported
-			return this.saving || (!this.exported && this.walletType === 'default');
+		revealWords() {
+			return this.wallet && this.wallet.seed ? String(this.wallet.seed).split(' ') : [];
+		},
+		seedWordCount() {
+			return this.wallet && this.wallet.seed ? String(this.wallet.seed).split(' ').length : 0;
+		},
+		confirmWordCount() {
+			const phrase = this.confirmPhrase.trim();
+
+			if (phrase === '')
+				return 0;
+
+			const words = phrase.split(/\s+/);
+
+			if (this.seedWordCount === 12)
+				return words.filter(word => WORD_MAP.has(word)).length;
+
+			return Math.min(words.length, this.seedWordCount);
 		},
 		hardwareBtnClasses() {
 			return {
@@ -95,7 +135,11 @@ export default {
 			saving: false,
 			ledgerSupported: false,
 			wallet: null,
-			addresses: []
+			addresses: [],
+			confirmPhrase: '',
+			confirmValid: false,
+			confirmValidating: false,
+			confirmError: null
 		};
 	},
 	async mounted() {
@@ -143,9 +187,12 @@ export default {
 					this.step = 'import';
 					break;
 				default:
-					this.saveWallet();
-
-					this.step = 'review';
+					this.exported = false;
+					this.confirmPhrase = '';
+					this.confirmValid = false;
+					this.confirmError = null;
+					this.addresses = await generateAddresses(this.wallet.seed, 0, 10);
+					this.step = 'reveal';
 					break;
 				}
 			} catch (ex) {
@@ -158,7 +205,7 @@ export default {
 		},
 		async saveWallet() {
 			if (this.saving)
-				return;
+				return false;
 
 			this.saving = true;
 
@@ -172,7 +219,8 @@ export default {
 				case 'watch':
 					break;
 				default:
-					this.addresses = await generateAddresses(this.wallet.seed, 0, 10);
+					if (this.addresses.length === 0)
+						this.addresses = await generateAddresses(this.wallet.seed, 0, 10);
 					break;
 				}
 
@@ -182,26 +230,91 @@ export default {
 				})));
 
 				this.queueWallet(this.wallet.id, true);
+
+				return true;
 			} catch (ex) {
 				console.error('saveWallet', ex);
 				this.pushNotification({
 					message: ex.message,
 					severity: 'danger'
 				});
+
+				return false;
 			} finally {
 				this.saving = false;
 			}
 		},
-		onComplete() {
+		onToConfirm() {
+			if (!this.exported || this.saving)
+				return;
+
+			this.confirmPhrase = '';
+			this.confirmValid = false;
+			this.confirmValidating = false;
+			this.confirmError = null;
+			this.exportSeed = false;
+			this.step = 'confirm';
+		},
+		onConfirmEditing(phrase) {
+			this.confirmPhrase = phrase;
+			this.confirmValid = false;
+			this.confirmValidating = false;
+			this.confirmError = null;
+		},
+		async onConfirmInput(phrase) {
+			const normalizedPhrase = phrase.trim().split(/\s+/).join(' '),
+				wordCount = normalizedPhrase === '' ? 0 : normalizedPhrase.split(' ').length;
+
+			this.confirmPhrase = normalizedPhrase;
+
+			if (wordCount !== this.seedWordCount) {
+				this.confirmValid = false;
+				this.confirmValidating = false;
+				this.confirmError = null;
+				return;
+			}
+
+			this.confirmValidating = true;
+			this.confirmError = null;
+
+			try {
+				const addresses = await generateAddresses(normalizedPhrase, 0, 1),
+					originalAddress = this.addresses[0] && this.addresses[0].address,
+					confirmedAddress = addresses[0] && addresses[0].address;
+
+				if (this.confirmPhrase !== normalizedPhrase)
+					return;
+
+				this.confirmValid = originalAddress !== undefined && confirmedAddress === originalAddress;
+				this.confirmError = this.confirmValid ? null : 'mismatch';
+			} catch {
+				if (this.confirmPhrase !== normalizedPhrase)
+					return;
+
+				this.confirmValid = false;
+				this.confirmError = 'invalid';
+			} finally {
+				if (this.confirmPhrase === normalizedPhrase)
+					this.confirmValidating = false;
+			}
+		},
+		async onComplete() {
+			if (this.saving)
+				return;
+
+			if (this.walletType === 'default') {
+				if (!this.confirmValid || !await this.saveWallet())
+					return;
+			}
+
 			this.$emit('created', this.wallet);
 		},
-		onImportAddresses(addresses) {
+		async onImportAddresses(addresses) {
 			try {
 				this.addresses = addresses;
 
-				this.saveWallet();
-
-				this.step = 'review';
+				if (await this.saveWallet())
+					this.step = 'review';
 			} catch (ex) {
 				console.error('onImportAddresses', ex);
 				this.pushNotification({
@@ -231,6 +344,31 @@ export default {
 	textarea {
 		height: 80px;
 	}
+}
+
+.wallet-seed-step {
+	grid-row-gap: 15px;
+
+	> p, > h3 {
+		margin-bottom: 0;
+	}
+
+	.controls {
+		padding: 8px 0;
+
+		.btn {
+			padding: 10px 18px;
+		}
+	}
+}
+
+.confirm-feedback {
+	display: flex;
+	height: 36px;
+	align-items: center;
+	justify-content: center;
+	text-align: center;
+	color: rgba(255, 255, 255, 0.54);
 }
 
 p {

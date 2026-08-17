@@ -8,8 +8,12 @@ BUILD_TIME=$(shell date)
 endif
 
 lint:
-	GOOS=js GOARCH=wasm golangci-lint run
+	GOOS=js GOARCH=wasm golangci-lint run ./wasm/...
 	npm run lint -- --fix
+
+test:
+	npm run test
+	go test ./wasm/internal/...
 
 install-dependencies:
 	npm i

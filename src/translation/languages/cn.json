@@ -129,8 +129,20 @@
 			"lblServerType": "服务类型",
 			"lblServerURL": "服务网址",
 			"seedExported": "我的恢复种子保存在安全的位置",
-			"siaSeed": "Sia种子",
-			"walrusSeed": "Walrus种子"
+			"siaSeed": "Sia 恢复短语（已弃用）",
+			"walrusSeed": "BIP-39 恢复短语",
+			"recoverySeed": "恢复种子",
+			"revealSeed": "写下这些单词。这是您找回钱包的唯一方式。接下来，您需要确认这些单词。",
+			"iHaveWrittenDown": "我已经写下这些单词",
+			"confirmSeed": "重新输入恢复种子",
+			"confirmNew": "按顺序输入您写下的12个单词以确认新钱包。",
+			"confirmRecover": "按顺序输入恢复短语中的单词。",
+			"validating": "正在验证种子...",
+			"savingWallet": "正在保存钱包...",
+			"seedInvalid": "该恢复种子与此钱包不匹配。",
+			"seedConfirmed": "恢复种子已确认。",
+			"confirmProgress": "已输入 {{0}} / {{1}} 个单词",
+			"copy": "复制"
 		},
 		"importAddresses": {
 			"importedHeader": "输入地址",

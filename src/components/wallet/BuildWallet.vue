@@ -4,13 +4,6 @@
 			<label>{{ translate('createWalletModal.lblWalletName') }}</label>
 			<input type="text" :placeholder="translate('wallet')" v-model="walletName" />
 		</div>
-		<div class="control" v-if="createType === 'create'">
-			<label>{{ translate('createWalletModal.lblSeedType') }}</label>
-			<select v-model="seedType">
-				<option value="walrus">BIP-39 Recovery Phrase</option>
-				<option value="sia">Sia Recovery Phrase (Deprecated)</option>
-			</select>
-		</div>
 		<template v-if="changeServerType">
 			<div class="control" v-if="showServerURL">
 				<label>{{ translate('createWalletModal.lblServerURL') }}</label>
@@ -18,12 +11,20 @@
 			</div>
 		</template>
 		<template v-if="createType === 'recover'">
+			<div class="control">
+				<label>{{ translate('createWalletModal.lblSeedType') }}</label>
+				<select v-model="seedType" @change="recoverySeed = ''">
+					<option value="walrus">{{ translate('createWalletModal.walrusSeed') }}</option>
+					<option value="sia">{{ translate('createWalletModal.siaSeed') }}</option>
+				</select>
+			</div>
 			<div class="buttons text-right">
 				<button class="btn btn-inline" @click="importSeed = true">{{ translate('import') }}</button>
 			</div>
 			<div class="control">
-				<label>{{ translate('createWalletModal.lblRecoverySeed') }}</label>
-				<textarea v-model="recoverySeed" />
+				<label>{{ translate('createWalletModal.recoverySeed') }}</label>
+				<seed-phrase-input v-if="seedType === 'walrus'" ref="seedInput" :count="12" @editing="onSeedInput" @input="onSeedInput" />
+				<textarea v-else v-model="recoverySeed" />
 			</div>
 		</template>
 		<div class="buttons">
@@ -42,10 +43,12 @@ import { randomBytes } from 'tweetnacl';
 import { encode } from '@stablelib/base64';
 
 import ImportSeedModal from '@/modal/ImportSeedModal';
+import SeedPhraseInput from '@/components/wallet/SeedPhraseInput';
 
 export default {
 	components: {
-		ImportSeedModal
+		ImportSeedModal,
+		SeedPhraseInput
 	},
 	props: {
 		createType: String
@@ -88,9 +91,20 @@ export default {
 		};
 	},
 	methods: {
-		onImportSeed(seed) {
+		onSeedInput(phrase) {
+			this.recoverySeed = phrase;
+		},
+		async onImportSeed(seed) {
 			try {
-				this.recoverySeed = seed;
+				const words = seed.trim().split(/\s+/);
+
+				this.seedType = words.length === 12 ? 'walrus' : 'sia';
+				this.recoverySeed = words.join(' ');
+				await this.$nextTick();
+
+				if (this.$refs.seedInput)
+					this.$refs.seedInput.setPhrase(this.recoverySeed);
+
 				this.importSeed = false;
 			} catch (ex) {
 				console.error('onImportSeed', ex);
