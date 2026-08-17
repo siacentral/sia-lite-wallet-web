@@ -129,8 +129,20 @@
 			"lblServerType": "Type du serveur",
 			"lblServerURL": "URL du serveur",
 			"seedExported": "Ma seed de récupération est stockée en lieu sûr.",
-			"siaSeed": "Seed Sia",
-			"walrusSeed": "Seed Walrus"
+			"siaSeed": "Phrase de récupération Sia (obsolète)",
+			"walrusSeed": "Phrase de récupération BIP-39",
+			"recoverySeed": "Seed de récupération",
+			"revealSeed": "Écrivez ces mots sur papier. C'est votre seul moyen de récupérer votre portefeuille. Vous devrez les confirmer à l'étape suivante.",
+			"iHaveWrittenDown": "J'ai écrit ces mots",
+			"confirmSeed": "Retapez votre seed de récupération",
+			"confirmNew": "Saisissez les 12 mots que vous avez écrits, dans l'ordre, pour confirmer votre nouveau portefeuille.",
+			"confirmRecover": "Saisissez les mots de votre phrase de récupération, dans l'ordre.",
+			"validating": "Validation de la seed...",
+			"savingWallet": "Enregistrement du portefeuille...",
+			"seedInvalid": "Cette seed de récupération ne correspond pas à ce portefeuille.",
+			"seedConfirmed": "Seed de récupération confirmée.",
+			"confirmProgress": "{{0}} mots saisis sur {{1}}",
+			"copy": "Copier"
 		},
 		"importAddresses": {
 			"importedHeader": "Adresses importées",
