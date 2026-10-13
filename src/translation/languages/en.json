@@ -124,7 +124,7 @@
 			"pReviewLedger": "Your Ledger wallet has been imported. Balance and transactions can now be viewed without the Ledger device. To send transactions you will need to plugin and unlock the device.",
 			"pReviewWatch": "A new watch-only wallet has been created. This wallet cannot send transactions. Balance and transactions will be shown for all imported addresses.",
 			"pReviewNew": "A new wallet has been created. Backup your recovery seed to a safe location, without your seed your funds cannot be recovered.",
-			"pReviewRecover": "Your wallet has been successfully recovered. The blockchain is now being scanned for balance and transactions. Backup your recovery seed to a safe location, without your seed your funds cannot be recovered.",
+			"pReviewRecover": "Your recovery phrase was accepted. After you confirm it, your wallet will be recovered and the blockchain scanned for balance and transactions. Backup your recovery seed to a safe location, without your seed your funds cannot be recovered.",
 			"lblWalletName": "Wallet Name",
 			"lblRecoverySeed": "Recovery Seed",
 			"lblSeedType": "Seed Type",
