@@ -5,14 +5,17 @@ import SeedPhraseInput from './SeedPhraseInput.vue';
 
 const goldenWords = 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about'.split(' ');
 
-const mountOpts = () => ({
+const mountOpts = (pushNotification = vi.fn()) => ({
 	global: {
 		stubs: { icon: true },
 		mixins: [
 			{
 				methods: {
-					translate(id) {
-						return id;
+					translate(id, ...params) {
+						return [id, ...params].join(':');
+					},
+					pushNotification(notification) {
+						pushNotification(notification);
 					}
 				}
 			}
@@ -32,6 +35,7 @@ describe('SeedPhraseInput', () => {
 			Array.from({ length: 12 }, (_, i) => String(i + 1))
 		);
 		expect(wrapper.findAll('.seed-phrase-cell').every(cell => cell.classes('control'))).toBe(true);
+		expect(wrapper.findAllComponents({ name: 'WordInput' })[0].props('label')).toBe('createWalletModal.seedWord:1');
 	});
 
 	it('advances focus after selecting an autocomplete suggestion', async() => {
@@ -136,5 +140,28 @@ describe('SeedPhraseInput', () => {
 		await wrapper.vm.$nextTick();
 
 		expect(writeText).toHaveBeenCalledWith(goldenWords.join(' '));
+	});
+
+	it('reports clipboard failures without exposing the phrase', async() => {
+		const writeText = vi.fn().mockRejectedValue(new Error('denied')),
+			pushNotification = vi.fn();
+
+		Object.defineProperty(navigator, 'clipboard', {
+			value: { writeText },
+			configurable: true
+		});
+
+		const wrapper = mount(SeedPhraseInput, {
+			props: { words: goldenWords, readonly: true },
+			...mountOpts(pushNotification)
+		});
+
+		await wrapper.find('button').trigger('click');
+		await wrapper.vm.$nextTick();
+
+		expect(pushNotification).toHaveBeenCalledWith({
+			severity: 'danger',
+			message: 'createWalletModal.copySeedFailed'
+		});
 	});
 });

@@ -8,7 +8,7 @@
 					:index="i"
 					:readonly="readonly"
 					:drop-up="i > count - 4"
-					:label="`word ${i}`"
+					:label="translate('createWalletModal.seedWord', i)"
 					@editing="onEditing(i - 1, $event)"
 					@input="onWord(i - 1, $event)"
 					@next="focusNext(i - 1)"
@@ -95,7 +95,17 @@ export default {
 			this.$emit('input', phrase);
 		},
 		async copy() {
-			await navigator.clipboard.writeText(this.internal.join(' '));
+			try {
+				if (!navigator.clipboard?.writeText)
+					throw new Error('clipboard unavailable');
+
+				await navigator.clipboard.writeText(this.internal.join(' '));
+			} catch {
+				this.pushNotification({
+					severity: 'danger',
+					message: this.translate('createWalletModal.copySeedFailed')
+				});
+			}
 		},
 		setPhrase(phrase) {
 			const words = phrase.split(' ');

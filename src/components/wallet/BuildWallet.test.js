@@ -1,6 +1,12 @@
 import { describe, expect, it, vi } from 'vitest';
 
+vi.mock('@/sia', () => ({
+	generateAddresses: vi.fn(),
+	generateSeed: vi.fn()
+}));
+
 import BuildWallet from './BuildWallet.vue';
+import { generateAddresses } from '@/sia';
 
 const bip39Phrase = 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about';
 const siaPhrase = 'rodent colony illness junk waist leopard pierce oust wield viewpoint slackens axis jittery vampire rockets cistern eels oaks cell emotion eagle vortex pests cedar business cactus inorganic cocoa';
@@ -36,5 +42,20 @@ describe('BuildWallet seed import', () => {
 		expect(context.seedType).toBe('sia');
 		expect(context.recoverySeed).toBe(siaPhrase);
 		expect(context.importSeed).toBe(false);
+	});
+
+	it('normalizes recovery phrase whitespace before validation and storage', async() => {
+		const recoverySeed = siaPhrase.replace('illness junk', 'illness  \n\tjunk'),
+			context = {
+				createType: 'recover',
+				recoverySeed
+			};
+
+		generateAddresses.mockResolvedValue([{ address: 'wallet-address' }]);
+
+		const seed = await BuildWallet.methods.generateWalletSeed.call(context);
+
+		expect(seed).toBe(siaPhrase);
+		expect(generateAddresses).toHaveBeenCalledWith(siaPhrase, 0, 1);
 	});
 });

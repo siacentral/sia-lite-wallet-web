@@ -134,6 +134,7 @@
 			"siaSeed": "Sia Recovery Phrase (Deprecated)",
 			"walrusSeed": "BIP-39 Recovery Phrase",
 			"recoverySeed": "Recovery Seed",
+			"seedWord": "Recovery seed, word {{0}}",
 			"revealSeed": "Write down these words. They are your only way to recover your wallet. You will be asked to confirm them next.",
 			"iHaveWrittenDown": "I have written these words down",
 			"confirmSeed": "Re-enter your recovery seed",
@@ -144,7 +145,8 @@
 			"seedInvalid": "That recovery seed does not match this wallet.",
 			"seedConfirmed": "Recovery seed confirmed.",
 			"confirmProgress": "{{0}} of {{1}} words entered",
-			"copy": "Copy"
+			"copy": "Copy",
+			"copySeedFailed": "Could not copy the recovery seed. Check your clipboard permissions and try again."
 		},
 		"importAddresses": {
 			"importedHeader": "Imported Addresses",

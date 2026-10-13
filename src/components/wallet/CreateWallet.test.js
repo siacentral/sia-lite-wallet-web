@@ -8,6 +8,7 @@ import CreateWallet from './CreateWallet.vue';
 import { generateAddresses } from '@/sia';
 
 const phrase = 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about';
+const siaPhrase = 'rodent colony illness junk waist leopard pierce oust wield viewpoint slackens axis jittery vampire rockets cistern eels oaks cell emotion eagle vortex pests cedar business cactus inorganic cocoa';
 
 function confirmationContext() {
 	return {
@@ -74,6 +75,16 @@ describe('CreateWallet seed confirmation', () => {
 		});
 
 		expect(count).toBe(2);
+	});
+
+	it('normalizes legacy phrase whitespace for reveal and confirmation', () => {
+		const seedWords = CreateWallet.computed.seedWords.call({
+			wallet: { seed: siaPhrase.replace('illness junk', 'illness  \n\tjunk') }
+		});
+
+		expect(seedWords).toEqual(siaPhrase.split(' '));
+		expect(CreateWallet.computed.revealWords.call({ seedWords })).toEqual(seedWords);
+		expect(CreateWallet.computed.seedWordCount.call({ seedWords })).toBe(28);
 	});
 
 	it('keeps a new wallet in memory until its seed is confirmed', async() => {

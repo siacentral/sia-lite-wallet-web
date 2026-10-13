@@ -7,11 +7,22 @@ run:
 linters:
   default: none
   enable:
+    - bodyclose
+    - dogsled
+    - dupl
+    - errcheck
+    - errorlint
+    - funlen
     - gocritic
+    - goconst
+    - gosec
     - govet
+    - ineffassign
     - misspell
     - revive
+    - staticcheck
     - tagliatelle
+    - unconvert
     - whitespace
     - unparam
     - unused
@@ -41,6 +52,9 @@ linters:
       enabled-tags:
         - diagnostic
         - style
+    funlen:
+      lines: 100
+      statements: 60
     govet:
       disable-all: false
     revive:
@@ -103,6 +117,7 @@ linters:
 issues:
   max-issues-per-linter: 0
   max-same-issues: 0
+
 formatters:
   enable:
     - gofmt

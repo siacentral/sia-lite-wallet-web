@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import { createHash } from 'node:crypto';
 
 import { WORDS, WORD_MAP, prefixWords } from '@/sia/bip39';
 
@@ -6,6 +7,14 @@ describe('bip39 wordlist', () => {
 	it('has 2048 unique words', () => {
 		expect(WORDS.length).toBe(2048);
 		expect(new Set(WORDS).size).toBe(2048);
+	});
+
+	it('matches the canonical ordered BIP-39 English wordlist', () => {
+		const checksum = createHash('sha256')
+			.update(`${WORDS.join('\n')}\n`)
+			.digest('hex');
+
+		expect(checksum).toBe('2f5eed53a4727b4bf8880d8f3f199efc90e58503646d9ff8eff3a2ed3b24dbda');
 	});
 
 	it('WORD_MAP is a bijection over WORDS', () => {
