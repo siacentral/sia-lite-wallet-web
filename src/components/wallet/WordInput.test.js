@@ -93,6 +93,62 @@ describe('WordInput', () => {
 		expect(wrapper.emitted('next')).toHaveLength(1);
 	});
 
+	it('commits an exact word on blur even when longer words share its prefix', async() => {
+		const wrapper = mount(WordInput, { props: { value: '', index: 1 } });
+
+		type(wrapper, 'act');
+		await wrapper.vm.$nextTick();
+		await wrapper.find('.word-input-field').trigger('blur');
+
+		expect(wrapper.emitted('input')).toEqual([['act']]);
+		expect(wrapper.emitted('next')).toBeFalsy();
+	});
+
+	it('re-commits the previous word when a cleared input loses focus', async() => {
+		const wrapper = mount(WordInput, { props: { value: 'abandon', index: 1 } });
+
+		type(wrapper, '');
+		await wrapper.vm.$nextTick();
+		await wrapper.find('.word-input-field').trigger('blur');
+
+		expect(wrapper.vm.text).toBe('abandon');
+		expect(wrapper.emitted('input')).toEqual([['abandon']]);
+	});
+
+	it('re-commits the previous word when an unmatched input loses focus', async() => {
+		const wrapper = mount(WordInput, { props: { value: 'abandon', index: 1 } });
+
+		type(wrapper, 'zzzz');
+		await wrapper.vm.$nextTick();
+		await wrapper.find('.word-input-field').trigger('blur');
+
+		expect(wrapper.vm.text).toBe('abandon');
+		expect(wrapper.emitted('input')).toEqual([['abandon']]);
+	});
+
+	it('does not re-commit an unchanged word on blur', async() => {
+		const wrapper = mount(WordInput, { props: { value: 'act', index: 1 } });
+
+		await wrapper.find('.word-input-field').trigger('focus');
+		await wrapper.find('.word-input-field').trigger('blur');
+
+		expect(wrapper.emitted('input')).toBeFalsy();
+	});
+
+	it('does not report the popup as expanded when nothing matches', async() => {
+		const wrapper = mount(WordInput, { props: { value: '', index: 1 } });
+
+		type(wrapper, 'zzzz');
+		await wrapper.vm.$nextTick();
+
+		expect(wrapper.find('.word-input-field').attributes('aria-expanded')).toBe('false');
+
+		type(wrapper, 'ab');
+		await wrapper.vm.$nextTick();
+
+		expect(wrapper.find('.word-input-field').attributes('aria-expanded')).toBe('true');
+	});
+
 	it('does not auto-complete on Escape', async() => {
 		const wrapper = mount(WordInput, { props: { value: '' } });
 

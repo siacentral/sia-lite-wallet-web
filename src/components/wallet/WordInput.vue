@@ -95,7 +95,7 @@ export default {
 			return `${this.listID}-${index}`;
 		},
 		onInput() {
-			this.open = true;
+			this.open = this.candidates.length !== 0;
 			this.highlighted = 0;
 			this.$emit('editing', this.text);
 		},
@@ -108,18 +108,33 @@ export default {
 
 			this.open = false;
 			if (prefix === '') {
-				this.text = this.value;
-				this.$emit('editing', this.value);
+				this.restore();
+				return;
+			}
+
+			if (prefix === this.value)
+				return;
+
+			if (this.exactWord) {
+				this.commit(this.exactWord);
 				return;
 			}
 
 			const matches = prefixWords(prefix);
 			if (matches.length === 1)
 				this.commit(matches[0]);
-			else if (matches.length === 0) {
-				this.text = this.value;
-				this.$emit('editing', this.value);
+			else if (matches.length === 0)
+				this.restore();
+		},
+		// re-commits the previous word so the parent revalidates the full phrase
+		restore() {
+			if (this.value === '') {
+				this.text = '';
+				this.$emit('editing', '');
+				return;
 			}
+
+			this.commit(this.value);
 		},
 		onKey(e) {
 			if (this.readonly)

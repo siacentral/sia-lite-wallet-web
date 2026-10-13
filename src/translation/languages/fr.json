@@ -122,7 +122,7 @@
 			"pReviewLedger": "Votre portefeuille matériel a bien été importé. Le solde et les transactions ne peuvent pas être visualisées sans le dispositif physique. Pour envoyer des transactions, vous devez brancher et déverrouiller le portefeuille matériel.",
 			"pReviewWatch": "Un nouveau portefeuille en lecture seule a bien été importé. Ce portefeuille ne peut pas émettre de transaction. Le solde et les transactions sont visualisables pour toutes les adresses importées.",
 			"pReviewNew": "Un nouveau portefeuille a bien été créé. Prenez soin de conserver la seed du portefeuille en lieu sûr. Sans cette dernière, vos fonds ne pourront pas être récupérés.",
-			"pReviewRecover": "Votre portefeuille a bien été rétabli. Le scan de la blockchain est en cours et le solde ainsi que les transactions seront bientôt disponibles. Prenez soin de conserver la seed du portefeuille en lieu sûr. Sans cette dernière, vos fonds ne pourront pas être récupérés.",
+			"pReviewRecover": "Votre phrase de récupération a été acceptée. Une fois confirmée, votre portefeuille sera rétabli et la blockchain scannée pour le solde et les transactions. Prenez soin de conserver la seed du portefeuille en lieu sûr. Sans cette dernière, vos fonds ne pourront pas être récupérés.",
 			"lblWalletName": "Nom du portefeuille",
 			"lblRecoverySeed": "Seed du portefeuille",
 			"lblSeedType": "Type de la seed",
