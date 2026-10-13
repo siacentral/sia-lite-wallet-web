@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"math"
 	"sort"
 	"strings"
 	"syscall/js"
@@ -56,6 +57,17 @@ func checkArgs(args []js.Value, argTypes ...js.Type) error {
 	}
 
 	return nil
+}
+
+func jsUint64(value js.Value, name string) (uint64, error) {
+	const maxSafeInteger = 1<<53 - 1
+
+	n := value.Float()
+	if math.IsNaN(n) || math.IsInf(n, 0) || n < 0 || n > maxSafeInteger || n != math.Trunc(n) {
+		return 0, fmt.Errorf("%s must be a non-negative safe integer", name)
+	}
+
+	return uint64(n), nil //nolint:gosec // n is validated to be in uint64's exactly representable range.
 }
 
 func interfaceToJSON(obj any) (con map[string]any, err error) {
@@ -144,6 +156,14 @@ func signTransaction(this js.Value, args []js.Value) any {
 	jsonTxn := args[1].String()
 	sigIndicesLen := args[2].Length()
 	callback := args[3]
+	sigIndices := make([]uint64, sigIndicesLen)
+	for i := range sigIndices {
+		index, err := jsUint64(args[2].Index(i), "signature index")
+		if err != nil {
+			return err.Error()
+		}
+		sigIndices[i] = index
+	}
 
 	var txn types.Transaction
 	if err := json.Unmarshal([]byte(jsonTxn), &txn); err != nil {
@@ -166,10 +186,8 @@ func signTransaction(this js.Value, args []js.Value) any {
 		}
 
 		for i := range sigIndicesLen {
-			index := uint64(args[2].Index(i).Int())
-
 			sigHash := cs.WholeSigHash(txn, txn.Signatures[i].ParentID, 0, 0, nil)
-			sk := wallet.KeyFromSeed(&seed, index)
+			sk := wallet.KeyFromSeed(&seed, sigIndices[i])
 			sig := sk.SignHash(sigHash)
 			txn.Signatures[i].Signature = sig[:]
 		}
@@ -237,7 +255,7 @@ func phraseToSeed(phrase string, seed *[32]byte) error {
 }
 
 func generateAddress(seed *[32]byte, i uint64) map[string]any {
-	sk := wallet.KeyFromSeed(seed, uint64(i))
+	sk := wallet.KeyFromSeed(seed, i)
 	return map[string]any{
 		"unlock_conditions": types.StandardUnlockConditions(sk.PublicKey()),
 		"usage_type":        "sent",
@@ -252,7 +270,10 @@ func generateAddresses(this js.Value, args []js.Value) any {
 	}
 
 	phrase := args[0].String()
-	i := uint64(args[1].Int())
+	i, err := jsUint64(args[1], "start index")
+	if err != nil {
+		return err.Error()
+	}
 	n := args[2].Int()
 	callback := args[3]
 
@@ -316,7 +337,11 @@ func v2SignTransaction(this js.Value, args []js.Value) any {
 	callback := args[3]
 
 	for i := range sigIndices {
-		sigIndices[i] = uint64(args[2].Index(i).Int())
+		index, err := jsUint64(args[2].Index(i), "signature index")
+		if err != nil {
+			return err.Error()
+		}
+		sigIndices[i] = index
 	}
 
 	var txn types.V2Transaction
@@ -382,9 +407,18 @@ func recoverAddresses(this js.Value, args []js.Value) any {
 	}
 
 	phrase := args[0].String()
-	startIndex := uint64(args[1].Int())
-	lookahead := uint64(args[2].Int())
-	lastKnownIndex := uint64(args[3].Int())
+	startIndex, err := jsUint64(args[1], "start index")
+	if err != nil {
+		return err.Error()
+	}
+	lookahead, err := jsUint64(args[2], "lookahead")
+	if err != nil {
+		return err.Error()
+	}
+	lastKnownIndex, err := jsUint64(args[3], "last known index")
+	if err != nil {
+		return err.Error()
+	}
 	callback := args[4]
 
 	var seed [32]byte
@@ -408,14 +442,14 @@ func recoverAddresses(this js.Value, args []js.Value) any {
 				recovered = append(recovered, generateAddress(&seed, i))
 			}
 
-			log.Println("checking addresses from", i, "to", i+uint64(n))
+			log.Println("checking addresses from", i, "to", i+n)
 			ok, err := w.CheckAddresses(addresses)
 			if err != nil {
 				callback.Invoke(fmt.Sprintf("error checking addresses: %s", err), js.Null())
 				return
 			} else if !ok {
 				// if no used addresses are found, increase the gap
-				gap += uint64(n)
+				gap += n
 				recovered = recovered[:0] // reset recovered addresses
 				log.Printf("no used addresses found, increasing gap to %d", gap)
 			} else {
@@ -438,8 +472,6 @@ func recoverAddresses(this js.Value, args []js.Value) any {
 			callback.Invoke("progress", data)
 		}
 
-		// if any used addresses are found, reset gap
-		gap = 0
 		callback.Invoke(js.Null(), js.Null())
 	}()
 	return nil
@@ -503,6 +535,150 @@ func hasV2Announcement(txn types.V2Transaction) bool {
 	return false
 }
 
+func processV1Transaction(processed *processedTransaction, data wallet.EventV1Transaction, relevantAddresses map[types.Address]bool) bool {
+	switch {
+	case len(data.Transaction.FileContracts) > 0 && len(data.Transaction.FileContractRevisions) > 0:
+		processed.Tags = append(processed.Tags, "contract_renewal")
+	case len(data.Transaction.FileContractRevisions) > 0:
+		processed.Tags = append(processed.Tags, "contract_revision")
+	case len(data.Transaction.FileContracts) > 0:
+		processed.Tags = append(processed.Tags, "contract_formation")
+	case len(data.Transaction.StorageProofs) > 0:
+		processed.Tags = append(processed.Tags, "storage_proof")
+	case hasAnnouncement(data.Transaction):
+		processed.Tags = append(processed.Tags, "host_announcement")
+	case max(len(data.Transaction.SiafundInputs), len(data.Transaction.SiafundOutputs)) > 0:
+		processed.Tags = append(processed.Tags, "siafund_transaction")
+	case max(len(data.Transaction.SiacoinInputs), len(data.Transaction.SiacoinOutputs)) > 0:
+		processed.Tags = append(processed.Tags, "siacoin_transaction")
+	}
+
+	var relevant bool
+	for _, sce := range data.SpentSiacoinElements {
+		if relevantAddresses[sce.SiacoinOutput.Address] {
+			relevant = true
+			processed.SiacoinInputs = processed.SiacoinInputs.Add(sce.SiacoinOutput.Value)
+		}
+	}
+	for _, sco := range data.Transaction.SiacoinOutputs {
+		if relevantAddresses[sco.Address] {
+			relevant = true
+			processed.SiacoinOutputs = processed.SiacoinOutputs.Add(sco.Value)
+		}
+	}
+	for _, sfe := range data.SpentSiafundElements {
+		if relevantAddresses[sfe.SiafundOutput.Address] {
+			relevant = true
+			processed.SiafundInputs += sfe.SiafundOutput.Value
+		}
+	}
+	for _, sfo := range data.Transaction.SiafundOutputs {
+		if relevantAddresses[sfo.Address] {
+			relevant = true
+			processed.SiafundOutputs += sfo.Value
+		}
+	}
+	return relevant
+}
+
+func processV2Transaction(processed *processedTransaction, data wallet.EventV2Transaction, relevantAddresses map[types.Address]bool) bool {
+	switch {
+	case len(data.FileContractRevisions) > 0:
+		processed.Tags = append(processed.Tags, "contract_revision")
+	case len(data.FileContracts) > 0:
+		processed.Tags = append(processed.Tags, "contract_formation")
+	case len(data.FileContractResolutions) > 0:
+		fce := data.FileContractResolutions[0].Parent
+		switch res := data.FileContractResolutions[0].Resolution.(type) {
+		case *types.V2StorageProof:
+			processed.Tags = append(processed.Tags, "storage_proof")
+		case *types.V2FileContractRenewal:
+			if res.NewContract.ProofHeight == fce.V2FileContract.ProofHeight && res.NewContract.ExpirationHeight == fce.V2FileContract.ExpirationHeight {
+				processed.Tags = append(processed.Tags, "contract_refresh")
+			} else {
+				processed.Tags = append(processed.Tags, "contract_renewal")
+			}
+		case *types.V2FileContractExpiration:
+			processed.Tags = append(processed.Tags, "contract_expiration")
+		default:
+			processed.Tags = append(processed.Tags, "contract_resolution")
+		}
+	case hasV2Announcement(types.V2Transaction(data)):
+		processed.Tags = append(processed.Tags, "host_announcement")
+	case max(len(data.SiafundInputs), len(data.SiafundOutputs)) > 0:
+		processed.Tags = append(processed.Tags, "siafund_transaction")
+	case max(len(data.SiacoinInputs), len(data.SiacoinOutputs)) > 0:
+		processed.Tags = append(processed.Tags, "siacoin_transaction")
+	}
+
+	var relevant bool
+	for _, sci := range data.SiacoinInputs {
+		if relevantAddresses[sci.Parent.SiacoinOutput.Address] {
+			relevant = true
+			processed.SiacoinInputs = processed.SiacoinInputs.Add(sci.Parent.SiacoinOutput.Value)
+		}
+	}
+	for _, sco := range data.SiacoinOutputs {
+		if relevantAddresses[sco.Address] {
+			relevant = true
+			processed.SiacoinOutputs = processed.SiacoinOutputs.Add(sco.Value)
+		}
+	}
+	for _, sfi := range data.SiafundInputs {
+		if relevantAddresses[sfi.Parent.SiafundOutput.Address] {
+			relevant = true
+			processed.SiafundInputs += sfi.Parent.SiafundOutput.Value
+		}
+	}
+	for _, sfo := range data.SiafundOutputs {
+		if relevantAddresses[sfo.Address] {
+			relevant = true
+			processed.SiafundOutputs += sfo.Value
+		}
+	}
+	return relevant
+}
+
+func processWalletEvent(event wallet.Event, relevantAddresses map[types.Address]bool) (processed processedTransaction, relevant bool) {
+	processed = processedTransaction{
+		ID:            event.ID,
+		Timestamp:     event.Timestamp,
+		BlockHeight:   event.Index.Height,
+		Confirmations: event.Confirmations,
+	}
+
+	switch data := event.Data.(type) {
+	case wallet.EventV1Transaction:
+		relevant = processV1Transaction(&processed, data, relevantAddresses)
+	case wallet.EventV2Transaction:
+		relevant = processV2Transaction(&processed, data, relevantAddresses)
+	case wallet.EventV1ContractResolution:
+		relevant = true
+		if data.Missed {
+			processed.Tags = append(processed.Tags, "contract_missed_output")
+		} else {
+			processed.Tags = append(processed.Tags, "contract_valid_output")
+		}
+		processed.SiacoinOutputs = data.SiacoinElement.SiacoinOutput.Value
+	case wallet.EventV2ContractResolution:
+		if data.SiacoinElement.SiacoinOutput.Value.IsZero() {
+			break
+		}
+		relevant = true
+		if data.Missed {
+			processed.Tags = append(processed.Tags, "contract_missed_output")
+		} else {
+			processed.Tags = append(processed.Tags, "contract_valid_output")
+		}
+		processed.SiacoinOutputs = data.SiacoinElement.SiacoinOutput.Value
+	case wallet.EventPayout:
+		relevant = true
+		processed.Tags = append(processed.Tags, "payout")
+		processed.SiacoinOutputs = data.SiacoinElement.SiacoinOutput.Value
+	}
+	return
+}
+
 func getWalletTransactions(w *api.Client, addresses []types.Address) ([]processedTransaction, error) {
 	if len(addresses) == 0 {
 		return nil, nil
@@ -513,144 +689,6 @@ func getWalletTransactions(w *api.Client, addresses []types.Address) ([]processe
 		relevantAddresses[addr] = true
 	}
 
-	processEvent := func(event wallet.Event) (processedTransaction, bool) {
-		processed := processedTransaction{
-			ID:            event.ID,
-			Timestamp:     event.Timestamp,
-			BlockHeight:   event.Index.Height,
-			Confirmations: event.Confirmations,
-		}
-		var relevant bool
-		switch data := event.Data.(type) {
-		case wallet.EventV1Transaction:
-			switch {
-			case len(data.Transaction.FileContracts) > 0 && len(data.Transaction.FileContractRevisions) > 0:
-				processed.Tags = append(processed.Tags, "contract_renewal")
-			case len(data.Transaction.FileContractRevisions) > 0:
-				processed.Tags = append(processed.Tags, "contract_revision")
-			case len(data.Transaction.FileContracts) > 0:
-				processed.Tags = append(processed.Tags, "contract_formation")
-			case len(data.Transaction.StorageProofs) > 0:
-				processed.Tags = append(processed.Tags, "storage_proof")
-			case hasAnnouncement(data.Transaction):
-				processed.Tags = append(processed.Tags, "host_announcement")
-			case max(len(data.Transaction.SiafundInputs), len(data.Transaction.SiafundOutputs)) > 0:
-				processed.Tags = append(processed.Tags, "siafund_transaction")
-			case max(len(data.Transaction.SiacoinInputs), len(data.Transaction.SiacoinOutputs)) > 0:
-				processed.Tags = append(processed.Tags, "siacoin_transaction")
-			}
-			for _, sce := range data.SpentSiacoinElements {
-				if !relevantAddresses[sce.SiacoinOutput.Address] {
-					continue
-				}
-				relevant = true
-				processed.SiacoinInputs = processed.SiacoinInputs.Add(sce.SiacoinOutput.Value)
-			}
-			for _, sco := range data.Transaction.SiacoinOutputs {
-				if !relevantAddresses[sco.Address] {
-					continue
-				}
-				relevant = true
-				processed.SiacoinOutputs = processed.SiacoinOutputs.Add(sco.Value)
-			}
-			for _, sfe := range data.SpentSiafundElements {
-				if !relevantAddresses[sfe.SiafundOutput.Address] {
-					continue
-				}
-				relevant = true
-				processed.SiafundInputs += sfe.SiafundOutput.Value
-			}
-			for _, sfo := range data.Transaction.SiafundOutputs {
-				if !relevantAddresses[sfo.Address] {
-					continue
-				}
-				relevant = true
-				processed.SiafundOutputs += sfo.Value
-			}
-		case wallet.EventV2Transaction:
-			switch {
-			case len(data.FileContractRevisions) > 0:
-				processed.Tags = append(processed.Tags, "contract_revision")
-			case len(data.FileContracts) > 0:
-				processed.Tags = append(processed.Tags, "contract_formation")
-			case len(data.FileContractResolutions) > 0:
-				fce := data.FileContractResolutions[0].Parent
-				switch res := data.FileContractResolutions[0].Resolution.(type) {
-				case *types.V2StorageProof:
-					processed.Tags = append(processed.Tags, "storage_proof")
-				case *types.V2FileContractRenewal:
-					if res.NewContract.ProofHeight == fce.V2FileContract.ProofHeight && res.NewContract.ExpirationHeight == fce.V2FileContract.ExpirationHeight {
-						processed.Tags = append(processed.Tags, "contract_refresh")
-					} else {
-						processed.Tags = append(processed.Tags, "contract_renewal")
-					}
-				case *types.V2FileContractExpiration:
-					processed.Tags = append(processed.Tags, "contract_expiration")
-				default:
-					processed.Tags = append(processed.Tags, "contract_resolution")
-				}
-			case hasV2Announcement(types.V2Transaction(data)):
-				processed.Tags = append(processed.Tags, "host_announcement")
-			case max(len(data.SiafundInputs), len(data.SiafundOutputs)) > 0:
-				processed.Tags = append(processed.Tags, "siafund_transaction")
-			case max(len(data.SiacoinInputs), len(data.SiacoinOutputs)) > 0:
-				processed.Tags = append(processed.Tags, "siacoin_transaction")
-			}
-			for _, sci := range data.SiacoinInputs {
-				if !relevantAddresses[sci.Parent.SiacoinOutput.Address] {
-					continue
-				}
-				relevant = true
-				processed.SiacoinInputs = processed.SiacoinInputs.Add(sci.Parent.SiacoinOutput.Value)
-			}
-			for _, sco := range data.SiacoinOutputs {
-				if !relevantAddresses[sco.Address] {
-					continue
-				}
-				relevant = true
-				processed.SiacoinOutputs = processed.SiacoinOutputs.Add(sco.Value)
-			}
-			for _, sfi := range data.SiafundInputs {
-				if !relevantAddresses[sfi.Parent.SiafundOutput.Address] {
-					continue
-				}
-				relevant = true
-				processed.SiafundInputs += sfi.Parent.SiafundOutput.Value
-			}
-			for _, sfo := range data.SiafundOutputs {
-				if !relevantAddresses[sfo.Address] {
-					continue
-				}
-				relevant = true
-				processed.SiafundOutputs += sfo.Value
-			}
-		case wallet.EventV1ContractResolution:
-			relevant = true
-			if data.Missed {
-				processed.Tags = append(processed.Tags, "contract_missed_output")
-			} else {
-				processed.Tags = append(processed.Tags, "contract_valid_output")
-			}
-			processed.SiacoinOutputs = data.SiacoinElement.SiacoinOutput.Value
-		case wallet.EventV2ContractResolution:
-			if data.SiacoinElement.SiacoinOutput.Value.IsZero() {
-				break
-			}
-			relevant = true
-			if data.Missed {
-				processed.Tags = append(processed.Tags, "contract_missed_output")
-			} else {
-				processed.Tags = append(processed.Tags, "contract_valid_output")
-			}
-			processed.SiacoinOutputs = data.SiacoinElement.SiacoinOutput.Value
-		case wallet.EventPayout:
-			relevant = true
-			processed.Tags = append(processed.Tags, "payout")
-			processed.SiacoinOutputs = data.SiacoinElement.SiacoinOutput.Value
-		}
-		return processed, relevant
-	}
-
 	events, err := w.TPoolEvents()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get unconfirmed transactions: %w", err)
@@ -658,7 +696,7 @@ func getWalletTransactions(w *api.Client, addresses []types.Address) ([]processe
 
 	var unconfirmed []processedTransaction
 	for _, event := range events {
-		processed, relevant := processEvent(event)
+		processed, relevant := processWalletEvent(event, relevantAddresses)
 		if relevant {
 			unconfirmed = append(unconfirmed, processed)
 		}
@@ -680,7 +718,7 @@ func getWalletTransactions(w *api.Client, addresses []types.Address) ([]processe
 				continue // skip already processed events
 			}
 			seen[event.ID] = true
-			processed, relevant := processEvent(event)
+			processed, relevant := processWalletEvent(event, relevantAddresses)
 			if !relevant {
 				continue // should never happen, but just in case
 			}

@@ -73,11 +73,11 @@ func intToBytes(bi *big.Int) (bs []byte) {
 	base := big.NewInt(256)
 	for bi.Cmp(base) >= 0 {
 		i := new(big.Int).Mod(bi, base).Int64()
-		bs = append(bs, byte(i))
+		bs = append(bs, byte(i)) //nolint:gosec // modulo 256 guarantees i is in byte range.
 		bi.Sub(bi, base)
 		bi.Div(bi, base)
 	}
-	bs = append(bs, byte(bi.Int64()))
+	bs = append(bs, byte(bi.Int64())) //nolint:gosec // the loop guarantees bi is in byte range.
 	return bs
 }
 

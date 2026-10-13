@@ -132,6 +132,7 @@
 			"siaSeed": "Sia 恢复短语（已弃用）",
 			"walrusSeed": "BIP-39 恢复短语",
 			"recoverySeed": "恢复种子",
+			"seedWord": "恢复种子，第 {{0}} 个单词",
 			"revealSeed": "写下这些单词。这是您找回钱包的唯一方式。接下来，您需要确认这些单词。",
 			"iHaveWrittenDown": "我已经写下这些单词",
 			"confirmSeed": "重新输入恢复种子",
@@ -142,7 +143,8 @@
 			"seedInvalid": "该恢复种子与此钱包不匹配。",
 			"seedConfirmed": "恢复种子已确认。",
 			"confirmProgress": "已输入 {{0}} / {{1}} 个单词",
-			"copy": "复制"
+			"copy": "复制",
+			"copySeedFailed": "无法复制恢复种子。请检查剪贴板权限后重试。"
 		},
 		"importAddresses": {
 			"importedHeader": "输入地址",

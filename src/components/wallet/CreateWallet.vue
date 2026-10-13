@@ -100,11 +100,17 @@ export default {
 		walletType() {
 			return this.wallet && typeof this.wallet.type === 'string' ? this.wallet.type : 'watch';
 		},
+		seedWords() {
+			if (!this.wallet || !this.wallet.seed)
+				return [];
+
+			return String(this.wallet.seed).trim().split(/\s+/).filter(Boolean);
+		},
 		revealWords() {
-			return this.wallet && this.wallet.seed ? String(this.wallet.seed).split(' ') : [];
+			return this.seedWords;
 		},
 		seedWordCount() {
-			return this.wallet && this.wallet.seed ? String(this.wallet.seed).split(' ').length : 0;
+			return this.seedWords.length;
 		},
 		confirmWordCount() {
 			const phrase = this.confirmPhrase.trim();

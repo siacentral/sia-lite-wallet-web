@@ -132,6 +132,7 @@
 			"siaSeed": "Phrase de récupération Sia (obsolète)",
 			"walrusSeed": "Phrase de récupération BIP-39",
 			"recoverySeed": "Seed de récupération",
+			"seedWord": "Seed de récupération, mot {{0}}",
 			"revealSeed": "Écrivez ces mots sur papier. C'est votre seul moyen de récupérer votre portefeuille. Vous devrez les confirmer à l'étape suivante.",
 			"iHaveWrittenDown": "J'ai écrit ces mots",
 			"confirmSeed": "Retapez votre seed de récupération",
@@ -142,7 +143,8 @@
 			"seedInvalid": "Cette seed de récupération ne correspond pas à ce portefeuille.",
 			"seedConfirmed": "Seed de récupération confirmée.",
 			"confirmProgress": "{{0}} mots saisis sur {{1}}",
-			"copy": "Copier"
+			"copy": "Copier",
+			"copySeedFailed": "Impossible de copier la seed de récupération. Vérifiez les autorisations du presse-papiers et réessayez."
 		},
 		"importAddresses": {
 			"importedHeader": "Adresses importées",
