@@ -62,6 +62,10 @@ func checkArgs(args []js.Value, argTypes ...js.Type) error {
 func jsUint64(value js.Value, name string) (uint64, error) {
 	const maxSafeInteger = 1<<53 - 1
 
+	if value.Type() != js.TypeNumber {
+		return 0, fmt.Errorf("%s must be a non-negative safe integer", name)
+	}
+
 	n := value.Float()
 	if math.IsNaN(n) || math.IsInf(n, 0) || n < 0 || n > maxSafeInteger || n != math.Trunc(n) {
 		return 0, fmt.Errorf("%s must be a non-negative safe integer", name)

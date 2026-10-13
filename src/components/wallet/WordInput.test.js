@@ -135,6 +135,15 @@ describe('WordInput', () => {
 		expect(wrapper.emitted('input')).toBeFalsy();
 	});
 
+	it('disables browser text services on the input', () => {
+		const attrs = mount(WordInput, { props: { value: '' } }).find('.word-input-field').attributes();
+
+		expect(attrs.autocomplete).toBe('off');
+		expect(attrs.autocorrect).toBe('off');
+		expect(attrs.autocapitalize).toBe('off');
+		expect(attrs.spellcheck).toBe('false');
+	});
+
 	it('does not report the popup as expanded when nothing matches', async() => {
 		const wrapper = mount(WordInput, { props: { value: '', index: 1 } });
 
