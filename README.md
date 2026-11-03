@@ -42,22 +42,38 @@ docker run -p 80:80 -d siacentral/sia-lite-wallet-web
 + NPM 10+
 + Go 1.26+
 
+### Install dependencies
+```
+npm install
+```
+
 ### Compiles and hot-reloads for development
 ```
-make run
+npm run dev
 ```
+
+Use `npm run dev:testnet` to run with testnet WASM.
 
 ### Compiles and minifies for production
 ```
-make build
+npm run build
 ```
+
+Use `npm run build:testnet` for a testnet production build, or `npm run build:wasm` to build only WASM.
 
 ### Build Docker Image
 ```
-make docker
+npm run docker
 ```
 
 ### Lint and fixes files
 ```
-make lint
+npm run lint
+```
+
+Requires `golangci-lint` in addition to the prerequisites above. Use `npm run lint:js` or `npm run lint:go` to run either linter separately.
+
+### Run tests
+```
+npm test
 ```

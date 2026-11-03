@@ -141,6 +141,7 @@
 			"validating": "正在验证种子...",
 			"savingWallet": "正在保存钱包...",
 			"seedInvalid": "该恢复种子与此钱包不匹配。",
+			"seedSuggestionsFailed": "无法加载种子词建议。请重新选择该输入框以重试。",
 			"seedConfirmed": "恢复种子已确认。",
 			"confirmProgress": "已输入 {{0}} / {{1}} 个单词",
 			"copy": "复制",

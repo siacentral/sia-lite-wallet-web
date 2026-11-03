@@ -2062,3 +2062,56 @@ export function prefixWords(prefix) {
 
 	return WORDS.filter(w => w.startsWith(p));
 }
+
+// Returns checksum-compatible replacements, or undefined until the other 11 words are valid.
+export async function checksumWords(words, index) {
+	if (!Array.isArray(words) || words.length !== 12 || !Number.isInteger(index) || index < 0 || index >= 12)
+		return undefined;
+
+	for (let i = 0; i < words.length; i++) {
+		if (i !== index && !WORD_MAP.has(words[i]))
+			return undefined;
+	}
+
+	const entropy = new Uint8Array(16),
+		matches = [],
+		checksum = index === 11 ? 0 : WORD_MAP.get(words[11]) & 15;
+
+	try {
+		for (let bit = 0; bit < 128; bit++) {
+			const position = Math.floor(bit / 11);
+
+			if (position !== index)
+				entropy[bit >> 3] |= ((WORD_MAP.get(words[position]) >> (10 - bit % 11)) & 1) << (7 - bit % 8);
+		}
+
+		// The final word has seven entropy bits and four SHA-256 checksum bits.
+		const count = index === 11 ? 128 : WORDS.length;
+
+		for (let candidate = 0; candidate < count; candidate++) {
+			if (index === 11)
+				entropy[15] = (entropy[15] & 128) | candidate;
+			else {
+				for (let offset = 0; offset < 11; offset++) {
+					const bit = index * 11 + offset,
+						mask = 1 << (7 - bit % 8);
+
+					entropy[bit >> 3] = (entropy[bit >> 3] & ~mask) | (((candidate >> (10 - offset)) & 1) ? mask : 0);
+				}
+			}
+
+			const digest = new Uint8Array(await globalThis.crypto.subtle.digest('SHA-256', entropy)),
+				candidateChecksum = digest[0] >> 4;
+
+			digest.fill(0);
+			if (index === 11)
+				matches.push(WORDS[(candidate << 4) | candidateChecksum]);
+			else if (candidateChecksum === checksum)
+				matches.push(WORDS[candidate]);
+		}
+
+		return matches;
+	} finally {
+		entropy.fill(0);
+	}
+}

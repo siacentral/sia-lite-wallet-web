@@ -6,6 +6,8 @@
 				<word-input
 					:value="internal[i - 1]"
 					:index="i"
+					:expected-word="expectedWords && expectedWords[i - 1]"
+					:phrase="drafts"
 					:readonly="readonly"
 					:drop-up="i > count - 4"
 					:label="translate('createWalletModal.seedWord', i)"
@@ -24,7 +26,6 @@
 
 <script>
 import WordInput from '@/components/wallet/WordInput';
-import { WORD_MAP } from '@/sia/bip39';
 
 export default {
 	components: {
@@ -33,6 +34,8 @@ export default {
 	emits: ['editing', 'input'],
 	props: {
 		words: Array,
+		// Original seed used to check word positions during confirmation.
+		expectedWords: Array,
 		count: {
 			type: Number,
 			default: 12
@@ -41,12 +44,14 @@ export default {
 	},
 	data() {
 		return {
-			internal: this.normalize(this.words)
+			internal: this.normalize(this.words),
+			drafts: this.normalize(this.words)
 		};
 	},
 	watch: {
 		words(v) {
 			this.internal = this.normalize(v);
+			this.drafts = this.normalize(v);
 		}
 	},
 	methods: {
@@ -61,16 +66,15 @@ export default {
 			return base.slice(0, this.count);
 		},
 		onEditing(index, word) {
-			const draft = this.internal.slice();
-
-			draft[index] = word;
-			this.$emit('editing', draft.join(' '));
+			this.drafts[index] = word;
+			this.$emit('editing', this.drafts.join(' '));
 		},
 		onWord(index, word) {
 			this.internal[index] = word;
-			this.$emit('editing', this.internal.join(' '));
+			this.drafts[index] = word;
+			this.$emit('editing', this.drafts.join(' '));
 
-			if (this.internal.every(w => w !== ''))
+			if (this.internal.every((w, i) => w !== '' && w === this.drafts[i]))
 				this.$emit('input', this.internal.join(' '));
 		},
 		focusNext(index) {
@@ -86,11 +90,12 @@ export default {
 			const phrase = event.clipboardData?.getData('text').trim().toLowerCase(),
 				words = phrase ? phrase.split(/\s+/) : [];
 
-			if (words.length !== this.count || !words.every(word => WORD_MAP.has(word)))
+			if (words.length !== this.count)
 				return;
 
 			event.preventDefault();
 			this.internal = words;
+			this.drafts = words.slice();
 			this.$emit('editing', phrase);
 			this.$emit('input', phrase);
 		},
@@ -112,6 +117,8 @@ export default {
 
 			for (let i = 0; i < this.count; i++)
 				this.internal[i] = words[i] ?? '';
+
+			this.drafts = this.internal.slice();
 		}
 	}
 };

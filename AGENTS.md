@@ -18,10 +18,14 @@ The `@` alias resolves to `src/`.
 
 ## Dev Commands
 
-- `make run` — builds WASM, installs dependencies, and starts the Vite dev server
-- `make build` — production build including WASM and Vite
-- `make lint` — runs Go and JS/Vue linters
-- `make build-wasm-testnet` — builds WASM with `-tags='testnet'`
+- `npm install` — installs dependencies
+- `npm run dev` — builds WASM and starts the Vite dev server
+- `npm run dev:testnet` — builds testnet WASM and starts the Vite dev server
+- `npm run build` — production build including WASM and Vite
+- `npm run build:testnet` — testnet production build including WASM and Vite
+- `npm run lint` — runs Go and JS/Vue linters
+- `npm test` — runs JS and Go tests
+- `npm run build:wasm:testnet` — builds WASM with `-tags='testnet'`
 
 WASM builds require Go 1.26+ and use `GOOS=js GOARCH=wasm`.
 
@@ -29,9 +33,9 @@ WASM builds require Go 1.26+ and use `GOOS=js GOARCH=wasm`.
 
 Before considering a change complete:
 
-- Run `make lint`.
-- Run `make build` for changes affecting WASM, dependencies, Vite configuration, build configuration, or production bundling.
-- There is currently no automated test suite. Manually reason through affected flows and edge cases.
+- Run `npm run lint`.
+- Run `npm run build` for changes affecting WASM, dependencies, Vite configuration, build configuration, or production bundling.
+- Run `npm test` and manually reason through affected flows and edge cases.
 - Do not claim a command passed unless you ran it.
 - If validation cannot be run, state what was not run and why.
 
@@ -62,13 +66,13 @@ Other architecture details:
 
 - Do not edit `src/sia/sia.wasm` directly; it is generated from `wasm/`.
 - `wasm_exec.js` is copied from Go's GOROOT during the WASM build. Do not modify generated copies directly.
-- Regenerate build artifacts through the Makefile targets.
+- Regenerate build artifacts through the npm scripts.
 
 ## Gotchas
 
 - Testnet WASM builds require `-tags='testnet'`.
 - `SIASCAN_ADDRESS` in `wasm/main.go` points to the SiaCentral API.
-- There is no automated test suite in this repository.
+- Tests use Vitest for JS/Vue and `go test` for Go.
 - Frontend functionality depends on a successfully built WASM binary.
 
 ## Code Quality
