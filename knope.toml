@@ -1,0 +1,85 @@
+[changes]
+ignore_conventional_commits = true
+
+[package]
+versioned_files = ["package.json", "package-lock.json"]
+changelog = "CHANGELOG.md"
+
+[github]
+owner = "siacentral"
+repo = "sia-lite-wallet-web"
+
+[[workflows]]
+name = "document-change"
+
+[[workflows.steps]]
+type = "CreateChangeFile"
+
+[[workflows]]
+name = "prepare-release"
+
+[[workflows.steps]]
+type = "Command"
+command = "git switch -c release"
+
+[[workflows.steps]]
+type = "PrepareRelease"
+
+[[workflows.steps]]
+type = "Command"
+command = 'git commit -m "chore: prepare release $version"'
+variables = { "$version" = "Version" }
+
+[[workflows.steps]]
+type = "Command"
+command = "git push --force-with-lease --set-upstream origin release"
+
+[[workflows.steps]]
+type = "CreatePullRequest"
+base = "master"
+
+[workflows.steps.title]
+template = "chore: prepare release $version"
+variables = { "$version" = "Version" }
+
+[workflows.steps.body]
+template = "Merging this PR publishes v$version and its container image to GHCR after validation.\n\n$changelog"
+variables = { "$version" = "Version", "$changelog" = "ChangelogEntry" }
+
+[[workflows]]
+name = "release"
+
+[[workflows.steps]]
+type = "Command"
+command = '''
+set -eu
+if git rev-parse -q --verify "refs/tags/v$version^{commit}" >/dev/null; then
+  test "$(git rev-parse "refs/tags/v$version^{commit}")" = "$(git rev-parse HEAD)"
+else
+  git tag "v$version"
+fi
+git push origin "v$version"
+'''
+shell = true
+variables = { "$version" = "Version" }
+
+[[workflows.steps]]
+type = "Command"
+command = '''
+set -eu
+notes_file=$(mktemp)
+trap 'rm -f "$notes_file"' EXIT
+# Read notes from disk so changelog text is never interpreted as shell code.
+awk -v version="$version" '
+  /^## / { if (found) exit; if ($2 == version) { found = 1; next } }
+  found { print }
+' CHANGELOG.md > "$notes_file"
+test -s "$notes_file"
+if gh release view "v$version" >/dev/null 2>&1; then
+  gh release edit "v$version" --title "v$version" --notes-file "$notes_file"
+else
+  gh release create "v$version" --verify-tag --title "v$version" --notes-file "$notes_file"
+fi
+'''
+shell = true
+variables = { "$version" = "Version" }

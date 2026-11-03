@@ -1,6 +1,6 @@
 Sia Central's Lite Wallet is a secure Siacoin (SC) wallet web app. This wallet has been tested and works with modern evergreen browsers: Chromium based browsers on Desktop, Safari on iOS, and Chrome on Android. Sensitive data, such as wallet seeds, is stored encrypted using a user-set passphrase and never leaves the device.
 
-**[Sia Central Lite Wallet](https://wallet.siacentral.com)** | **[GitHub](https://github.com/siacentral/sia-lite-wallet-web)** | **[Docker](https://hub.docker.com/r/siacentral/sia-lite-wallet-web)**
+**[Sia Central Lite Wallet](https://wallet.siacentral.com)** | **[GitHub](https://github.com/siacentral/sia-lite-wallet-web)** | **[Container](https://github.com/siacentral/sia-lite-wallet-web/pkgs/container/sia-lite-wallet-web)**
 
 ### Main Features
 
@@ -32,13 +32,13 @@ This wallet uses a Sia wrapper that allows parts of Sia to be run directly in th
 
 ## Run Docker
 ```
-docker run -p 80:80 -d siacentral/sia-lite-wallet-web
+docker run -p 80:80 -d ghcr.io/siacentral/sia-lite-wallet-web:latest
 ```
 
 ## Build Locally
 
 ### Prerequisites
-+ Node v20.19+ or v22.12+
++ Node 24+
 + NPM 10+
 + Go 1.26+
 
@@ -77,3 +77,15 @@ Requires `golangci-lint` in addition to the prerequisites above. Use `npm run li
 ```
 npm test
 ```
+
+## Releases
+
+Use [Knope](https://knope.tech/) to document changes that should appear in the next release:
+
+```sh
+knope document-change
+```
+
+Commit the generated `.changeset/*.md` file with the change. After it reaches `master`, automation creates or updates the `release` PR with a version bump and changelog. Merging that PR runs validation, publishes the versioned container image and `latest` to GHCR, and creates the Git tag and GitHub release. Ordinary `master` pushes publish development images tagged `master` and `sha-<commit>`.
+
+The workflows use the built-in `GITHUB_TOKEN`; enable **Allow GitHub Actions to create and approve pull requests** in the repository's Actions settings. GitHub may require a maintainer to approve CI runs on the automatically created release PR. No Docker Hub credentials are needed.

@@ -24,6 +24,7 @@
 		>
 		<ul
 			v-if="open && candidates.length !== 0"
+			ref="list"
 			:id="listID"
 			:class="{ 'word-input-list-up': dropUp }"
 			class="word-input-list"
@@ -128,7 +129,7 @@ export default {
 			if (this.text.trim() === '')
 				return [];
 
-			return this.matchingWords.filter(w => w !== this.value).slice(0, 5);
+			return this.matchingWords;
 		}
 	},
 	watch: {
@@ -141,6 +142,19 @@ export default {
 		},
 		checksumContext(context) {
 			this.updateChecksumCandidates(context);
+		},
+		async highlighted() {
+			await this.$nextTick();
+			const list = this.$refs.list,
+				option = list?.children[this.highlighted];
+
+			if (!option)
+				return;
+
+			if (option.offsetTop < list.scrollTop)
+				list.scrollTop = option.offsetTop;
+			else if (option.offsetTop + option.offsetHeight > list.scrollTop + list.clientHeight)
+				list.scrollTop = option.offsetTop + option.offsetHeight - list.clientHeight;
 		}
 	},
 	beforeUnmount() {
@@ -252,7 +266,9 @@ export default {
 				}
 				break;
 			case 'Tab':
-				if (this.exactWord)
+				if (this.open && this.candidates[this.highlighted])
+					this.commit(this.candidates[this.highlighted]);
+				else if (this.exactWord)
 					this.commit(this.exactWord);
 				break;
 			case 'Escape':
@@ -301,7 +317,8 @@ export default {
 	z-index: 100;
 	margin: 0;
 	padding: 0;
-	overflow: hidden;
+	max-height: calc(6rem + 95px);
+	overflow-y: auto;
 	list-style: none;
 	text-align: left;
 	font-family: inherit;

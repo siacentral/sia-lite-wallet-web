@@ -45,13 +45,13 @@ describe('WordInput', () => {
 		words.forEach(w => expect(w.startsWith('ab')).toBe(true));
 	});
 
-	it('keeps the suggestion menu short and opens upward when requested', async() => {
+	it('keeps all matching suggestions available and opens upward when requested', async() => {
 		const wrapper = mount(WordInput, { props: { value: '', index: 12, dropUp: true } });
 
 		type(wrapper, 'a');
 		await wrapper.vm.$nextTick();
 
-		expect(wrapper.findAll('.word-input-list li')).toHaveLength(5);
+		expect(wrapper.findAll('.word-input-list li').map(option => option.text())).toEqual(prefixWords('a'));
 		expect(wrapper.find('.word-input-list').classes()).toContain('word-input-list-up');
 	});
 
@@ -62,6 +62,28 @@ describe('WordInput', () => {
 		await wrapper.vm.$nextTick();
 
 		expect(wrapper.find('.word-input-list').exists()).toBe(false);
+	});
+
+	it('scrolls to and selects a keyboard suggestion beyond the first five', async() => {
+		const wrapper = mount(WordInput, { props: { index: 1 } });
+		const input = wrapper.find('.word-input-field');
+
+		await input.setValue('a');
+		const list = wrapper.find('.word-input-list').element,
+			option = list.children[5];
+
+		Object.defineProperty(list, 'clientHeight', { value: 100 });
+		Object.defineProperties(option, {
+			offsetTop: { value: 100 },
+			offsetHeight: { value: 20 }
+		});
+		for (let i = 0; i < 5; i++)
+			await input.trigger('keydown', { key: 'ArrowDown' });
+
+		expect(list.scrollTop).toBe(20);
+		expect(input.attributes('aria-activedescendant')).toBe(option.id);
+		await input.trigger('keydown', { key: 'Enter' });
+		expect(wrapper.emitted('input')).toEqual([['absent']]);
 	});
 
 	it('commits a highlighted candidate on Enter', async() => {
@@ -76,6 +98,37 @@ describe('WordInput', () => {
 		await wrapper.vm.$nextTick();
 		expect(wrapper.emitted('input')).toBeTruthy();
 		expect(wrapper.emitted('input')[0]).toEqual(['abandon']);
+	});
+
+	it.each([
+		['ab', 'ability', false],
+		['ab', 'ability', true],
+		['act', 'action', false]
+	])('accepts the highlighted suggestion on Tab (prefix=%s, word=%s, shift=%s)', async(prefix, word, shiftKey) => {
+		const wrapper = mount(WordInput, { props: { index: 1 } });
+		const input = wrapper.find('.word-input-field');
+
+		await input.setValue(prefix);
+		await input.trigger('keydown', { key: 'ArrowDown' });
+		const event = new KeyboardEvent('keydown', { key: 'Tab', shiftKey, bubbles: true, cancelable: true });
+
+		input.element.dispatchEvent(event);
+		await wrapper.vm.$nextTick();
+		expect(wrapper.emitted('input')).toEqual([[word]]);
+		expect(wrapper.emitted('next')).toBeFalsy();
+		expect(event.defaultPrevented).toBe(false);
+		expect(wrapper.find('.word-input-list').exists()).toBe(false);
+	});
+
+	it('does not accept a dismissed suggestion on Tab', async() => {
+		const wrapper = mount(WordInput, { props: { index: 1 } });
+		const input = wrapper.find('.word-input-field');
+
+		await input.setValue('ab');
+		await input.trigger('keydown', { key: 'ArrowDown' });
+		await input.trigger('keydown', { key: 'Escape' });
+		await input.trigger('keydown', { key: 'Tab' });
+		expect(wrapper.emitted('input')).toBeFalsy();
 	});
 
 	it('commits a clicked suggestion and requests the next input', async() => {
@@ -164,7 +217,7 @@ describe('WordInput', () => {
 		expect(wrapper.find('.word-input-field').classes()).not.toContain('word-input-complete');
 	});
 
-	it('filters suggestions by checksum before limiting the visible list', async() => {
+	it('filters suggestions by checksum without truncating the matches', async() => {
 		const wrapper = mount(WordInput, {
 			props: { index: 12, phrase: [...Array(11).fill('abandon'), ''], expectedWord: 'about' }
 		});
@@ -177,7 +230,8 @@ describe('WordInput', () => {
 
 		const suggestions = wrapper.findAll('.word-input-list li').map(option => option.text());
 
-		expect(suggestions).toHaveLength(5);
+		expect(suggestions).toEqual(wrapper.vm.checksumCandidates.filter(word => word.startsWith('a')));
+		expect(suggestions.length).toBeGreaterThan(5);
 		expect(suggestions).toContain('about');
 		expect(suggestions).not.toContain('abandon');
 		expect(suggestions).toContain('actual');
@@ -295,10 +349,29 @@ describe('WordInput', () => {
 		expect(wrapper.emitted('input')).toBeFalsy();
 	});
 
-	it('excludes the already-committed word from candidates', () => {
-		const candidates = prefixWords('abandon').filter(w => w !== 'abandon');
+	it.each(['', 'erase'])('suggests a matching word on initial entry and when editing (value=%s)', async(value) => {
+		const wrapper = mount(WordInput, { props: { value, index: 11 } });
+		const input = wrapper.find('.word-input-field');
 
-		expect(candidates).not.toContain('abandon');
+		await input.trigger('focus');
+		for (const prefix of ['e', 'er', 'erase']) {
+			await input.setValue(prefix);
+			expect(wrapper.findAll('.word-input-list li').map(option => option.text())).toContain('erase');
+		}
+	});
+
+	it.each(['', 'thank'])('retains checksum-compatible suggestions at word 11 (value=%s)', async(value) => {
+		const phrase = 'legal winner thank year wave sausage worth useful legal winner thank yellow'.split(' ');
+		phrase[10] = value;
+		const wrapper = mount(WordInput, { props: { value, index: 11, phrase } });
+		const input = wrapper.find('.word-input-field');
+
+		await input.trigger('focus');
+		await input.setValue('th');
+		await vi.waitFor(() => expect(wrapper.vm.checkedContext).not.toBeNull());
+		expect(wrapper.findAll('.word-input-list li').map(option => option.text())).toContain('thank');
+		await wrapper.findAll('.word-input-list li').find(option => option.text() === 'thank').trigger('mousedown');
+		expect(wrapper.emitted('input')).toEqual([['thank']]);
 	});
 
 	it('synchronizes its autocomplete text when the committed value changes', async() => {
@@ -308,6 +381,6 @@ describe('WordInput', () => {
 		await wrapper.find('.word-input-field').trigger('focus');
 
 		expect(wrapper.vm.text).toBe('about');
-		expect(wrapper.find('.word-input-list').exists()).toBe(false);
+		expect(wrapper.findAll('.word-input-list li').map(option => option.text())).toEqual(['about']);
 	});
 });
