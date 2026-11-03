@@ -43,7 +43,7 @@ try {
 			stdio: 'inherit'
 		});
 	} else {
-		const image = 'siacentral/sia-lite-wallet-web',
+		const image = 'ghcr.io/siacentral/sia-lite-wallet-web',
 			args = ['build', '-t', `${image}:sia`, '-t', `${image}:${revision}`];
 
 		if (clean)

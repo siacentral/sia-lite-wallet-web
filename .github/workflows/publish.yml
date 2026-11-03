@@ -1,36 +1,94 @@
 name: Publish
+
 on:
   push:
-    branches:
-      - master
+    branches: [master]
+  pull_request:
+    branches: [master]
+    types: [closed]
+
+permissions: {}
+
+concurrency:
+  group: publish-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
 
 jobs:
+  test:
+    if: >-
+      github.event_name == 'push' ||
+      (github.event.pull_request.merged == true &&
+       github.event.pull_request.head.ref == 'release' &&
+       github.event.pull_request.head.repo.full_name == github.repository)
+    permissions:
+      contents: read
+    uses: ./.github/workflows/test.yml
+
   docker:
+    needs: test
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     steps:
-      - uses: actions/checkout@v7
-      - uses: docker/setup-qemu-action@v4
-      - uses: docker/setup-buildx-action@v4
-      - uses: docker/login-action@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          username: ${{ secrets.DOCKERHUB_USER }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - uses: docker/login-action@v4
+          ref: ${{ github.event.pull_request.merge_commit_sha || github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Read release version
+        id: version
+        if: github.event_name == 'pull_request'
+        run: |
+          version=$(node -p 'require("./package.json").version')
+          [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]
+          if git rev-parse -q --verify "refs/tags/v$version^{commit}" >/dev/null; then
+            test "$(git rev-parse "refs/tags/v$version^{commit}")" = "$(git rev-parse HEAD)"
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+      - uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1 # v4.4.0
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+      - uses: docker/login-action@81c6f93d4bc991e510b342a00b419b3bb4efc5c6 # v4.7.0
         with:
           registry: ghcr.io
-          username: ${{ github.repository_owner }}
+          username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: dockerhub
-        uses: docker/build-push-action@v7
+      - uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
+        id: meta
+        with:
+          images: ghcr.io/${{ github.repository }}
+          flavor: latest=false
+          tags: |
+            type=raw,value=master,enable=${{ github.event_name == 'push' }}
+            type=sha,format=long,enable=${{ github.event_name == 'push' }}
+            type=semver,pattern={{version}},value=${{ steps.version.outputs.version }},enable=${{ github.event_name == 'pull_request' }}
+            type=raw,value=latest,enable=${{ github.event_name == 'pull_request' }}
+      - name: Publish to GHCR
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:
           context: .
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: siacentral/sia-lite-wallet-web:latest
-      - name: ghcr
-        uses: docker/build-push-action@v7
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=wallet
+          cache-to: type=gha,scope=wallet,mode=max
+
+  release:
+    if: github.event_name == 'pull_request'
+    needs: docker
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          context: .
-          platforms: linux/amd64,linux/arm64
-          push: true
-          tags: ghcr.io/siacentral/sia-lite-wallet-web:latest
+          ref: ${{ github.event.pull_request.merge_commit_sha }}
+          fetch-depth: 0
+      - uses: knope-dev/action@19617851f9f13ab2f27a05989c55efb18aca3675 # v2.1.2
+        with:
+          version: 0.23.2
+      - name: Create GitHub release
+        run: knope release --verbose
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
