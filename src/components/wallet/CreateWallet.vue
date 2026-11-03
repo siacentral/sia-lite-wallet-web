@@ -53,7 +53,7 @@
 		</div>
 		<div class="wallet-step wallet-seed-step" v-else-if="step === 'confirm'">
 			<p>{{ translate('createWalletModal.' + (createType === 'recover' ? 'confirmRecover' : 'confirmNew')) }}</p>
-			<seed-phrase-input v-if="seedWordCount === 12" :count="seedWordCount" @editing="onConfirmEditing" @input="onConfirmInput" />
+			<seed-phrase-input v-if="seedWordCount === 12" :count="seedWordCount" :expected-words="seedWords" @editing="onConfirmEditing" @input="onConfirmInput" />
 			<textarea
 				v-else
 				v-model="confirmPhrase"

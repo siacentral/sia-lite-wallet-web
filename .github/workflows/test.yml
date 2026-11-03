@@ -17,6 +17,8 @@ jobs:
           go-version-file: go.mod
       - name: Install Dependencies
         run: npm i
+      - name: Install Go Linter
+        run: go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.15.0
 
       - name: Lint
         run: npm run lint
@@ -34,10 +36,8 @@ jobs:
           cache: true
       - name: Install Dependencies
         run: npm ci
-      - name: Vitest
+      - name: Test
         run: npm test
-      - name: Go Test
-        run: go test ./wasm/internal/...
   build:
     runs-on: ubuntu-latest
     steps:
@@ -48,5 +48,7 @@ jobs:
       - uses: actions/setup-go@v7
         with:
           go-version-file: go.mod
+      - name: Install Dependencies
+        run: npm ci
       - name: Build
-        run: make build
+        run: npm run build

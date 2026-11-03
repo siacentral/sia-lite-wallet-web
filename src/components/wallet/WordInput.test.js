@@ -1,5 +1,6 @@
-import { describe, it, expect } from 'vitest';
-import { mount } from '@vue/test-utils';
+import { afterEach, beforeEach, describe, it, expect, vi } from 'vitest';
+import { flushPromises, mount } from '@vue/test-utils';
+import { webcrypto } from 'node:crypto';
 
 import WordInput from './WordInput.vue';
 import { prefixWords } from '@/sia/bip39';
@@ -14,6 +15,14 @@ function type(wrapper, text) {
 }
 
 describe('WordInput', () => {
+	beforeEach(() => {
+		vi.stubGlobal('crypto', webcrypto);
+	});
+
+	afterEach(() => {
+		vi.unstubAllGlobals();
+	});
+
 	it('does not open the full word list for an empty input', async() => {
 		const wrapper = mount(WordInput, { props: { value: '' } });
 
@@ -115,15 +124,119 @@ describe('WordInput', () => {
 		expect(wrapper.emitted('input')).toEqual([['abandon']]);
 	});
 
-	it('re-commits the previous word when an unmatched input loses focus', async() => {
+	it('keeps an unmatched word visible and invalid when it loses focus', async() => {
 		const wrapper = mount(WordInput, { props: { value: 'abandon', index: 1 } });
 
 		type(wrapper, 'zzzz');
 		await wrapper.vm.$nextTick();
 		await wrapper.find('.word-input-field').trigger('blur');
 
-		expect(wrapper.vm.text).toBe('abandon');
-		expect(wrapper.emitted('input')).toEqual([['abandon']]);
+		expect(wrapper.vm.text).toBe('zzzz');
+		expect(wrapper.emitted('input')).toEqual([['zzzz']]);
+		expect(wrapper.find('.word-input-field').attributes('aria-invalid')).toBe('true');
+		expect(wrapper.find('.word-input-field').classes()).toContain('word-input-invalid');
+	});
+
+	it('marks a dictionary word incorrect for its confirmation position', async() => {
+		const wrapper = mount(WordInput, {
+			props: { value: 'ability', expectedWord: 'abandon', index: 1 }
+		});
+		const input = wrapper.find('.word-input-field');
+
+		expect(input.classes()).toContain('word-input-invalid');
+		expect(input.classes()).not.toContain('word-input-complete');
+		expect(input.attributes('aria-invalid')).toBe('true');
+
+		await input.setValue('aban');
+		expect(input.attributes('aria-invalid')).toBe('false');
+		await input.trigger('blur');
+		await wrapper.setProps({ value: 'abandon' });
+		expect(input.classes()).toContain('word-input-complete');
+		expect(input.classes()).not.toContain('word-input-invalid');
+	});
+
+	it('does not mark empty or read-only fields invalid', async() => {
+		const wrapper = mount(WordInput, { props: { expectedWord: 'about' } });
+
+		expect(wrapper.find('.word-input-field').attributes('aria-invalid')).toBe('false');
+		await wrapper.setProps({ value: 'abandon', readonly: true });
+		expect(wrapper.find('.word-input-field').attributes('aria-invalid')).toBe('false');
+		expect(wrapper.find('.word-input-field').classes()).not.toContain('word-input-complete');
+	});
+
+	it('filters suggestions by checksum before limiting the visible list', async() => {
+		const wrapper = mount(WordInput, {
+			props: { index: 12, phrase: [...Array(11).fill('abandon'), ''], expectedWord: 'about' }
+		});
+		const input = wrapper.find('.word-input-field');
+
+		await input.trigger('focus');
+		await input.setValue('a');
+		expect(wrapper.find('.word-input-list').exists()).toBe(false);
+		await vi.waitFor(() => expect(wrapper.vm.checkedContext).not.toBeNull());
+
+		const suggestions = wrapper.findAll('.word-input-list li').map(option => option.text());
+
+		expect(suggestions).toHaveLength(5);
+		expect(suggestions).toContain('about');
+		expect(suggestions).not.toContain('abandon');
+		expect(suggestions).toContain('actual');
+		await input.setValue('ab');
+		await input.trigger('blur');
+		expect(wrapper.emitted('input')).toEqual([['about']]);
+	});
+
+	it('discards checksum suggestions after another word is edited', async() => {
+		const words = [...Array(11).fill('abandon'), ''];
+		const wrapper = mount(WordInput, { props: { index: 12, phrase: words } });
+		const input = wrapper.find('.word-input-field');
+
+		await input.trigger('focus');
+		await input.setValue('ab');
+		await wrapper.setProps({ phrase: ['', ...words.slice(1)] });
+		await flushPromises();
+
+		expect(wrapper.vm.checkedContext).toBeNull();
+		expect(wrapper.findAll('.word-input-list li').map(option => option.text())).toContain('abandon');
+	});
+
+	it('keeps a pending checksum dropdown dismissed after Escape', async() => {
+		const wrapper = mount(WordInput, {
+			props: { index: 12, phrase: [...Array(11).fill('abandon'), ''] }
+		});
+		const input = wrapper.find('.word-input-field');
+
+		await input.trigger('focus');
+		await input.setValue('ab');
+		await input.trigger('keydown', { key: 'Escape' });
+		await vi.waitFor(() => expect(wrapper.vm.checkedContext).not.toBeNull());
+
+		expect(wrapper.find('.word-input-list').exists()).toBe(false);
+	});
+
+	it('reports checksum failures without displaying unfiltered suggestions or error details', async() => {
+		vi.stubGlobal('crypto', { subtle: { digest: vi.fn().mockRejectedValue(new Error('hash failed')) } });
+		const pushNotification = vi.fn();
+		const wrapper = mount(WordInput, {
+			props: { index: 12, phrase: [...Array(11).fill('abandon'), ''] },
+			global: {
+				mocks: {
+					pushNotification,
+					translate: key => key
+				}
+			}
+		});
+		const input = wrapper.find('.word-input-field');
+
+		await input.trigger('focus');
+		await input.setValue('ab');
+		await flushPromises();
+
+		expect(wrapper.find('.word-input-list').exists()).toBe(false);
+		expect(pushNotification).toHaveBeenCalledWith({
+			severity: 'danger',
+			message: 'createWalletModal.seedSuggestionsFailed'
+		});
 	});
 
 	it('does not re-commit an unchanged word on blur', async() => {
@@ -133,6 +246,18 @@ describe('WordInput', () => {
 		await wrapper.find('.word-input-field').trigger('blur');
 
 		expect(wrapper.emitted('input')).toBeFalsy();
+	});
+
+	it('re-commits a normalized edit of the same word on blur', async() => {
+		const wrapper = mount(WordInput, { props: { value: 'about', expectedWord: 'about', index: 12 } });
+		const input = wrapper.find('.word-input-field');
+
+		await input.setValue(' ABOUT ');
+		await input.trigger('blur');
+
+		expect(wrapper.vm.text).toBe('about');
+		expect(wrapper.emitted('input')).toEqual([['about']]);
+		expect(input.attributes('aria-invalid')).toBe('false');
 	});
 
 	it('disables browser text services on the input', () => {

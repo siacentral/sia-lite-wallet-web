@@ -1,7 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { flushPromises, mount } from '@vue/test-utils';
 
 vi.mock('@/sia', () => ({
 	generateAddresses: vi.fn()
+}));
+
+vi.mock('@/ledger/sia', () => ({
+	supportedTransports: vi.fn().mockResolvedValue([])
 }));
 
 import CreateWallet from './CreateWallet.vue';
@@ -19,6 +24,30 @@ function confirmationContext() {
 		confirmValidating: false,
 		seedWordCount: 12
 	};
+}
+
+async function mountConfirmation() {
+	vi.useFakeTimers();
+	const wrapper = mount(CreateWallet, {
+		global: {
+			stubs: { BuildWallet: true, ExportSeedModal: true, ImportSiaAddresses: true, icon: true },
+			mocks: {
+				$store: { state: { password: '', changeSeedType: false } },
+				translate: id => id,
+				pushNotification: vi.fn()
+			}
+		}
+	});
+
+	await vi.advanceTimersByTimeAsync(300);
+	vi.useRealTimers();
+	await wrapper.setData({
+		step: 'confirm',
+		wallet: { seed: phrase, type: 'default' },
+		addresses: [{ address: 'wallet-address' }]
+	});
+
+	return wrapper;
 }
 
 describe('CreateWallet seed confirmation', () => {
@@ -66,6 +95,63 @@ describe('CreateWallet seed confirmation', () => {
 		expect(context.confirmPhrase).toBe('ability');
 		expect(context.confirmValid).toBe(false);
 		expect(context.confirmValidating).toBe(false);
+	});
+
+	it('marks dictionary words that do not match the original seed position as invalid', async() => {
+		const wrapper = await mountConfirmation(),
+			input = wrapper.find('.word-input-field');
+
+		await input.setValue('ability');
+		await input.trigger('blur');
+
+		expect(input.classes()).toContain('word-input-invalid');
+		expect(input.classes()).not.toContain('word-input-complete');
+		expect(input.attributes('aria-invalid')).toBe('true');
+		expect(wrapper.find('button').element.disabled).toBe(true);
+		wrapper.unmount();
+	});
+
+	it('keeps confirmation disabled when another field commits after an invalid draft edit', async() => {
+		generateAddresses.mockImplementation(async(value) => {
+			if (value !== phrase)
+				throw new Error('invalid seed');
+
+			return [{ address: 'wallet-address' }];
+		});
+		const wrapper = await mountConfirmation(),
+			inputs = wrapper.findAll('.word-input-field'),
+			paste = new Event('paste', { bubbles: true, cancelable: true });
+
+		Object.defineProperty(paste, 'clipboardData', {
+			value: { getData: () => phrase }
+		});
+		inputs[0].element.dispatchEvent(paste);
+		await flushPromises();
+
+		expect(wrapper.vm.confirmValid).toBe(true);
+		expect(wrapper.find('button').element.disabled).toBe(false);
+		expect(generateAddresses).toHaveBeenCalledOnce();
+
+		await inputs[0].setValue('zzzz');
+		await inputs[1].trigger('keydown', { key: 'Enter' });
+		await flushPromises();
+
+		expect(inputs[0].element.value).toBe('zzzz');
+		expect(inputs[0].classes()).toContain('word-input-invalid');
+		expect(wrapper.vm.confirmPhrase.split(' ')[0]).toBe('zzzz');
+		expect(wrapper.vm.confirmValid).toBe(false);
+		expect(wrapper.find('button').element.disabled).toBe(true);
+		expect(generateAddresses).toHaveBeenCalledOnce();
+
+		await inputs[0].trigger('blur');
+		await inputs[1].trigger('keydown', { key: 'Enter' });
+		await flushPromises();
+
+		expect(inputs[0].element.value).toBe('zzzz');
+		expect(wrapper.vm.confirmValid).toBe(false);
+		expect(wrapper.find('button').element.disabled).toBe(true);
+		expect(generateAddresses.mock.calls.slice(1).every(([value]) => value.startsWith('zzzz '))).toBe(true);
+		wrapper.unmount();
 	});
 
 	it('reports progress using committed BIP-39 words', () => {

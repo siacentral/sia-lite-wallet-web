@@ -26,7 +26,8 @@ publish.sh
 /dist_electron
 
 #Ignore Sia WASM
-sia.wasm
+**/sia.wasm
+**/wasm_exec.js
 
 #Ignore translation utils
 translation/utils/*

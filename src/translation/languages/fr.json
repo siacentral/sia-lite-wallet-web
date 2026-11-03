@@ -141,6 +141,7 @@
 			"validating": "Validation de la seed...",
 			"savingWallet": "Enregistrement du portefeuille...",
 			"seedInvalid": "Cette seed de récupération ne correspond pas à ce portefeuille.",
+			"seedSuggestionsFailed": "Impossible de charger les suggestions de mots. Sélectionnez à nouveau le champ pour réessayer.",
 			"seedConfirmed": "Seed de récupération confirmée.",
 			"confirmProgress": "{{0}} mots saisis sur {{1}}",
 			"copy": "Copier",

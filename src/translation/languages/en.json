@@ -143,6 +143,7 @@
 			"validating": "Validating seed...",
 			"savingWallet": "Saving wallet...",
 			"seedInvalid": "That recovery seed does not match this wallet.",
+			"seedSuggestionsFailed": "Could not load seed word suggestions. Focus the word again to retry.",
 			"seedConfirmed": "Recovery seed confirmed.",
 			"confirmProgress": "{{0}} of {{1}} words entered",
 			"copy": "Copy",

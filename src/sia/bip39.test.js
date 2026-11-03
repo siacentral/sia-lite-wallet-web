@@ -1,7 +1,7 @@
-import { describe, it, expect } from 'vitest';
-import { createHash } from 'node:crypto';
+import { afterEach, beforeEach, describe, it, expect, vi } from 'vitest';
+import { createHash, webcrypto } from 'node:crypto';
 
-import { WORDS, WORD_MAP, prefixWords } from '@/sia/bip39';
+import { WORDS, WORD_MAP, prefixWords, checksumWords } from '@/sia/bip39';
 
 describe('bip39 wordlist', () => {
 	it('has 2048 unique words', () => {
@@ -32,5 +32,80 @@ describe('bip39 wordlist', () => {
 
 	it('prefixWords is empty for a non-matching prefix', () => {
 		expect(prefixWords('zzzz')).toEqual([]);
+	});
+});
+
+describe('bip39 checksum suggestions', () => {
+	const phrase = 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about'.split(' ');
+
+	beforeEach(() => {
+		vi.stubGlobal('crypto', webcrypto);
+	});
+
+	afterEach(() => {
+		vi.unstubAllGlobals();
+	});
+
+	function validChecksum(words) {
+		const bits = words.map(word => WORD_MAP.get(word).toString(2).padStart(11, '0')).join(''),
+			entropy = Buffer.from(bits.slice(0, 128).match(/.{8}/g).map(byte => parseInt(byte, 2))),
+			digest = createHash('sha256').update(entropy).digest();
+
+		return digest[0] >> 4 === parseInt(bits.slice(128), 2);
+	}
+
+	it.each([
+		'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about',
+		'legal winner thank year wave sausage worth useful legal winner thank yellow',
+		'letter advice cage absurd amount doctor acoustic avoid letter advice cage above',
+		'zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo wrong'
+	])('includes the final word of published BIP39 vector %#', async(vector) => {
+		const words = vector.split(' '),
+			matches = await checksumWords([...words.slice(0, 11), ''], 11);
+
+		expect(matches).toHaveLength(128);
+		expect(matches).toContain(words[11]);
+		expect(matches.every(word => validChecksum([...words.slice(0, 11), word]))).toBe(true);
+	});
+
+	it.each([0, 5, 10, 11])('returns every checksum-compatible replacement at position %i', async(index) => {
+		const words = phrase.slice(),
+			expected = WORDS.filter(word => validChecksum(phrase.map((original, i) => i === index ? word : original)));
+
+		words[index] = 'not-a-word';
+		expect(await checksumWords(words, index)).toEqual(expected);
+		expect(words[index]).toBe('not-a-word');
+	});
+
+	it('excludes a dictionary word with an invalid checksum', async() => {
+		const matches = await checksumWords(phrase, 11);
+
+		expect(matches).toContain('about');
+		expect(matches).not.toContain('abandon');
+	});
+
+	it('does not restrict suggestions while another word is missing or malformed', async() => {
+		for (const invalid of ['', 'aban', 'not-a-word', null, undefined]) {
+			const words = phrase.slice();
+
+			words[3] = invalid;
+			expect(await checksumWords(words, 11)).toBeUndefined();
+		}
+	});
+
+	it('does not apply the 12-word checksum to unsupported input', async() => {
+		expect(await checksumWords([], 0)).toBeUndefined();
+		expect(await checksumWords(new Array(12), 11)).toBeUndefined();
+		expect(await checksumWords(null, 0)).toBeUndefined();
+		expect(await checksumWords(phrase, -1)).toBeUndefined();
+		expect(await checksumWords(phrase, 12)).toBeUndefined();
+	});
+
+	it('propagates hashing failures and clears the entropy buffer', async() => {
+		const digest = vi.fn().mockRejectedValue(new Error('digest unavailable'));
+
+		vi.stubGlobal('crypto', { subtle: { digest } });
+		await expect(checksumWords(new Array(12).fill('zoo'), 11)).rejects.toThrow('digest unavailable');
+		expect([...digest.mock.calls[0][1]]).toEqual(new Array(16).fill(0));
 	});
 });

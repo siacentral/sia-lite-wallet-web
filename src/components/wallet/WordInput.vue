@@ -2,12 +2,13 @@
 	<div class="word-input">
 		<input
 			ref="input"
-			:class="{ 'word-input-complete': wordComplete }"
+			:class="{ 'word-input-complete': wordComplete, 'word-input-invalid': wordInvalid }"
 			class="word-input-field"
 			v-model="text"
 			:readonly="readonly"
 			:aria-label="label"
-			:aria-expanded="open"
+			:aria-invalid="wordInvalid"
+			:aria-expanded="open && candidates.length !== 0"
 			:aria-controls="listID"
 			:aria-activedescendant="activeCandidateID"
 			role="combobox"
@@ -43,7 +44,7 @@
 </template>
 
 <script>
-import { prefixWords, WORD_MAP } from '@/sia/bip39';
+import { checksumWords, prefixWords, WORD_MAP } from '@/sia/bip39';
 
 export default {
 	props: {
@@ -54,6 +55,10 @@ export default {
 		},
 		// 1-based position shown to the user
 		index: Number,
+		// Expected word at this position when confirming an existing seed.
+		expectedWord: String,
+		// Current phrase used to constrain suggestions by its BIP39 checksum.
+		phrase: Array,
 		label: String,
 		readonly: Boolean,
 		dropUp: Boolean
@@ -63,12 +68,26 @@ export default {
 		return {
 			text: this.value,
 			open: false,
-			highlighted: 0
+			focused: false,
+			highlighted: 0,
+			checksumCandidates: [],
+			checkedContext: null
 		};
 	},
 	computed: {
 		wordComplete() {
-			return !this.readonly && this.text === this.value && WORD_MAP.has(this.value);
+			return !this.readonly && !this.wordInvalid && this.text === this.value && WORD_MAP.has(this.value);
+		},
+		wordInvalid() {
+			const word = this.text.trim().toLowerCase();
+
+			if (this.readonly || word === '')
+				return false;
+
+			if (this.expectedWord !== undefined)
+				return this.text === this.value ? word !== this.expectedWord : !this.expectedWord.startsWith(word);
+
+			return this.text === this.value ? !WORD_MAP.has(word) : prefixWords(word).length === 0;
 		},
 		exactWord() {
 			const word = this.text.trim().toLowerCase();
@@ -81,41 +100,106 @@ export default {
 		activeCandidateID() {
 			return this.open && this.candidates[this.highlighted] ? this.candidateID(this.highlighted) : undefined;
 		},
+		draft() {
+			return this.phrase?.[this.index - 1];
+		},
+		checksumContext() {
+			if (!this.focused || this.readonly || this.phrase?.length !== 12)
+				return null;
+
+			const words = this.phrase.map((word, i) => i === this.index - 1 ? '' : word.trim().toLowerCase());
+
+			if (words.some((word, i) => i !== this.index - 1 && !WORD_MAP.has(word)))
+				return null;
+
+			return words.join(' ');
+		},
+		matchingWords() {
+			if (this.checksumContext !== null) {
+				if (this.checkedContext !== this.checksumContext)
+					return [];
+
+				return this.checksumCandidates.filter(word => word.startsWith(this.text.trim().toLowerCase()));
+			}
+
+			return prefixWords(this.text);
+		},
 		candidates() {
 			if (this.text.trim() === '')
 				return [];
 
-			return prefixWords(this.text).filter(w => w !== this.value).slice(0, 5);
+			return this.matchingWords.filter(w => w !== this.value).slice(0, 5);
 		}
 	},
 	watch: {
 		value(value) {
 			this.text = value;
+		},
+		draft(value) {
+			if (value !== undefined)
+				this.text = value;
+		},
+		checksumContext(context) {
+			this.updateChecksumCandidates(context);
 		}
 	},
+	beforeUnmount() {
+		this.focused = false;
+	},
 	methods: {
+		async updateChecksumCandidates(context) {
+			this.checksumCandidates = [];
+			this.checkedContext = null;
+			this.highlighted = 0;
+
+			if (context === null)
+				return;
+
+			try {
+				const candidates = await checksumWords(context.split(' '), this.index - 1);
+
+				if (this.checksumContext !== context)
+					return;
+
+				this.checksumCandidates = candidates;
+				this.checkedContext = context;
+			} catch {
+				if (this.checksumContext !== context)
+					return;
+
+				this.open = false;
+				this.pushNotification({
+					severity: 'danger',
+					message: this.translate('createWalletModal.seedSuggestionsFailed')
+				});
+			}
+		},
 		candidateID(index) {
 			return `${this.listID}-${index}`;
 		},
 		onInput() {
-			this.open = this.candidates.length !== 0;
+			this.open = true;
 			this.highlighted = 0;
 			this.$emit('editing', this.text);
 		},
 		onFocus() {
-			if (!this.readonly)
-				this.open = this.candidates.length !== 0;
+			if (!this.readonly) {
+				this.focused = true;
+				this.open = true;
+			}
 		},
 		onBlur() {
-			const prefix = this.text.trim().toLowerCase();
+			const prefix = this.text.trim().toLowerCase(),
+				matches = this.matchingWords;
 
 			this.open = false;
+			this.focused = false;
 			if (prefix === '') {
 				this.restore();
 				return;
 			}
 
-			if (prefix === this.value)
+			if (this.text === this.value)
 				return;
 
 			if (this.exactWord) {
@@ -123,11 +207,10 @@ export default {
 				return;
 			}
 
-			const matches = prefixWords(prefix);
 			if (matches.length === 1)
 				this.commit(matches[0]);
-			else if (matches.length === 0)
-				this.restore();
+			else
+				this.commit(prefix);
 		},
 		// re-commits the previous word so the parent revalidates the full phrase
 		restore() {
@@ -204,6 +287,10 @@ export default {
 
 .word-input-complete.word-input-complete {
 	border-color: primary;
+}
+
+.word-input-invalid.word-input-invalid {
+	border-color: negative-accent;
 }
 
 .word-input-list {

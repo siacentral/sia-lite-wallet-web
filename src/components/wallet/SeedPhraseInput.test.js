@@ -95,6 +95,63 @@ describe('SeedPhraseInput', () => {
 		expect(wrapper.vm.internal).toEqual(goldenWords);
 	});
 
+	it('preserves an invalid draft when a different word is committed', async() => {
+		const wrapper = mount(SeedPhraseInput, {
+			props: { words: goldenWords, expectedWords: goldenWords },
+			...mountOpts()
+		});
+		const inputs = wrapper.findAll('.word-input-field');
+
+		await inputs[0].setValue('zzzz');
+		await inputs[1].setValue('abandon');
+		await inputs[1].trigger('keydown', { key: 'Enter' });
+
+		expect(wrapper.emitted('editing').at(-1)[0].split(' ')[0]).toBe('zzzz');
+		expect(wrapper.emitted('input')).toBeFalsy();
+		expect(inputs[0].attributes('aria-invalid')).toBe('true');
+	});
+
+	it('retains an incorrect pasted word in its own field for correction', async() => {
+		const wrapper = mount(SeedPhraseInput, {
+			props: { expectedWords: goldenWords },
+			...mountOpts()
+		});
+		const pastedWords = goldenWords.slice();
+		pastedWords[4] = 'zzzz';
+		const paste = new Event('paste', { bubbles: true, cancelable: true });
+
+		Object.defineProperty(paste, 'clipboardData', {
+			value: { getData: () => pastedWords.join(' ') }
+		});
+		wrapper.find('.word-input-field').element.dispatchEvent(paste);
+		await wrapper.vm.$nextTick();
+
+		expect(paste.defaultPrevented).toBe(true);
+		expect(wrapper.findAll('.word-input-invalid')).toHaveLength(1);
+		expect(wrapper.findAll('.word-input-field')[4].element.value).toBe('zzzz');
+		expect(wrapper.emitted('input').at(-1)).toEqual([pastedWords.join(' ')]);
+	});
+
+	it('replaces an uncommitted draft when the original phrase is pasted again', async() => {
+		const wrapper = mount(SeedPhraseInput, {
+			props: { words: goldenWords, expectedWords: goldenWords },
+			...mountOpts()
+		});
+		const input = wrapper.find('.word-input-field');
+
+		await input.setValue('zzzz');
+		const paste = new Event('paste', { bubbles: true, cancelable: true });
+
+		Object.defineProperty(paste, 'clipboardData', {
+			value: { getData: () => goldenWords.join(' ') }
+		});
+		input.element.dispatchEvent(paste);
+		await wrapper.vm.$nextTick();
+
+		expect(input.element.value).toBe('abandon');
+		expect(input.attributes('aria-invalid')).toBe('false');
+	});
+
 	it('accepts a complete BIP-39 phrase pasted into any word field', async() => {
 		const wrapper = mount(SeedPhraseInput, {
 			props: { count: 12 },
