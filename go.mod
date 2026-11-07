@@ -4,8 +4,8 @@ go 1.26.0
 
 require (
 	go.sia.tech/core v0.21.8
-	go.sia.tech/coreutils v0.25.2
-	go.sia.tech/walletd/v2 v2.16.0
+	go.sia.tech/coreutils v0.25.3
+	go.sia.tech/walletd/v2 v2.16.1
 	golang.org/x/text v0.43.0
 	lukechampine.com/frand v1.5.1
 )
