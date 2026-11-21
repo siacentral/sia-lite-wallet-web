@@ -3,7 +3,7 @@
 # Go toolchain
 FROM golang AS buildgo
 
-FROM node:25 AS dependencies
+FROM node:26 AS dependencies
 
 WORKDIR /app
 
@@ -12,7 +12,7 @@ COPY package.json package-lock.json ./
 RUN --mount=type=cache,target=/root/.npm HUSKY=0 npm ci
 
 # build web app
-FROM node:25 AS buildnode
+FROM node:26 AS buildnode
 
 COPY --from=buildgo /usr/local/go /usr/local/go
 ENV PATH="/usr/local/go/bin:${PATH}"

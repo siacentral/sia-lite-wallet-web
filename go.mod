@@ -6,7 +6,7 @@ require (
 	go.sia.tech/core v0.21.8
 	go.sia.tech/coreutils v0.25.3
 	go.sia.tech/walletd/v2 v2.16.1
-	golang.org/x/text v0.43.0
+	golang.org/x/text v0.44.0
 	lukechampine.com/frand v1.5.1
 )
 
